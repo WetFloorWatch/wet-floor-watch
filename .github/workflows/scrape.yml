@@ -3,7 +3,7 @@ name: Public Safety Scraper
 on:
   schedule:
     - cron: '0 */6 * * *' # Runs every 6 hours automatically
-  workflow_dispatch: # Allows you to trigger it manually from GitHub
+  workflow_dispatch: # Allows manual trigger from Actions tab
 
 jobs:
   scrape:
@@ -18,9 +18,10 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install firebase-admin
+        run: npm install firebase-admin rss-parser @google/genai
 
       - name: Run Scraper Script
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scraper.js
