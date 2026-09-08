@@ -10,13 +10,14 @@ const db = admin.firestore();
 const parser = new Parser();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Expanded RSS feed sources across Greater Hamilton public reporting
+// Expanded RSS feed sources across Greater Hamilton
 const FEEDS = [
-  "https://rss.cbc.ca/lineup/canada-hamilton.xml"
+  "https://rss.cbc.ca/lineup/canada-hamilton.xml",
+  // Additional regional RSS aggregators can be added here
 ];
 
 async function run() {
-  console.log("Starting maxed-out Hamilton safety intelligence scraper...");
+  console.log("Starting maxed-out Greater Hamilton safety intelligence scraper...");
   let totalProcessed = 0;
 
   for (const feedUrl of FEEDS) {
@@ -24,7 +25,8 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      for (const item of (feed.items || []).slice(0, 25)) {
+      // Increased scan capacity to capture maximum records per run
+      for (const item of (feed.items || []).slice(0, 35)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
@@ -35,18 +37,17 @@ async function run() {
         const textToAnalyze = `${item.title}. ${item.contentSnippet || item.content || ""}`;
         
         const prompt = `Analyze this news item for Greater Hamilton, Ontario: "${textToAnalyze}". 
-        Extract a precise real-world street address or intersection in Greater Hamilton (e.g., James St N, Jackson Square, Beasley Park, Gore Park, etc.). 
-        Determine if it relates to public safety, crime, transit incidents, or hazards. 
+        Extract a precise real-world street address, intersection, or landmark anywhere across Greater Hamilton (including Downtown, Stoney Creek, Ancaster, Dundas, Waterdown, Flamborough, or the Hamilton Mountain). 
+        Determine if it relates to public safety, crime, road work, transit incidents, or hazards. 
         Return ONLY a valid JSON object with these exact keys:
         - "address": string (street location description)
         - "category": string (strictly one of: 'shootings', 'assaults', 'drugs', 'emergency')
-        - "lat": number (precise latitude within Greater Hamilton bounds ~43.16 to 43.35)
-        - "lng": number (precise longitude within Greater Hamilton bounds ~-80.02 to -79.72)
+        - "lat": number (precise latitude anywhere within Greater Hamilton bounds ~43.12 to 43.50)
+        - "lng": number (precise longitude anywhere within Greater Hamilton bounds ~-80.35 to -79.50)
         - "severity": string (strictly one of: 'low', 'medium', 'high')
-        - "valid": boolean (true only if it is genuinely located in Hamilton and pertains to safety/incidents, false otherwise)`;
+        - "valid": boolean (true only if it is genuinely located in Greater Hamilton and pertains to safety, hazards, or incidents, false otherwise)`;
 
         try {
-          // Correct @google/genai SDK invocation method
           const result = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -60,10 +61,11 @@ async function run() {
             continue;
           }
 
+          // Broadened coordinate bounds covering all of Greater Hamilton (Stoney Creek to Flamborough / Ancaster)
           const lat = Number(report.lat);
           const lng = Number(report.lng);
-          if (isNaN(lat) || isNaN(lng) || lat < 43.15 || lat > 43.35 || lng < -80.1 || lng > -79.6) {
-            console.warn(`[Skipped] Coordinates out of Hamilton bounds: [${lat}, ${lng}]`);
+          if (isNaN(lat) || isNaN(lng) || lat < 43.12 || lat > 43.50 || lng < -80.35 || lng > -79.50) {
+            console.warn(`[Skipped] Coordinates out of Greater Hamilton bounds: [${lat}, ${lng}]`);
             continue;
           }
 
@@ -89,7 +91,7 @@ async function run() {
           });
 
           totalProcessed++;
-          console.log(`[Success] Mapped pin: ${item.title} at [${lat}, ${lng}]`);
+          console.log(`[Success] Mapped verified news pin: ${item.title} at [${lat}, ${lng}]`);
         } catch (parseErr) {
           console.warn(`[AI Parse Skip] Failed to parse item "${item.title}":`, parseErr.message);
         }
