@@ -9,12 +9,10 @@ admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 const parser = new Parser();
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" }); // or gemini-3.7-flash
 
 // Expanded RSS feed sources across Greater Hamilton public reporting
 const FEEDS = [
   "https://rss.cbc.ca/lineup/canada-hamilton.xml"
-  // You can add additional local RSS endpoints here as needed
 ];
 
 async function run() {
@@ -26,12 +24,10 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      // Increased scan capacity to 25 items to maximize active pin generation
       for (const item of (feed.items || []).slice(0, 25)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
-        // Skip already ingested records to optimize execution time and quota
         if ((await docRef.get()).exists) {
           continue;
         }
@@ -50,16 +46,20 @@ async function run() {
         - "valid": boolean (true only if it is genuinely located in Hamilton and pertains to safety/incidents, false otherwise)`;
 
         try {
-          const result = await model.generateContent(prompt);
-          const responseText = result.response.text().replace(/```json|```/g, "").trim();
+          // Correct @google/genai SDK invocation method
+          const result = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: { responseMimeType: "application/json" }
+          });
+
+          const responseText = result.text.replace(/```json|```/g, "").trim();
           const report = JSON.parse(responseText);
 
-          // Discard items not validated as local safety incidents or missing proper coordinate numbers
           if (!report.valid || typeof report.lat !== 'number' || typeof report.lng !== 'number') {
             continue;
           }
 
-          // Strict coordinate sanitization to ensure pins stay locked inside Greater Hamilton geographic bounds
           const lat = Number(report.lat);
           const lng = Number(report.lng);
           if (isNaN(lat) || isNaN(lng) || lat < 43.15 || lat > 43.35 || lng < -80.1 || lng > -79.6) {
