@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WetFloorWatch - Live Alerts</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; }
+    form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; margin-bottom: 20px; }
+    input, select, button { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; }
+    button { background-color: #ff3b30; color: white; border: none; font-weight: bold; cursor: pointer; }
+    button:hover { background-color: #d32f2f; }
+    .report-card { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ff9500; }
+    .high { border-left-color: #ff3b30; }
+    .low { border-left-color: #34c759; }
+  </style>
+</head>
+<body>
+
+  <h1>⚠️ WetFloorWatch Live Reports</h1>
+
+  <!-- Form to Submit Reports -->
+  <form id="reportForm">
+    <h3>Report a New Hazard</h3>
+    <input type="text" id="location" placeholder="e.g., Lobby Entrance near elevator" required>
+    <select id="severity">
+      <option value="low">Low (Spill/Dampness)</option>
+      <option value="medium" selected>Medium (Active Wet Floor)</option>
+      <option value="high">High (Major flooding / No warning sign)</option>
+    </select>
+    <button type="submit">Broadcast Warning</button>
+  </form>
+
+  <!-- Container for Real-time Reports -->
+  <h2>Active Warnings</h2>
+  <div id="reportsList">Waiting for reports...</div>
+
+  <!-- App logic integration -->
+  <script type="module">
+    import { reportWetFloor, listenToReports } from "./app.js";
+
+    const form = document.getElementById("reportForm");
+    const reportsList = document.getElementById("reportsList");
+
+    // Handle Form Submission
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const location = document.getElementById("location").value;
+      const severity = document.getElementById("severity").value;
+      
+      await reportWetFloor(location, severity);
+      form.reset();
+    });
+
+    // Handle Real-time Updates
+    listenToReports((reports) => {
+      if (reports.length === 0) {
+        reportsList.innerHTML = "<p>All clear! No hazards reported.</p>";
+        return;
+      }
+
+      reportsList.innerHTML = reports.map(report => `
+        <div class="report-card ${report.severity}">
+          <strong>📍 Location:</strong> ${report.location} <br>
+          <strong>⚠️ Severity:</strong> ${report.severity.toUpperCase()} <br>
+          <small>Reported: ${report.timestamp?.toDate ? report.timestamp.toDate().toLocaleTimeString() : 'Just now'}</small>
+        </div>
+      `).join("");
+    });
+  </script>
+</body>
+</html>
