@@ -239,6 +239,22 @@
         const yellowWetIcon = createWetFloorPinIcon('#eab308');  // Drug Sales / Needles / Encampments
         const greenWetIcon = createWetFloorPinIcon('#22c55e');   // Official Dispatch
 
+        // Safe timestamp formatter to fix raw database object output
+        function formatTimestamp(ts) {
+            if (!ts) return 'Just now';
+            if (typeof ts === 'string') return ts;
+            if (ts.toDate && typeof ts.toDate === 'function') {
+                return ts.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+            }
+            if (ts.seconds) {
+                return new Date(ts.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+            }
+            if (typeof ts === 'number') {
+                return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+            }
+            return 'Verified Record';
+        }
+
         async function fetchWeather() {
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.2557&longitude=-79.8711&current=temperature_2m');
@@ -286,11 +302,11 @@
                 heatPoints.push([inc.lat, inc.lng, 5.0]);
                 if (showShootings) {
                     const marker = L.marker([inc.lat, inc.lng], { icon: redWetIcon }).addTo(markersLayer);
-                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-red-600 uppercase font-bold">⚠️ Wet Floor Alert: Critical Incident</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${inc.timestamp}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
+                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-red-600 uppercase font-bold">⚠️ Wet Floor Alert: Critical Incident</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
                 }
                 const nodeItem = document.createElement('div');
                 nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
-                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-red-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${inc.timestamp}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-red-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
                 nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 15); };
                 shootingsList.appendChild(nodeItem);
             });
@@ -300,11 +316,11 @@
                 heatPoints.push([inc.lat, inc.lng, 4.0]);
                 if (showAssaults) {
                     const marker = L.marker([inc.lat, inc.lng], { icon: orangeWetIcon }).addTo(markersLayer);
-                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-orange-600 uppercase font-bold">⚠️ Wet Floor Alert: Assault / Harassment</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${inc.timestamp}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
+                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-orange-600 uppercase font-bold">⚠️ Wet Floor Alert: Assault / Harassment</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
                 }
                 const nodeItem = document.createElement('div');
                 nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
-                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-orange-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${inc.timestamp}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-orange-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
                 nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 15); };
                 assaultsList.appendChild(nodeItem);
             });
@@ -314,11 +330,11 @@
                 heatPoints.push([inc.lat, inc.lng, 4.5]);
                 if (showDrugs) {
                     const marker = L.marker([inc.lat, inc.lng], { icon: yellowWetIcon }).addTo(markersLayer);
-                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-yellow-600 uppercase font-bold">⚠️ Wet Floor Alert: Drug Sales / Needles / Encampments</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${inc.timestamp}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
+                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-yellow-600 uppercase font-bold">⚠️ Wet Floor Alert: Drug Sales / Needles / Encampments</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
                 }
                 const nodeItem = document.createElement('div');
                 nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
-                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-yellow-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${inc.timestamp}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-yellow-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
                 nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 15); };
                 drugsList.appendChild(nodeItem);
             });
@@ -328,11 +344,11 @@
                 heatPoints.push([inc.lat, inc.lng, 2.5]);
                 if (showEmergency) {
                     const marker = L.marker([inc.lat, inc.lng], { icon: greenWetIcon }).addTo(markersLayer);
-                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-emerald-600 uppercase font-bold">⚠️ Wet Floor Alert: Official Dispatch</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${inc.timestamp}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
+                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-emerald-600 uppercase font-bold">⚠️ Wet Floor Alert: Official Dispatch</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p></div>`);
                 }
                 const nodeItem = document.createElement('div');
                 nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
-                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-emerald-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${inc.timestamp}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-emerald-400">⚠️ ${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
                 nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 15); };
                 emergencyList.appendChild(nodeItem);
             });
@@ -367,7 +383,7 @@
                 }
             });
 
-            // Fallback default sample records if Firestore collection is completely empty yet
+            // Fallback default sample records if Firestore collection is empty
             if (snapshot.empty) {
                 appData = {
                     shootings: [{ lat: 43.25806, lng: -79.86222, source: "HPS Core Safety Log • Beasley Park", timestamp: "Verified Record", description: "Municipal safety audits and park corridor monitoring." }],
@@ -422,7 +438,7 @@
                         lng: -79.8700 + (Math.random() - 0.5) * 0.03,
                         source: `Verified Field Report (${loc})`,
                         description: desc,
-                        timestamp: 'Just now',
+                        timestamp: serverTimestamp(),
                         createdAt: serverTimestamp()
                     });
                     document.getElementById('report-modal').classList.add('hidden');
