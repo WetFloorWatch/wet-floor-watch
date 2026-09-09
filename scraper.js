@@ -17,7 +17,7 @@ const MAX_GEMINI_CALLS = 3;
 
 const parser = new Parser({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/16.0',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/17.0',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
@@ -25,18 +25,23 @@ const parser = new Parser({
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const FEEDS = [
-  // Combined historical baseline & recent live feeds (Dated + Recent coverage)
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(drug+OR+weapons+OR+assault+OR+stabbing+OR+abduction+OR+arrest)+when:2y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com)+(abduction+OR+kidnap+OR+attempted+OR+warning+OR+witness+OR+assault+OR+needle+OR+drug+OR+encampment)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Facebook Neighbourhood Watch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(needle+OR+syringe+OR+paraphernalia+OR+pipe+OR+overdose+OR+tent+OR+encampment)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Community Public Hazard Watch" },
-  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "unverified", sourceName: "@interventionintersection2026" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+weapons+OR+abduction+OR+assault+OR+drug)+when:2y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=all", type: "unverified", sourceName: "Reddit r/Hamilton" }
+  // Official Police & Emergency (Mapped to Emergency / Police & Fire)
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(drug+OR+weapons+OR+assault+OR+stabbing+OR+abduction+OR+arrest)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
+  
+  // Local News Networks (Mapped to News)
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+weapons+OR+abduction+OR+assault+OR+drug)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(needle+OR+paraphernalia+OR+encampment+OR+tent+OR+overdose)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Watch" },
+
+  // Social Networks & Community Chatter (Mapped to Unverified / Community Chatter & Socials)
+  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com)+(abduction+OR+kidnap+OR+attempted+OR+warning+OR+witness+OR+assault+OR+needle+OR+drug+OR+encampment)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Facebook Neighbourhood Watch" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+(site:twitter.com+OR+site:x.com)+(danger+OR+needle+OR+drug+OR+tent+OR+police+OR+warning)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "X / Social Media Feed" },
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
+  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "unverified", sourceName: "@interventionintersection2026" }
 ];
 
 const EXACT_STREET_WHITELIST = [
-  { names: ['york & bay', 'york blvd & bay', 'york and bay'], name: "York Blvd & Bay St Intersection", lat: 43.2625, lng: -79.8732 },
-  { names: ['barton & james', 'barton and james', 'christ church', 'james n & barton'], name: "Barton St E & James St N Corridor", lat: 43.2618, lng: -79.8660 },
+  { names: ['york & bay', 'york blvd & bay', 'york and bay'], name: "York Blvd & Bay St", lat: 43.2625, lng: -79.8732 },
+  { names: ['barton & james', 'barton and james', 'christ church', 'james n & barton'], name: "Barton St E & James St N", lat: 43.2618, lng: -79.8660 },
   { names: ['jackson square', 'king st w & macnab', 'gore park'], name: "Jackson Square Core", lat: 43.2557, lng: -79.8711 },
   { names: ['orchard park', 'dewitt', 'fruitland', 'candlewood'], name: "Orchard Park / Fruitland Corridor", lat: 43.2144, lng: -79.7135 },
   { names: ['james st n', 'james north'], name: "James St N Corridor", lat: 43.2612, lng: -79.8665 },
@@ -86,9 +91,15 @@ async function verifyAndExtract(item, feedType, sourceName) {
     }
   }
 
-  // Corrected fallback corridor name (Barton St E & James St N Corridor)
+  // Dynamic location parsing for intervention posts without forcing a single blanket store/street name
   if (!matchedCorridor && sourceName === "@interventionintersection2026") {
-      matchedCorridor = { name: "Barton St E & James St N Corridor", lat: 43.2618, lng: -79.8660 };
+      if (leadText.includes('york') || leadText.includes('bay')) {
+          matchedCorridor = { name: "York Blvd & Bay St", lat: 43.2625, lng: -79.8732 };
+      } else if (leadText.includes('jackson') || leadText.includes('gore')) {
+          matchedCorridor = { name: "Jackson Square Core", lat: 43.2557, lng: -79.8711 };
+      } else {
+          matchedCorridor = { name: "Barton St E & James St N", lat: 43.2618, lng: -79.8660 };
+      }
   } else if (!matchedCorridor) {
       return null;
   }
