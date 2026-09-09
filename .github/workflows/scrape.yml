@@ -2,8 +2,8 @@ name: Public Safety Scraper
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Runs every 6 hours automatically
-  workflow_dispatch: # Allows manual trigger from Actions tab
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   scrape:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install firebase-admin rss-parser groq-sdk
