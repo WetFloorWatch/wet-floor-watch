@@ -170,8 +170,8 @@
                     
                     <!-- Dynamic Live Feed Box -->
                     <div id="intervention-feed-container" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400">
-                            Syncing Intervention & Community updates...
+                        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">
+                            Awaiting live feed sync...
                         </div>
                     </div>
                 </div>
@@ -345,15 +345,10 @@
                 unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Community Chatter & Socials' }
             };
 
-            // DYNAMIC INTERVENTION SPOTLIGHT FEED POPULATION
+            // STRICT MATCHING FOR INTERVENTION SPOTLIGHT
             const allItems = [...appData.unverified, ...appData.news, ...appData.verified, ...appData.emergency];
             const interventionItems = allItems.filter(i => 
-                i.source.toLowerCase().includes('intervention') || 
-                i.source.toLowerCase().includes('social') || 
-                i.source.toLowerCase().includes('facebook') ||
-                i.description.toLowerCase().includes('needle') || 
-                i.description.toLowerCase().includes('tent') ||
-                i.description.toLowerCase().includes('drug')
+                i.source.includes('@interventionintersection2026')
             ).slice(0, 3);
 
             const spotlightContainer = document.getElementById('intervention-feed-container');
@@ -361,14 +356,14 @@
                 spotlightContainer.innerHTML = interventionItems.map(item => `
                     <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] space-y-1 cursor-pointer hover:border-pink-500/40 transition" onclick="window.mapFlyTo(${item.lat}, ${item.lng})">
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-pink-400 truncate">${item.source}</span>
+                            <span class="font-bold text-pink-400 truncate">${item.source.split('•')[1] || item.source}</span>
                             <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
                         </div>
                         <p class="text-slate-300 line-clamp-2 leading-snug">${item.description}</p>
                     </div>
                 `).join('');
             } else {
-                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400">Monitoring social & intervention posts...</div>`;
+                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Awaiting live feed sync...</div>`;
             }
 
             ['emergency', 'verified', 'news', 'unverified'].forEach(category => {
@@ -412,18 +407,17 @@
 
             if (heatLayer) map.removeLayer(heatLayer);
             if (showHeatmap && heatPoints.length > 0) {
-                // STORM RADAR HEATMAP OVERLAY CONFIGURATION
                 heatLayer = L.heatLayer(heatPoints, { 
-                    radius: 65,            // Broad weather radar style spread
-                    blur: 35,              // Smooth blending across street blocks
+                    radius: 65,
+                    blur: 35,
                     maxZoom: 15,
-                    minOpacity: 0.35,      // Ensures low-risk zones remain visible as blue/green radar fields
+                    minOpacity: 0.35,
                     gradient: { 
-                        0.0: '#0284c7',    // Cool Blue (Low Density)
-                        0.25: '#22c55e',   // Safe Green
-                        0.50: '#eab308',   // Caution Yellow
-                        0.75: '#f97316',   // High Alert Orange
-                        1.00: '#dc2626'    // Extreme Critical Danger (Red)
+                        0.0: '#0284c7',
+                        0.25: '#22c55e',
+                        0.50: '#eab308',
+                        0.75: '#f97316',
+                        1.00: '#dc2626'
                     }
                 }).addTo(map);
             }
