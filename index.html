@@ -53,22 +53,22 @@
 </head>
 <body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden selection:bg-amber-500/30 selection:text-amber-200">
 
-    <!-- LEGAL DISCLAIMER MODAL -->
+    <!-- DISCLAIMER MODAL -->
     <div id="disclaimer-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full p-6 shadow-[0_0_40px_-10px_rgba(245,158,11,0.2)] space-y-5">
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
                 <div class="bg-amber-500/20 p-2 rounded-lg border border-amber-500/30">
                     <svg class="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
-                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch <span class="text-amber-500 text-sm block font-mono">LIABILITY & TERMS</span></h2>
+                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch <span class="text-amber-500 text-sm block font-mono">INTELLIGENCE GRID</span></h2>
             </div>
             <p class="text-sm text-slate-300 leading-relaxed">
-                <strong class="text-rose-400">CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency or are in real danger, <strong>call 911 immediately</strong>. 
+                <strong class="text-rose-400">SAFETY NOTICE:</strong> If you are facing an immediate emergency, <strong>call 911 immediately</strong>. 
                 <br><br>
-                Wet Floor Watch is an independent crowdsourced intelligence grid. Data is aggregated from official police dispatches, local news networks, and community intelligence feeds for informational purposes only.
+                Independent crowdsourced community grid mapping real-world street events, dispatches, and verified source intel.
             </p>
-            <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
-                I Understand & Agree
+            <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                Access Map Grid
             </button>
         </div>
     </div>
@@ -82,7 +82,7 @@
             <div>
                 <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
                     Wet Floor Watch 
-                    <span class="text-emerald-400 font-mono text-[10px] uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 tracking-wider">Live Grid</span>
+                    <span class="text-emerald-400 font-mono text-[10px] uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 tracking-wider">Live Map Grid</span>
                 </h1>
                 <p class="text-[11px] text-slate-400 font-medium hidden sm:block tracking-wide uppercase">Hamilton Intelligence Platform</p>
             </div>
@@ -92,10 +92,6 @@
                 <svg class="w-3.5 h-3.5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 <span class="hidden sm:inline">GPS Verify</span>
             </button>
-            <div id="weather-pill" class="hidden md:flex items-center space-x-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="weather-text" class="font-mono">Hamilton: Syncing...</span>
-            </div>
             <button id="sidebar-toggle" class="md:hidden bg-slate-800 hover:bg-slate-700 p-2 rounded-lg text-slate-200 border border-slate-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
             </button>
@@ -105,117 +101,84 @@
     <!-- MAIN APP CONTAINER -->
     <div class="flex-1 flex relative overflow-hidden bg-slate-950">
         
-        <!-- SIDEBAR -->
-        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[410px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
-            <div class="p-4 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/30">
-                <h2 class="font-bold text-slate-300 text-xs uppercase tracking-widest flex items-center gap-2">
-                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Control Center
+        <!-- SIDEBAR / CRIMEMAP FILTER CONTROLS -->
+        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[420px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+                <h2 class="font-bold text-slate-200 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    Interactive Map Filters & Date Range
                 </h2>
                 <button id="sidebar-close" class="md:hidden text-slate-500 hover:text-white transition p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 space-y-5">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 
-                <div class="space-y-3">
-                    <button id="open-report-modal" class="w-full group relative flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl shadow-xl shadow-amber-500/20 transition-all active:scale-95">
-                        <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Broadcast Field Report
-                    </button>
+                <!-- Action Broadcast Button -->
+                <button id="open-report-modal" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold py-3 px-4 rounded-xl shadow-lg transition-all active:scale-95">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Broadcast Field Report
+                </button>
 
-                    <!-- Storm Radar Controls -->
-                    <div class="bg-slate-950/50 border border-slate-800/80 p-3 rounded-xl space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex flex-col">
-                                <span class="text-xs font-bold text-slate-200">Storm Radar Heatmap</span>
-                                <span class="text-[10px] text-slate-500">Wide-area risk density overlay</span>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="heatmap-toggle" checked class="sr-only peer">
-                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
-                            </label>
-                        </div>
-                    </div>
+                <!-- CRIME MAP STYLE DATE RANGE SELECTOR -->
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-xl space-y-2.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Date Range Filter</label>
+                    <select id="date-range-filter" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-xs text-slate-200 font-mono outline-none focus:border-amber-500">
+                        <option value="all">All Recorded History</option>
+                        <option value="1">Past 24 Hours</option>
+                        <option value="7" selected>Past 7 Days</option>
+                        <option value="30">Past 30 Days</option>
+                        <option value="90">Past 90 Days</option>
+                    </select>
                 </div>
 
-                <div id="geo-status-banner" class="hidden bg-sky-900/20 border border-sky-800/50 p-3 rounded-xl flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
-                    <p id="geo-status-text" class="text-sky-200 text-xs font-mono">Locating signals...</p>
-                </div>
-
-                <!-- Legend -->
-                <div class="bg-slate-950/40 border border-slate-800 p-3 rounded-xl grid grid-cols-1 gap-2.5 text-[11px] font-semibold tracking-wide">
-                    <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Official Police Dispatch (Verified)</span>
-                        <span class="text-slate-500 font-mono" id="count-badge-em">0</span>
-                    </div>
-                    <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span> Local News Reports</span>
-                        <span class="text-slate-500 font-mono" id="count-badge-ne">0</span>
-                    </div>
-                    <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span> User Field Reports</span>
-                        <span class="text-slate-500 font-mono" id="count-badge-user">0</span>
-                    </div>
-                    <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span> Word on the Street / Community</span>
-                        <span class="text-slate-500 font-mono" id="count-badge-un">0</span>
-                    </div>
-                </div>
-
-                <!-- ON THE STREET REPORTING FEED TAB -->
-                <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
-                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
-                            On The Street Reporting
-                        </span>
-                        <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-400 hover:underline">@interventionintersection2026 &rarr;</a>
-                    </div>
-                    <div id="intervention-feed-container" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">
-                            Syncing field logs...
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Support Buttons -->
-                <div class="grid grid-cols-2 gap-2">
-                    <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 font-bold text-xs py-2.5 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        ☕ Ko-fi
-                    </a>
-                    <a href="https://www.paypal.com/paypalme/3cl1pz" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 font-bold text-xs py-2.5 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        💳 PayPal
-                    </a>
-                </div>
-
-                <!-- Feed Lists Sorted by Theme -->
-                <div class="space-y-4 pt-4 border-t border-slate-800">
+                <!-- CRIME MAP STYLE CATEGORY CHECKBOX FILTERS -->
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-xl space-y-3">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Event Selection Filters</label>
                     
-                    <div class="space-y-2">
-                        <h3 class="text-[10px] font-bold text-amber-400 uppercase tracking-widest pl-1 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                            Recent User Field Reports
-                        </h3>
-                        <div id="user-reports-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
-                    </div>
+                    <div class="grid grid-cols-1 gap-2.5 text-xs font-semibold">
+                        <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                Official Police Dispatch
+                            </span>
+                            <input type="checkbox" id="filter-emergency" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                        </label>
 
-                    <div class="space-y-2 pt-2">
-                        <h3 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest pl-1">Official Police Dispatch (Verified)</h3>
-                        <div id="emergency-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
-                    </div>
+                        <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                                Local News Reports
+                            </span>
+                            <input type="checkbox" id="filter-news" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                        </label>
 
-                    <div class="space-y-2 pt-2">
-                        <h3 class="text-[10px] font-bold text-blue-500 uppercase tracking-widest pl-1">Local News Reports</h3>
-                        <div id="news-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
-                    </div>
+                        <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+                                User Field Reports
+                            </span>
+                            <input type="checkbox" id="filter-user" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                        </label>
 
-                    <div class="space-y-2 pt-2">
-                        <h3 class="text-[10px] font-bold text-rose-500 uppercase tracking-widest pl-1">Word on the Street / Community Chatter</h3>
-                        <div id="unverified-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 pb-4"></div>
+                        <label class="flex items-center justify-between p-2 rounded-lg bg-slate-900/80 hover:bg-slate-900 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span>
+                                Social Media / Street Intel (@...)
+                            </span>
+                            <input type="checkbox" id="filter-street" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
+                        </label>
                     </div>
+                </div>
+
+                <!-- Live Feed with Social Media Links -->
+                <div class="space-y-3 pt-2">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-[10px] font-bold text-amber-400 uppercase tracking-widest pl-1">Filtered Feed & Social Source Links</h3>
+                        <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] text-amber-400 font-bold hover:underline">Instagram &rarr;</a>
+                    </div>
+                    <div id="filtered-feed-list" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
                 </div>
 
             </div>
@@ -225,8 +188,8 @@
         <main class="flex-1 h-full relative bg-[#020617]">
             <div id="map" class="w-full h-full z-10"></div>
             
-            <!-- MOBILE FLOATING ACTION BUTTON (FAB) -->
-            <button id="floating-report-btn" class="md:hidden absolute bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black p-4 rounded-full shadow-[0_0_25px_rgba(245,158,11,0.5)] flex items-center justify-center transition-transform active:scale-95">
+            <!-- MOBILE FAB -->
+            <button id="floating-report-btn" class="md:hidden absolute bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black p-4 rounded-full shadow-2xl flex items-center justify-center active:scale-95">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             </button>
         </main>
@@ -241,31 +204,19 @@
             </div>
             <form id="hazard-form" class="space-y-3 relative">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Report Classification</label>
-                    <select id="hazard-type" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none">
-                        <option value="user_report" selected>User Field Report (Amber - Standout)</option>
-                    </select>
-                </div>
-                
-                <!-- Instant Predictive Search Input -->
-                <div class="space-y-1 relative">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Street / Intersection (Instant Predictive Search)</label>
-                    <input type="text" id="hazard-location-input" autocomplete="off" placeholder="Start typing street (e.g. King, Barton, York, Rebecca)..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none focus:border-amber-500" required>
-                    <!-- Suggestions Dropdown Box -->
-                    <div id="address-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-52 overflow-y-auto hidden"></div>
-                    <!-- Hidden coordinate storage -->
+                    <input type="text" id="hazard-location-input" autocomplete="off" placeholder="Start typing street (e.g. King, Barton, York)..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none focus:border-amber-500" required>
+                    <div id="address-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
                     <input type="hidden" id="selected-lat" value="43.2570">
                     <input type="hidden" id="selected-lng" value="-79.8700">
                 </div>
-
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (Drug Use, Needles, Weapons, Hazards)</label>
-                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics (5-400 characters)..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (5-400 characters)</label>
+                    <textarea id="hazard-desc-input" placeholder="Incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Attach or Take Photo (Optional)</label>
-                    <input type="file" id="hazard-image-input" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
-                    <span class="text-[10px] text-slate-500 block pt-0.5">Accepted formats: JPG, PNG, WEBP (Max compressed size &lt; 800KB)</span>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Attach Social/Evidence Link (Facebook, Instagram, News URL)</label>
+                    <input type="url" id="hazard-url-input" placeholder="https://instagram.com/p/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-300 font-mono outline-none focus:border-amber-500">
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-98">
                     Deploy Field Report
@@ -293,21 +244,14 @@
 
         const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         let markersLayer = L.layerGroup().addTo(map);
-        let heatLayer = null;
 
-        function createCustomPinIcon(colorHex, shadowHex, isPulsing) {
-            let pulseHtml = isPulsing ? `<div class="confirmed-pulse"></div>` : '';
+        function createPinIcon(colorHex, shadowHex) {
             return L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-slate-900" style="background-color: ${colorHex}; box-shadow: 0 0 14px ${shadowHex};">
-                         ${pulseHtml}
                          <div class="w-1.5 h-1.5 rounded-full bg-slate-950/60 z-10"></div>
                        </div>`,
                 iconSize: [20, 20],
@@ -315,440 +259,151 @@
             });
         }
 
-        const greenIcon = createCustomPinIcon('#10b981', 'rgba(16,185,129,0.7)', true);  
-        const blueIcon = createCustomPinIcon('#3b82f6', 'rgba(59,130,246,0.7)', false);   
-        const redIcon = createCustomPinIcon('#e11d48', 'rgba(225,29,72,0.7)', false);    
-        const amberIcon = createCustomPinIcon('#fbbf24', 'rgba(251,191,36,0.8)', true);
+        const icons = {
+            emergency: createPinIcon('#10b981', 'rgba(16,185,129,0.7)'),
+            news: createPinIcon('#3b82f6', 'rgba(59,130,246,0.7)'),
+            user_report: createPinIcon('#fbbf24', 'rgba(251,191,36,0.8)'),
+            street: createPinIcon('#e11d48', 'rgba(225,29,72,0.7)')
+        };
 
         function formatTimestamp(ts) {
             if (!ts) return 'Just now';
-            if (typeof ts === 'string') return ts;
             if (ts.toDate) return ts.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
             return 'Recent Record';
         }
 
-        async function fetchWeather() {
-            try {
-                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.2557&longitude=-79.8711&current=temperature_2m');
-                const data = await res.json();
-                document.getElementById('weather-text').innerText = `Hamilton: ${Math.round(data.current.temperature_2m)}°C`;
-            } catch (e) {
-                document.getElementById('weather-text').innerText = `Hamilton: GRID ACTIVE`;
-            }
-        }
+        let rawAppData = { emergency: [], news: [], user_report: [], street: [] };
 
-        let currentAppData = { emergency: [], news: [], unverified: [], user_report: [], street: [] };
-
-        function renderData(appData) {
+        function filterAndRender() {
             markersLayer.clearLayers();
-            
-            const listElements = {
-                user_reports: document.getElementById('user-reports-list'),
-                emergency: document.getElementById('emergency-list'),
-                news: document.getElementById('news-list'),
-                unverified: document.getElementById('unverified-list')
+            const feedContainer = document.getElementById('filtered-feed-list');
+            feedContainer.innerHTML = '';
+
+            const dateRangeDays = document.getElementById('date-range-filter').value;
+            const now = Date.now();
+            const cutoffTime = dateRangeDays === 'all' ? 0 : now - (parseInt(dateRangeDays) * 24 * 60 * 60 * 1000);
+
+            const activeCategories = {
+                emergency: document.getElementById('filter-emergency').checked,
+                news: document.getElementById('filter-news').checked,
+                user_report: document.getElementById('filter-user').checked,
+                street: document.getElementById('filter-street').checked
             };
 
-            Object.values(listElements).forEach(el => el.innerHTML = '');
-
-            document.getElementById('count-badge-em').innerText = appData.emergency.length;
-            document.getElementById('count-badge-ne').innerText = appData.news.length;
-            document.getElementById('count-badge-user').innerText = (appData.user_report || []).length;
-            document.getElementById('count-badge-un').innerText = appData.unverified.length;
-
-            let heatPoints = [];
-            const showHeatmap = document.getElementById('heatmap-toggle').checked;
-
-            const config = {
-                user_report: { icon: amberIcon, heat: 3.5, colorClass: 'amber', title: 'User Field Report' },
-                emergency: { icon: greenIcon, heat: 3.0, colorClass: 'emerald', title: 'Official Police Dispatch (Verified)' },
-                news: { icon: blueIcon, heat: 1.8, colorClass: 'blue', title: 'Local News Report' },
-                unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Word on the Street / Community (Unverified)' },
-                street: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: '@interventionintersection2026' }
+            const configs = {
+                emergency: { color: 'emerald', label: 'Police Dispatch' },
+                news: { color: 'blue', label: 'Local News' },
+                user_report: { color: 'amber', label: 'User Field Report' },
+                street: { color: 'rose', label: 'Social / Street Intel' }
             };
 
-            const streetReports = appData.street || [];
-            const spotlightContainer = document.getElementById('intervention-feed-container');
-            if (streetReports.length > 0) {
-                spotlightContainer.innerHTML = streetReports.slice(0, 5).map(item => `
-                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-amber-400 truncate">@interventionintersection2026</span>
-                            <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
-                        </div>
-                        <p class="text-slate-300 line-clamp-2 leading-snug">${item.description}</p>
-                        <span class="text-[9px] font-bold text-amber-400 uppercase tracking-wider block pt-1">View Post &rarr;</span>
-                    </a>
-                `).join('');
-            } else {
-                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Syncing field logs...</div>`;
-            }
+            Object.keys(rawAppData).forEach(cat => {
+                if (!activeCategories[cat]) return;
 
-            (appData.user_report || []).forEach(inc => {
-                if (inc.hasPin && inc.lat && inc.lng) {
-                    heatPoints.push([inc.lat, inc.lng, config.user_report.heat]);
-                    const marker = L.marker([inc.lat, inc.lng], { icon: config.user_report.icon }).addTo(markersLayer);
-                    
-                    let imageHtml = inc.imageUrl ? `<div class="mt-2"><img src="${inc.imageUrl}" class="w-full h-32 object-cover rounded-lg border border-amber-500/30"></div>` : '';
-                    let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
-                    
-                    marker.bindPopup(`
-                        <div class="p-0.5 font-sans min-w-[200px]">
-                            <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
-                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                                <strong class="text-[10px] text-amber-400 uppercase tracking-widest">User Field Report</strong>
-                            </div>
-                            <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
-                            <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
-                            <p class="text-xs text-slate-300 mt-3 leading-relaxed">${inc.description}</p>
-                            ${imageHtml}
-                            ${linkHtml}
-                        </div>
-                    `);
-                }
+                rawAppData[cat].forEach(item => {
+                    const itemTime = item.timestamp?.toMillis ? item.timestamp.toMillis() : now;
+                    if (cutoffTime > 0 && itemTime < cutoffTime) return;
 
-                const nodeItem = document.createElement('div');
-                nodeItem.className = `slide-hover bg-amber-950/20 hover:bg-amber-950/40 p-3 rounded-r-xl border border-amber-500/30 border-l-4 border-l-amber-400 cursor-pointer flex flex-col gap-1.5 shadow-md`;
-                let imageThumbnail = inc.imageUrl ? `<div class="mt-1"><img src="${inc.imageUrl}" class="w-full h-24 object-cover rounded-md border border-amber-500/20"></div>` : '';
-                nodeItem.innerHTML = `
-                    <div class="flex items-start justify-between gap-2">
-                        <span class="text-[11px] font-extrabold text-amber-300 uppercase tracking-wide leading-tight flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ${inc.source}
-                        </span>
-                        <span class="text-[9px] font-mono text-amber-400/80 shrink-0 mt-0.5">${formatTimestamp(inc.timestamp)}</span>
-                    </div>
-                    <div class="text-[11px] text-slate-200 line-clamp-2 leading-snug">${inc.description}</div>
-                    ${imageThumbnail}
-                `;
-                if (inc.hasPin && inc.lat && inc.lng) {
-                    nodeItem.onclick = () => { map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); };
-                }
-                listElements.user_reports.appendChild(nodeItem);
-            });
-
-            ['emergency', 'news', 'unverified', 'street'].forEach(category => {
-                const targetKey = category === 'street' ? 'unverified' : category;
-                const targetEl = listElements[targetKey];
-                if (!targetEl) return;
-                const cfg = config[category];
-
-                appData[category].forEach(inc => {
-                    if (inc.hasPin && inc.lat && inc.lng) {
-                        heatPoints.push([inc.lat, inc.lng, cfg.heat]);
-                        const marker = L.marker([inc.lat, inc.lng], { icon: cfg.icon }).addTo(markersLayer);
+                    // Render Pin on Map
+                    if (item.lat && item.lng) {
+                        const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
                         
-                        let imageHtml = inc.imageUrl ? `<div class="mt-2"><img src="${inc.imageUrl}" class="w-full h-32 object-cover rounded-lg border border-slate-700"></div>` : '';
-                        let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-${cfg.colorClass}-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
+                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-[10px] uppercase rounded-lg">View Social / Source Post &rarr;</a>` : '';
                         
                         marker.bindPopup(`
-                            <div class="p-0.5 font-sans min-w-[200px]">
-                                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
-                                    <span class="w-2 h-2 rounded-full bg-${cfg.colorClass}-500"></span>
-                                    <strong class="text-[10px] text-${cfg.colorClass}-400 uppercase tracking-widest">${cfg.title}</strong>
-                                </div>
-                                <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
-                                <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
-                                <p class="text-xs text-slate-300 mt-3 leading-relaxed">${inc.description}</p>
-                                ${imageHtml}
-                                ${linkHtml}
+                            <div class="p-1 font-sans min-w-[200px]">
+                                <strong class="text-xs text-${configs[cat].color}-400 uppercase tracking-widest block mb-1">${configs[cat].label}</strong>
+                                <strong class="text-sm text-white block mb-1">${item.source}</strong>
+                                <p class="text-xs text-slate-300">${item.description}</p>
+                                ${socialLink}
                             </div>
                         `);
                     }
 
-                    const nodeItem = document.createElement('div');
-                    nodeItem.className = `slide-hover bg-slate-900/40 hover:bg-slate-800/80 p-3 rounded-r-xl border border-transparent border-l-2 border-l-${cfg.colorClass}-500 border-b-slate-800/60 cursor-pointer flex flex-col gap-1.5 shadow-sm`;
-                    let sourceLinkIcon = inc.url ? `<a href="${inc.url}" target="_blank" class="text-[9px] text-amber-400 hover:underline ml-auto" onclick="event.stopPropagation()">[Source Post]</a>` : '';
-                    let imageThumbnail = inc.imageUrl ? `<div class="mt-1"><img src="${inc.imageUrl}" class="w-full h-24 object-cover rounded-md border border-slate-800"></div>` : '';
-                    nodeItem.innerHTML = `
-                        <div class="flex items-start justify-between gap-2">
-                            <span class="text-[11px] font-bold text-${cfg.colorClass}-400 uppercase tracking-wide leading-tight">${inc.source}</span>
-                            <div class="flex items-center gap-2 shrink-0">
-                                ${sourceLinkIcon}
-                                <span class="text-[9px] font-mono text-slate-500 mt-0.5">${formatTimestamp(inc.timestamp)}</span>
-                            </div>
+                    // Render Feed Card
+                    const card = document.createElement('div');
+                    card.className = `slide-hover bg-slate-900/60 p-3 rounded-xl border border-slate-800 border-l-4 border-l-${configs[cat].color}-500 cursor-pointer space-y-1`;
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-extrabold text-${configs[cat].color}-400 uppercase">${configs[cat].label}</span>
+                            <span class="text-[9px] font-mono text-slate-500">${formatTimestamp(item.timestamp)}</span>
                         </div>
-                        <div class="text-[11px] text-slate-300 line-clamp-2 leading-snug">${inc.description}</div>
-                        ${imageThumbnail}
+                        <p class="text-xs text-slate-300 line-clamp-2">${item.description}</p>
+                        ${item.url ? `<a href="${item.url}" target="_blank" class="text-[10px] text-amber-400 hover:underline font-mono" onclick="event.stopPropagation()">🔗 Source Link</a>` : ''}
                     `;
-                    if (inc.hasPin && inc.lat && inc.lng) {
-                        nodeItem.onclick = () => { map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); };
+                    if (item.lat && item.lng) {
+                        card.onclick = () => map.flyTo([item.lat, item.lng], 16, { duration: 1 });
                     }
-                    targetEl.appendChild(nodeItem);
+                    feedContainer.appendChild(card);
                 });
             });
-
-            if (heatLayer) map.removeLayer(heatLayer);
-            if (showHeatmap && heatPoints.length > 0) {
-                heatLayer = L.heatLayer(heatPoints, { 
-                    radius: 65,
-                    blur: 35,
-                    maxZoom: 15,
-                    minOpacity: 0.35,
-                    gradient: { 
-                        0.0: '#0284c7',
-                        0.25: '#22c55e',
-                        0.50: '#eab308',
-                        0.75: '#f97316',
-                        1.00: '#dc2626'
-                    }
-                }).addTo(map);
-            }
         }
 
         onSnapshot(collection(db, "reports"), (snapshot) => {
-            let newData = { emergency: [], news: [], unverified: [], user_report: [], street: [] };
-            
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                const cat = data.category || 'unverified';
-                if (newData[cat]) {
-                    newData[cat].push({ id: doc.id, ...data });
-                }
+            let data = { emergency: [], news: [], user_report: [], street: [] };
+            snapshot.forEach(doc => {
+                const item = doc.data();
+                const cat = item.category || 'user_report';
+                if (data[cat]) data[cat].push({ id: doc.id, ...item });
             });
-
-            Object.keys(newData).forEach(key => {
-                newData[key].sort((a, b) => {
-                    const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
-                    const timeB = b.timestamp?.toMillis ? b.timestamp.toMillis() : 0;
-                    return timeB - timeA;
-                });
-            });
-
-            currentAppData = newData;
-            renderData(currentAppData);
+            rawAppData = data;
+            filterAndRender();
         });
 
-        document.getElementById('locate-me-btn').addEventListener('click', () => {
-            const banner = document.getElementById('geo-status-banner');
-            const statusText = document.getElementById('geo-status-text');
-            banner.classList.remove('hidden');
-            
-            if (!navigator.geolocation) {
-                statusText.innerText = "Geolocation not supported.";
-                return;
-            }
-            navigator.geolocation.getCurrentPosition(pos => {
-                const latLng = L.latLng(pos.coords.latitude, pos.coords.longitude);
-                map.flyTo(latLng, 16, { duration: 1 });
-                L.marker(latLng).addTo(map).bindPopup("<strong class='text-sky-400'>Signal Located</strong>").openPopup();
-                statusText.innerText = "GPS verified securely.";
-                setTimeout(() => banner.classList.add('hidden'), 4000);
-            }, () => {
-                statusText.innerText = "Signal blocked or HTTPS required.";
-            }, { enableHighAccuracy: true });
+        document.getElementById('date-range-filter').onchange = filterAndRender;
+        ['filter-emergency', 'filter-news', 'filter-user', 'filter-street'].forEach(id => {
+            document.getElementById(id).onchange = filterAndRender;
         });
 
-        // Comprehensive Hamilton Street & Intersection Master Index
-        const HAMILTON_STREET_INDEX = [
+        // Hamilton Index Autocomplete
+        const HAMILTON_INDEX = [
             { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8660 },
-            { name: "Rebecca St & Wellington St N", lat: 43.2490, lng: -79.8520 },
-            { name: "King St W & MacNab St N (Jackson Square Core)", lat: 43.2557, lng: -79.8711 },
-            { name: "King St E & James St S", lat: 43.2550, lng: -79.8660 },
+            { name: "King St W & MacNab St N", lat: 43.2557, lng: -79.8711 },
             { name: "King St E & Victoria Ave S", lat: 43.2510, lng: -79.8500 },
-            { name: "King St E & Ottawa St N", lat: 43.2435, lng: -79.8185 },
-            { name: "King St E & Kenilworth Ave N", lat: 43.2390, lng: -79.8050 },
-            { name: "Main St W & Paradise Rd S", lat: 43.2560, lng: -79.9020 },
-            { name: "Main St W & Longwood Rd S", lat: 43.2570, lng: -79.8950 },
-            { name: "Main St E & James St S", lat: 43.2520, lng: -79.8660 },
-            { name: "Main St E & Wellington St S", lat: 43.2490, lng: -79.8520 },
-            { name: "Main St E & Gage Ave S", lat: 43.2450, lng: -79.8350 },
-            { name: "Main St E & Sherman Ave S", lat: 43.2460, lng: -79.8420 },
-            { name: "Barton St E & James St N", lat: 43.2618, lng: -79.8660 },
-            { name: "Barton St E & Wellington St N", lat: 43.2580, lng: -79.8520 },
-            { name: "Barton St E & Ottawa St N", lat: 43.2480, lng: -79.8185 },
-            { name: "Barton St E & Kenilworth Ave N", lat: 43.2460, lng: -79.8050 },
-            { name: "York Blvd & Bay St N", lat: 43.2625, lng: -79.8732 },
-            { name: "York Blvd & Queen St N", lat: 43.2600, lng: -79.8800 },
-            { name: "Cannon St E & Hughson St N", lat: 43.2590, lng: -79.8640 },
-            { name: "Cannon St E & Wellington St N", lat: 43.2560, lng: -79.8520 },
-            { name: "Cannon St E & Ottawa St N", lat: 43.2450, lng: -79.8185 },
-            { name: "James St N & Cannon St W", lat: 43.2600, lng: -79.8660 },
-            { name: "James St S & Hunter St W", lat: 43.2510, lng: -79.8670 },
-            { name: "Locke St S & King St W", lat: 43.2550, lng: -79.8850 },
-            { name: "Locke St S & Main St W", lat: 43.2520, lng: -79.8850 },
-            { name: "Hess St S & King St W", lat: 43.2530, lng: -79.8795 },
-            { name: "Hess St S & Main St W", lat: 43.2500, lng: -79.8795 },
-            { name: "Upper James St & Mohawk Rd W", lat: 43.2280, lng: -79.8780 },
-            { name: "Upper James St & Fennell Ave E", lat: 43.2400, lng: -79.8780 },
-            { name: "Upper Wellington St & Concession St", lat: 43.2350, lng: -79.8400 },
-            { name: "Upper Paradise Rd & Stone Church Rd W", lat: 43.2050, lng: -79.9100 },
-            { name: "Queenston Rd & Nash Rd", lat: 43.2250, lng: -79.7650 },
-            { name: "Rymal Rd E & Upper Centennial Pkwy", lat: 43.1950, lng: -79.7800 },
-            { name: "Fruitland Rd & DeWitt Rd (Stoney Creek)", lat: 43.2144, lng: -79.7135 },
-            { name: "Oriole Crescent Sector", lat: 43.2350, lng: -79.8400 },
-            { name: "East 14th St & Concession St", lat: 43.2300, lng: -79.8600 },
-            { name: "Beasley Park Zone (Mary St & Wilson St)", lat: 43.2575, lng: -79.8580 },
-            { name: "Gage Park Sector (Gage Ave S & Main St E)", lat: 43.2450, lng: -79.8350 }
+            { name: "Barton St E & Ottawa St N", lat: 43.2480, lng: -79.8185 }
         ];
 
-        const locationInput = document.getElementById('hazard-location-input');
+        const locInput = document.getElementById('hazard-location-input');
         const suggestionsBox = document.getElementById('address-suggestions');
-        const selectedLatInput = document.getElementById('selected-lat');
-        const selectedLngInput = document.getElementById('selected-lng');
-
-        locationInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (query.length < 2) {
-                suggestionsBox.classList.add('hidden');
-                return;
-            }
-
-            const matches = HAMILTON_STREET_INDEX.filter(item => item.name.toLowerCase().includes(query)).slice(0, 6);
-
-            if (matches.length > 0) {
-                suggestionsBox.innerHTML = matches.map(match => `
-                    <div class="p-3 hover:bg-slate-800 text-xs text-slate-200 cursor-pointer border-b border-slate-800 last:border-0 flex items-center justify-between" data-lat="${match.lat}" data-lon="${match.lng}" data-name="${match.name}">
-                        <span>📍 ${match.name}</span>
-                        <span class="text-[10px] text-amber-400 font-mono">Hamilton</span>
-                    </div>
-                `).join('');
-                suggestionsBox.classList.remove('hidden');
-
-                suggestionsBox.querySelectorAll('div').forEach(el => {
-                    el.onclick = () => {
-                        locationInput.value = el.getAttribute('data-name');
-                        selectedLatInput.value = el.getAttribute('data-lat');
-                        selectedLngInput.value = el.getAttribute('data-lon');
-                        suggestionsBox.classList.add('hidden');
-                    };
-                });
-            } else {
-                suggestionsBox.innerHTML = `<div class="p-3 text-xs text-slate-400 font-mono">Custom location recorded (will map to central core)</div>`;
-                suggestionsBox.classList.remove('hidden');
-                selectedLatInput.value = "43.2570";
-                selectedLngInput.value = -79.8700;
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                suggestionsBox.classList.add('hidden');
-            }
-        });
-
-        // Curated Profanity & Slang Blacklist Filter
-        const PROFANITY_BLACKLIST = ['nsfw', 'porn', 'xxx', 'dick', 'cock', 'pussy', 'slut', 'whore', 'fag', 'nigger', 'cuck', 'shit', 'asshole', 'fuck', 'bitch'];
-
-        function containsProfanity(text) {
-            const lower = text.toLowerCase();
-            return PROFANITY_BLACKLIST.some(word => {
-                const regex = new RegExp(`\\b${word}\\b`, 'i');
-                return regex.test(lower) || lower.includes(word);
+        
+        locInput.oninput = (e) => {
+            const q = e.target.value.toLowerCase();
+            if (q.length < 2) { suggestionsBox.classList.add('hidden'); return; }
+            const matches = HAMILTON_INDEX.filter(i => i.name.toLowerCase().includes(q));
+            suggestionsBox.innerHTML = matches.map(m => `<div class="p-2.5 hover:bg-slate-800 text-xs text-slate-200 cursor-pointer" data-lat="${m.lat}" data-lng="${m.lng}" data-name="${m.name}">📍 ${m.name}</div>`).join('');
+            suggestionsBox.classList.remove('hidden');
+            suggestionsBox.querySelectorAll('div').forEach(el => {
+                el.onclick = () => {
+                    locInput.value = el.getAttribute('data-name');
+                    document.getElementById('selected-lat').value = el.getAttribute('data-lat');
+                    document.getElementById('selected-lng').value = el.getAttribute('data-lng');
+                    suggestionsBox.classList.add('hidden');
+                };
             });
-        }
+        };
 
-        // Image Compression Helper
-        function compressImage(file, callback) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
-                    const MAX_HEIGHT = 800;
-                    let width = img.width;
-                    let height = img.height;
+        document.getElementById('hazard-form').onsubmit = async (e) => {
+            e.preventDefault();
+            await addDoc(collection(db, "reports"), {
+                category: 'user_report',
+                hasPin: true,
+                lat: parseFloat(document.getElementById('selected-lat').value),
+                lng: parseFloat(document.getElementById('selected-lng').value),
+                source: `Field Report (${locInput.value})`,
+                description: document.getElementById('hazard-desc-input').value,
+                url: document.getElementById('hazard-url-input').value,
+                timestamp: serverTimestamp()
+            });
+            document.getElementById('report-modal').classList.add('hidden');
+            e.target.reset();
+        };
 
-                    if (width > height) {
-                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                    } else {
-                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
-                    callback(compressedDataUrl);
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchWeather();
-
-            const openModal = () => document.getElementById('report-modal').classList.remove('hidden');
-            const closeModal = () => document.getElementById('report-modal').classList.add('hidden');
-
-            document.getElementById('heatmap-toggle').addEventListener('change', () => renderData(currentAppData));
-            document.getElementById('accept-disclaimer-btn').onclick = () => document.getElementById('disclaimer-modal').classList.add('hidden');
-            document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            document.getElementById('sidebar-close').onclick = () => document.getElementById('sidebar').classList.add('-translate-x-full');
-            
-            document.getElementById('open-report-modal').onclick = openModal;
-            document.getElementById('floating-report-btn').onclick = openModal;
-            document.getElementById('close-report-modal').onclick = closeModal;
-            
-            document.getElementById('hazard-form').onsubmit = async (e) => {
-                e.preventDefault();
-
-                // 1. Spam Cooldown Validation (60 Seconds)
-                const lastSubmit = localStorage.getItem('wfw_last_submit');
-                const now = Date.now();
-                if (lastSubmit && (now - lastSubmit < 60000)) {
-                    const secondsLeft = Math.ceil((60000 - (now - lastSubmit)) / 1000);
-                    alert(`Rate limit active: Please wait ${secondsLeft} seconds before broadcasting another report.`);
-                    return;
-                }
-
-                const locInput = locationInput.value;
-                const desc = document.getElementById('hazard-desc-input').value.trim();
-                const imageFile = document.getElementById('hazard-image-input').files[0];
-                const lat = parseFloat(selectedLatInput.value) || 43.2570;
-                const lng = parseFloat(selectedLngInput.value) || -79.8700;
-
-                // 2. Character Length Validation
-                if (desc.length < 5 || desc.length > 400) {
-                    alert("Description must be between 5 and 400 characters.");
-                    return;
-                }
-
-                // 3. Profanity & Slang Validation Check
-                if (containsProfanity(desc) || containsProfanity(locInput)) {
-                    alert("Submission rejected: Content violates community guidelines regarding profanity or prohibited language.");
-                    return;
-                }
-
-                const processSubmission = async (imageUrl = '') => {
-                    try {
-                        await addDoc(collection(db, "reports"), {
-                            category: 'user_report',
-                            hasPin: true,
-                            lat: lat,
-                            lng: lng,
-                            source: `Field Report (${locInput})`,
-                            description: desc,
-                            imageUrl: imageUrl,
-                            url: '',
-                            timestamp: serverTimestamp(),
-                            createdAt: serverTimestamp(),
-                            active: true
-                        });
-                        
-                        // Set cooldown timestamp in localStorage
-                        localStorage.setItem('wfw_last_submit', Date.now());
-
-                        closeModal();
-                        document.getElementById('hazard-form').reset();
-                    } catch (err) {
-                        alert("Write failed: Ensure Firestore rules allow public writes and image size is within limits.");
-                        console.error(err);
-                    }
-                };
-
-                if (imageFile) {
-                    compressImage(imageFile, (compressedUrl) => {
-                        processSubmission(compressedUrl);
-                    });
-                } else {
-                    processSubmission('');
-                }
-            };
-        });
+        document.getElementById('accept-disclaimer-btn').onclick = () => document.getElementById('disclaimer-modal').classList.add('hidden');
+        document.getElementById('open-report-modal').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
+        document.getElementById('close-report-modal').onclick = () => document.getElementById('report-modal').classList.add('hidden');
+        document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        document.getElementById('sidebar-close').onclick = () => document.getElementById('sidebar').classList.add('-translate-x-full');
+        document.getElementById('locate-me-btn').onclick = () => navigator.geolocation?.getCurrentPosition(p => map.flyTo([p.coords.latitude, p.coords.longitude], 16));
     </script>
 </body>
 </html>
