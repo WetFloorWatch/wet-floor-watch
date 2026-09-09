@@ -7,6 +7,7 @@ admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 const db = admin.firestore();
 
+// Standard parser for general news feeds
 const parser = new Parser({
   headers: {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -14,12 +15,19 @@ const parser = new Parser({
   }
 });
 
+// Dedicated parser for Reddit with a custom descriptive User-Agent to prevent blocks
+const redditParser = new Parser({
+  headers: {
+    'User-Agent': 'WetFloorWatchSafetyGrid/2.0 (Contact: admin@wetfloorwatch.local)',
+    'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+  }
+});
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Multiple feeds combining verified news and crowdsourced community/social media discussions
 const FEEDS = [
-  { url: "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews", type: "verified" },
-  { url: "https://www.reddit.com/r/Hamilton/new/.rss", type: "crowdsourced" }
+  { url: "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews", parser: parser, type: "verified" },
+  { url: "https://www.reddit.com/r/Hamilton/new/.rss", parser: redditParser, type: "crowdsourced" }
 ];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -46,15 +54,16 @@ async function generateWithRetry(prompt, retries = 3, delay = 5000) {
 }
 
 async function run() {
-  console.log("Starting multi-source Greater Hamilton safety intelligence scraper...");
+  console.log("Starting high-yield Greater Hamilton safety intelligence scraper...");
   let totalProcessed = 0;
 
   for (const feedSource of FEEDS) {
     try {
       console.log(`Parsing feed (${feedSource.type}): ${feedSource.url}`);
-      const feed = await parser.parseURL(feedSource.url);
+      const feed = await feedSource.parser.parseURL(feedSource.url);
       
-      for (const item of (feed.items || []).slice(0, 6)) {
+      // Increased item slice to 8 per feed to maximize pin generation
+      for (const item of (feed.items || []).slice(0, 8)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
@@ -65,16 +74,16 @@ async function run() {
 
         const textToAnalyze = `${item.title}. ${item.contentSnippet || item.content || ""}`;
         
-        const prompt = `Analyze this community report or news item for Greater Hamilton, Ontario (including Downtown, Stoney Creek, Ancaster, Dundas, Waterdown, Flamborough, or the Mountain): "${textToAnalyze}". 
-        Extract a precise real-world street address, intersection, or landmark within Greater Hamilton. 
-        Determine if it relates to public safety, crime, road work, transit disruptions, traffic hazards, open-air activity, or disturbances. 
+        const prompt = `Analyze this news item or community post for Greater Hamilton or surrounding regional areas (including Hamilton, Niagara, Halton, Burlington): "${textToAnalyze}". 
+        Extract a real-world street address, intersection, school zone, highway stretch, or landmark. 
+        Be inclusive: map traffic safety blitzes, police activity, road work, transit updates, hazards, disruptions, or public alerts. 
         Return ONLY a valid JSON object with these exact keys:
-        - "address": string (street location or description)
+        - "address": string (street location or landmark description)
         - "category": string (strictly one of: 'shootings', 'assaults', 'drugs', 'emergency')
-        - "lat": number (precise latitude within regional bounds ~43.12 to 43.50)
-        - "lng": number (precise longitude within regional bounds ~-80.35 to -79.50)
+        - "lat": number (precise latitude within regional bounds ~43.10 to 43.60)
+        - "lng": number (precise longitude within regional bounds ~-80.50 to -79.30)
         - "severity": string (strictly one of: 'low', 'medium', 'high')
-        - "valid": boolean (true if it relates to safety, hazards, or incidents in Hamilton; false for general fluff, ads, or off-topic discussions)`;
+        - "valid": boolean (true if it relates to any traffic, safety, hazard, police, or community alert; false ONLY for pure entertainment, sports scores, history trivia, or lifestyle fluff)`;
 
         try {
           const responseText = await generateWithRetry(prompt);
@@ -87,7 +96,8 @@ async function run() {
 
           const lat = Number(report.lat);
           const lng = Number(report.lng);
-          if (isNaN(lat) || isNaN(lng) || lat < 43.12 || lat > 43.50 || lng < -80.35 || lng > -79.50) {
+          // Expanded regional bounds to comfortably capture Hamilton, Niagara school zones, and Burlington
+          if (isNaN(lat) || isNaN(lng) || lat < 43.10 || lat > 43.60 || lng < -80.50 || lng > -79.30) {
             console.warn(`[Skipped] Coordinates out of bounds: [${lat}, ${lng}]`);
             continue;
           }
@@ -100,7 +110,6 @@ async function run() {
           let severity = String(report.severity || 'medium').toLowerCase().trim();
           if (!allowedSeverities.includes(severity)) severity = 'medium';
 
-          // Explicitly differentiate verified news feeds from unverified community/social media reports
           const sourceLabel = feedSource.type === 'verified'
             ? `Verified News Feed (${report.address || 'Hamilton Region'})`
             : `Crowdsourced Community Report (${report.address || 'Hamilton Region'})`;
