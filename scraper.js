@@ -8,7 +8,7 @@ admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 const db = admin.firestore();
 
-// Fixed: Added custom headers so CBC and other feeds don't return 406 errors
+// Configured with correct regional URLs and browser headers to bypass 406 blocks
 const parser = new Parser({
   headers: {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -18,8 +18,11 @@ const parser = new Parser({
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Multiple reliable RSS feeds covering Hamilton and broader regional safety/news
 const FEEDS = [
-  "https://rss.cbc.ca/lineup/canada-hamilton.xml"
+  "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews",
+  "https://www.cbc.ca/webfeed/rss/rss-canada-toronto",
+  "https://www.cbc.ca/webfeed/rss/rss-canada"
 ];
 
 async function run() {
@@ -31,7 +34,7 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      for (const item of (feed.items || []).slice(0, 35)) {
+      for (const item of (feed.items || []).slice(0, 30)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
@@ -41,8 +44,8 @@ async function run() {
 
         const textToAnalyze = `${item.title}. ${item.contentSnippet || item.content || ""}`;
         
-        const prompt = `Analyze this news item for Greater Hamilton, Ontario: "${textToAnalyze}". 
-        Extract a precise real-world street address, intersection, or landmark anywhere across Greater Hamilton (including Downtown, Stoney Creek, Ancaster, Dundas, Waterdown, Flamborough, or the Hamilton Mountain). 
+        const prompt = `Analyze this news item for Greater Hamilton, Ontario (including Downtown, Stoney Creek, Ancaster, Dundas, Waterdown, Flamborough, or the Mountain): "${textToAnalyze}". 
+        Extract a precise real-world street address, intersection, or landmark within Greater Hamilton. 
         Determine if it relates to public safety, crime, road work, transit incidents, or hazards. 
         Return ONLY a valid JSON object with these exact keys:
         - "address": string (street location description)
