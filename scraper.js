@@ -1,49 +1,35 @@
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore, Timestamp, FieldValue } = require("firebase-admin/firestore");
 const Parser = require("rss-parser");
-const Groq = require("groq-sdk");
-const { GoogleGenAI } = require("@google/genai");
 const crypto = require("crypto");
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY });
-
-let geminiCallCount = 0;
-const MAX_GEMINI_CALLS = 5;
-
 const parser = new Parser({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/18.0',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/19.0',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Strict Hamilton-focused RSS search feeds targeting drug paraphernalia, needles, and public hazards
 const FEEDS = [
-  // 1. Official Police & Emergency
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(drug+OR+weapons+OR+assault+OR+stabbing+OR+abduction+OR+arrest)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
-  
-  // 2. Local News
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+weapons+OR+abduction+OR+assault+OR+drug+OR+encampment)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
-
-  // 3. Community Chatter & Socials (Facebook, Twitter/X, YouTube, Instagram multi-source)
-  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com)+(abduction+OR+kidnap+OR+warning+OR+witness+OR+assault+OR+needle+OR+drug+OR+tent)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Facebook Community Watch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(site:twitter.com+OR+site:x.com)+(danger+OR+needle+OR+drug+OR+tent+OR+police+OR+warning)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "X / Social Media Feed" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(site:youtube.com)+(hazard+OR+safety+OR+incident+OR+news)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "YouTube Public Safety Feed" },
-  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "unverified", sourceName: "Instagram (@interventionintersection2026)" },
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" }
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(police+OR+drug+OR+weapons+OR+assault+OR+stabbing)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(needle+OR+syringe+OR+paraphernalia+OR+pipe+OR+overdose+OR+tent+OR+encampment)+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=needle+OR+drug+OR+tent+OR+encampment+OR+paraphernalia+OR+overdose&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
+  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "unverified", sourceName: "@interventionintersection2026" }
 ];
 
+// Strict Hamilton Intersection / Corridor Whitelist with Verified Coordinates
 const EXACT_STREET_WHITELIST = [
   { names: ['york & bay', 'york blvd & bay', 'york and bay'], name: "York Blvd & Bay St", lat: 43.2625, lng: -79.8732 },
   { names: ['barton & james', 'barton and james', 'christ church', 'james n & barton'], name: "Barton St E & James St N", lat: 43.2618, lng: -79.8660 },
-  { names: ['jackson square', 'king st w & macnab', 'gore park'], name: "Jackson Square Core", lat: 43.2557, lng: -79.8711 },
-  { names: ['orchard park', 'dewitt', 'fruitland', 'candlewood'], name: "Orchard Park / Fruitland Corridor", lat: 43.2144, lng: -79.7135 },
+  { names: ['jackson square', 'king st w & macnab', 'gore park', 'king & macnab'], name: "Jackson Square Core", lat: 43.2557, lng: -79.8711 },
+  { names: ['orchard park', 'dewitt', 'fruitland'], name: "Orchard Park / Fruitland Corridor", lat: 43.2144, lng: -79.7135 },
   { names: ['james st n', 'james north'], name: "James St N Corridor", lat: 43.2612, lng: -79.8665 },
   { names: ['beasley', 'beasley park', 'mary st'], name: "Beasley Park Zone", lat: 43.2575, lng: -79.8580 },
   { names: ['hess st', 'hess village'], name: "Hess Village Corridor", lat: 43.2530, lng: -79.8795 },
@@ -65,6 +51,11 @@ async function verifyAndExtract(item, feedType, sourceName) {
   const rawSnippet = (item.contentSnippet || item.content || "").toLowerCase();
   const leadText = title + " " + rawSnippet;
 
+  // Filter out irrelevant or non-Hamilton results
+  if (!leadText.includes('hamilton') && sourceName !== "@interventionintersection2026") {
+    return null;
+  }
+
   let matchedCorridor = null;
   for (const corridor of EXACT_STREET_WHITELIST) {
     if (corridor.names.some(keyword => new RegExp('\\b' + keyword + '\\b', 'i').test(leadText))) {
@@ -73,35 +64,33 @@ async function verifyAndExtract(item, feedType, sourceName) {
     }
   }
 
-  // Precise context matching for general reports without defaulting incorrectly
-  if (!matchedCorridor) {
-      if (leadText.includes('york') || leadText.includes('bay')) {
-          matchedCorridor = { name: "York Blvd & Bay St", lat: 43.2625, lng: -79.8732 };
-      } else if (leadText.includes('jackson') || leadText.includes('gore') || leadText.includes('king')) {
-          matchedCorridor = { name: "Jackson Square Core", lat: 43.2557, lng: -79.8711 };
-      } else if (leadText.includes('barton') || leadText.includes('james')) {
-          matchedCorridor = { name: "Barton St E & James St N", lat: 43.2618, lng: -79.8660 };
-      } else {
-          return null; // Discard unlocalized chatter to maintain map accuracy
-      }
-  }
+  // If no exact confirmed street address is found, store it for the sidebar news/chatter feed WITHOUT pinning it on the map
+  const hasPin = matchedCorridor !== null;
+  const pinData = matchedCorridor || { name: "Hamilton General Area", lat: null, lng: null };
 
   let articleDate = item.pubDate ? new Date(item.pubDate) : new Date();
   if (isNaN(articleDate.getTime())) articleDate = new Date();
 
+  // Clean up URL to prevent dead or malformed links
+  let cleanUrl = item.link || '';
+  if (cleanUrl.includes('news.google.com') && item.link) {
+    cleanUrl = item.link;
+  }
+
   return {
     category: feedType,
-    lat: matchedCorridor.lat,
-    lng: matchedCorridor.lng,
-    source: `${sourceName} • ${matchedCorridor.name}`,
+    hasPin: hasPin,
+    lat: pinData.lat,
+    lng: pinData.lng,
+    source: `${sourceName} • ${pinData.name}`,
     description: (item.contentSnippet || item.title || '').replace(/(<([^>]+)>)/gi, "").substring(0, 180) + '...',
-    url: String(item.link || 'https://www.instagram.com/interventionintersection2026'),
+    url: cleanUrl,
     timestamp: Timestamp.fromDate(articleDate)
   };
 }
 
 async function run() {
-  console.log("Running Multi-Source Intelligence Ingestion...");
+  console.log("Running Precision Intelligence Ingestion...");
   let count = 0;
 
   for (const feed of FEEDS) {
@@ -109,7 +98,7 @@ async function run() {
       console.log(`Processing feed: ${feed.sourceName}`);
       const parsedFeed = await parser.parseURL(feed.url);
       
-      for (const item of (parsedFeed.items || []).slice(0, 50)) {
+      for (const item of (parsedFeed.items || []).slice(0, 60)) {
         const intel = await verifyAndExtract(item, feed.type, feed.sourceName);
         if (!intel) continue;
 
@@ -118,10 +107,11 @@ async function run() {
 
         await db.collection("reports").doc(docId).set({
           category: intel.category,
-          source: intel.source,
-          description: intel.description,
+          hasPin: intel.hasPin,
           lat: intel.lat,
           lng: intel.lng,
+          source: intel.source,
+          description: intel.description,
           url: intel.url,
           timestamp: intel.timestamp,
           createdAt: FieldValue.serverTimestamp(),
@@ -129,7 +119,7 @@ async function run() {
         });
 
         count++;
-        console.log(`[Mapped] ${intel.category} -> ${intel.source}`);
+        console.log(`[Ingested] ${intel.category} (${intel.hasPin ? 'Pinned' : 'Feed Only'}) -> ${intel.source}`);
       }
 
       await sleep(2000);
@@ -137,7 +127,7 @@ async function run() {
       console.error(`Feed Error (${feed.sourceName}):`, e.message);
     }
   }
-  console.log(`Ingestion Complete. Deployed ${count} precise pins.`);
+  console.log(`Ingestion Complete. Processed ${count} intel reports.`);
 }
 
 run().catch(err => {
