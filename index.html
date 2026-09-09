@@ -9,16 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-    <script>
-        const originalGetContext = HTMLCanvasElement.prototype.getContext;
-        HTMLCanvasElement.prototype.getContext = function(type, attributes) {
-            if (type === '2d') {
-                attributes = attributes || {};
-                attributes.willReadFrequently = true;
-            }
-            return originalGetContext.call(this, type, attributes);
-        };
-    </script>
     <style>
         .leaflet-container { background: #07090e !important; font-family: ui-sans-serif, system-ui, sans-serif; }
         .custom-div-icon { background: transparent; border: none; }
@@ -39,7 +29,7 @@
                 <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch • Liability & Terms Notice</h2>
             </div>
             <p class="text-xs text-slate-300 leading-relaxed">
-                <strong>CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency or are in real danger, **call 911 immediately**. Wet Floor Watch is an independent crowdsourced intelligence grid and mapping utility. All data is aggregated from public records, official emergency dispatches, local news outlets, and community submissions for informational purposes only. Operators assume zero liability.
+                <strong>CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency or are in real danger, **call 911 immediately**. Wet Floor Watch is an independent crowdsourced intelligence grid and mapping utility. All data is aggregated from public records, official emergency dispatches, local news outlets, and community submissions for informational purposes only. Operators assume zero liability for actions taken based on this platform. All locations are strictly snapped to public street intersections to maintain privacy and legal compliance.
             </p>
             <button id="accept-disclaimer-btn" class="w-full mt-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold py-3 px-4 rounded-xl transition cursor-pointer">
                 I Understand, Agree & Enter Grid
@@ -55,7 +45,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
-                    Wet Floor Watch <span class="text-emerald-400 font-mono text-xs uppercase bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">Live Grid</span>
+                    Wet Floor Watch <span class="text-emerald-400 font-mono text-xs uppercase bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">High-Density Grid</span>
                 </h1>
                 <p class="text-xs text-slate-400 hidden sm:block">Massive Multi-Source Intelligence & Heatmap Engine</p>
             </div>
@@ -89,7 +79,6 @@
                     Broadcast Street Report
                 </button>
 
-                <!-- HEATMAP TOGGLE CONTROL -->
                 <div class="bg-slate-800/50 border border-slate-700/60 p-3 rounded-xl flex items-center justify-between">
                     <div class="flex flex-col">
                         <span class="text-xs font-bold text-slate-200">Fluid Density Heatmap Overlay</span>
@@ -101,15 +90,38 @@
                     </label>
                 </div>
 
-                <!-- PIN LEGEND -->
-                <div class="bg-slate-800/30 border border-slate-700/50 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-[10px] font-semibold">
-                    <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Official Police/Fire/EMS</span>
-                    <span class="flex items-center gap-1.5 text-orange-400"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Verified Reports</span>
-                    <span class="flex items-center gap-1.5 text-blue-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Local News</span>
-                    <span class="flex items-center gap-1.5 text-red-400"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Unverified / Reddit</span>
+                <div id="geo-status-banner" class="hidden bg-slate-800/80 border border-slate-700 p-3 rounded-xl text-xs space-y-1">
+                    <p id="geo-status-text" class="text-slate-300 text-[11px]">Locating...</p>
                 </div>
 
-                <!-- FEED SECTION 1: OFFICIAL EMERGENCY (POLICE/FIRE/EMS) -->
+                <div class="bg-slate-800/30 border border-slate-700/50 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-[10px] font-semibold">
+                    <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Official Police/Fire/EMS (Green)</span>
+                    <span class="flex items-center gap-1.5 text-orange-400"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Verified Reports (Orange)</span>
+                    <span class="flex items-center gap-1.5 text-blue-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Local News (Blue)</span>
+                    <span class="flex items-center gap-1.5 text-red-400"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Unverified / Reddit (Red)</span>
+                </div>
+
+                <div class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-xl space-y-2">
+                    <div class="flex items-center space-x-3 text-xs text-amber-300">
+                        <span class="font-bold text-white">Community Safety Feed</span>
+                    </div>
+                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="w-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 py-2 px-3 rounded-lg text-xs font-semibold text-amber-300 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                        <span>📷 Visit Instagram Profile</span>
+                    </a>
+                </div>
+
+                <div class="bg-slate-800/40 border border-slate-700/60 p-3 rounded-xl space-y-2">
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Support & Keep Feed Live</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs py-2 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow">
+                            <span>☕ Ko-fi</span>
+                        </a>
+                        <a href="https://www.paypal.com/paypalme/3cl1pz" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow">
+                            <span>💳 PayPal.Me</span>
+                        </a>
+                    </div>
+                </div>
+
                 <div class="space-y-2">
                     <h3 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
                         <span>Official Police / Fire / EMS (<span id="emergency-count">0</span>)</span>
@@ -117,7 +129,6 @@
                     <div id="emergency-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- FEED SECTION 2: VERIFIED MUNICIPAL / INFRASTRUCTURE -->
                 <div class="space-y-2 border-t border-slate-800 pt-3">
                     <h3 class="text-xs font-semibold text-orange-400 uppercase tracking-wider flex items-center justify-between">
                         <span>Verified Reports & Roadwork (<span id="verified-count">0</span>)</span>
@@ -125,7 +136,6 @@
                     <div id="verified-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- FEED SECTION 3: LOCAL NEWS REPORTS -->
                 <div class="space-y-2 border-t border-slate-800 pt-3">
                     <h3 class="text-xs font-semibold text-blue-400 uppercase tracking-wider flex items-center justify-between">
                         <span>Local News Feeds (<span id="news-count">0</span>)</span>
@@ -133,13 +143,13 @@
                     <div id="news-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- FEED SECTION 4: UNVERIFIED / SOCIAL / REDDIT -->
                 <div class="space-y-2 border-t border-slate-800 pt-3">
                     <h3 class="text-xs font-semibold text-red-400 uppercase tracking-wider flex items-center justify-between">
                         <span>Unverified / Reddit Chatter (<span id="unverified-count">0</span>)</span>
                     </h3>
                     <div id="unverified-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
+
             </div>
         </aside>
 
@@ -170,7 +180,6 @@
         </div>
     </div>
 
-    <!-- FIREBASE AND MAP APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -206,10 +215,10 @@
             });
         }
 
-        const greenIcon = createColoredPinIcon('#22c55e');  // Official Police/Fire/EMS
-        const orangeIcon = createColoredPinIcon('#f97316'); // Verified
-        const blueIcon = createColoredPinIcon('#3b82f6');   // News
-        const redIcon = createColoredPinIcon('#dc2626');    // Unverified
+        const greenIcon = createColoredPinIcon('#22c55e');  
+        const orangeIcon = createColoredPinIcon('#f97316'); 
+        const blueIcon = createColoredPinIcon('#3b82f6');   
+        const redIcon = createColoredPinIcon('#dc2626');    
 
         function formatTimestamp(ts) {
             if (!ts) return 'Just now';
@@ -224,7 +233,7 @@
                 const data = await res.json();
                 document.getElementById('weather-text').innerText = `Hamilton: ${Math.round(data.current.temperature_2m)}°C • Clear Skies`;
             } catch (e) {
-                document.getElementById('weather-text').innerText = `Hamilton: Live Grid Active`;
+                document.getElementById('weather-text').innerText = `Hamilton: High-Density Grid Active`;
             }
         }
 
@@ -251,9 +260,8 @@
             let heatPoints = [];
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
-            // Render Emergency (Green)
             appData.emergency.forEach(inc => {
-                heatPoints.push([inc.lat, inc.lng, 1.5]);
+                heatPoints.push([inc.lat, inc.lng, 1.5]); 
                 const marker = L.marker([inc.lat, inc.lng], { icon: greenIcon }).addTo(markersLayer);
                 let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-2 px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded transition">&rarr; Official Dispatch Record</a>` : '';
                 marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-emerald-600 uppercase font-bold">Official Police/Fire/EMS (Green)</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p>${linkHtml}</div>`);
@@ -265,7 +273,6 @@
                 emergencyList.appendChild(nodeItem);
             });
 
-            // Render Verified (Orange)
             appData.verified.forEach(inc => {
                 heatPoints.push([inc.lat, inc.lng, 1.0]);
                 const marker = L.marker([inc.lat, inc.lng], { icon: orangeIcon }).addTo(markersLayer);
@@ -279,7 +286,6 @@
                 verifiedList.appendChild(nodeItem);
             });
 
-            // Render News (Blue)
             appData.news.forEach(inc => {
                 heatPoints.push([inc.lat, inc.lng, 0.8]);
                 const marker = L.marker([inc.lat, inc.lng], { icon: blueIcon }).addTo(markersLayer);
@@ -293,7 +299,6 @@
                 newsList.appendChild(nodeItem);
             });
 
-            // Render Unverified (Red)
             appData.unverified.forEach(inc => {
                 heatPoints.push([inc.lat, inc.lng, 0.6]);
                 const marker = L.marker([inc.lat, inc.lng], { icon: redIcon }).addTo(markersLayer);
@@ -307,7 +312,6 @@
                 unverifiedList.appendChild(nodeItem);
             });
 
-            // Heatmap layer
             if (heatLayer) map.removeLayer(heatLayer);
             if (showHeatmap && heatPoints.length > 0) {
                 heatLayer = L.heatLayer(heatPoints, { 
@@ -319,7 +323,7 @@
             }
         }
 
-        // Real-time Firestore Sync
+        // Live Firebase Ingestion Pipeline
         onSnapshot(collection(db, "reports"), (snapshot) => {
             let newData = { emergency: [], verified: [], news: [], unverified: [] };
             
@@ -336,13 +340,22 @@
         });
 
         document.getElementById('locate-me-btn').addEventListener('click', () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const latLng = L.latLng(pos.coords.latitude, pos.coords.longitude);
-                    map.setView(latLng, 16);
-                    L.marker(latLng).addTo(map).bindPopup("You are here").openPopup();
-                });
+            const banner = document.getElementById('geo-status-banner');
+            const statusText = document.getElementById('geo-status-text');
+            banner.classList.remove('hidden');
+            
+            if (!navigator.geolocation) {
+                statusText.innerText = "Geolocation not supported.";
+                return;
             }
+            navigator.geolocation.getCurrentPosition(pos => {
+                const latLng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                map.setView(latLng, 16);
+                L.marker(latLng).addTo(map).bindPopup("You are here").openPopup();
+                statusText.innerText = "GPS active & verified securely.";
+            }, () => {
+                statusText.innerText = "Permission denied or requires HTTPS connection.";
+            }, { enableHighAccuracy: true });
         });
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -376,7 +389,7 @@
                     document.getElementById('report-modal').classList.add('hidden');
                     document.getElementById('hazard-form').reset();
                 } catch (err) {
-                    alert("Write failed: Check Firestore Rules or console.");
+                    alert("Write failed: Check console for permissions.");
                     console.error(err);
                 }
             };
