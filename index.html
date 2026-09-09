@@ -37,7 +37,6 @@
         .slide-hover { transition: transform 0.2s ease, background-color 0.2s ease; }
         .slide-hover:hover { transform: translateX(4px); }
 
-        /* Pulsing animation for confirmed high-risk incident pins */
         @keyframes pulse-ring {
             0% { transform: scale(0.95); opacity: 0.8; }
             50% { transform: scale(1.35); opacity: 0.3; }
@@ -157,6 +156,10 @@
                         <span class="text-slate-500 font-mono" id="count-badge-ne">0</span>
                     </div>
                     <div class="flex items-center justify-between px-1">
+                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span> User Field Reports</span>
+                        <span class="text-slate-500 font-mono" id="count-badge-user">0</span>
+                    </div>
+                    <div class="flex items-center justify-between px-1">
                         <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span> Word on the Street / Community</span>
                         <span class="text-slate-500 font-mono" id="count-badge-un">0</span>
                     </div>
@@ -190,7 +193,16 @@
 
                 <!-- Feed Lists Sorted by Theme -->
                 <div class="space-y-4 pt-4 border-t border-slate-800">
+                    
                     <div class="space-y-2">
+                        <h3 class="text-[10px] font-bold text-amber-400 uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                            Recent User Field Reports
+                        </h3>
+                        <div id="user-reports-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <div class="space-y-2 pt-2">
                         <h3 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest pl-1">Official Police Dispatch (Verified)</h3>
                         <div id="emergency-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
                     </div>
@@ -227,46 +239,34 @@
                 <h3 class="font-bold text-lg text-white">Broadcast Field Report</h3>
                 <button id="close-report-modal" class="text-slate-500 hover:text-white transition p-1 bg-slate-800 rounded-md">✕</button>
             </div>
-            <form id="hazard-form" class="space-y-3">
+            <form id="hazard-form" class="space-y-3 relative">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Report Classification</label>
                     <select id="hazard-type" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none">
-                        <option value="unverified" selected>Word on the Street / Community (Red - Unverified)</option>
+                        <option value="user_report" selected>User Field Report (Amber - Standout)</option>
                     </select>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Intersection / Zone (Autocompletes as you type)</label>
-                    <input type="text" id="hazard-location-input" list="hamilton-streets" placeholder="Start typing street (e.g. York, Barton, Main)..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none" required>
-                    <datalist id="hamilton-streets">
-                        <option value="York Blvd & Bay St">
-                        <option value="Barton St E & James St N">
-                        <option value="Jackson Square Core">
-                        <option value="Stoney Creek / Fruitland">
-                        <option value="Beasley Park Zone">
-                        <option value="Hess Village Corridor">
-                        <option value="Central Memorial Park">
-                        <option value="Ottawa St N Corridor">
-                        <option value="Main St E & Victoria Ave">
-                        <option value="Gage Park Sector">
-                        <option value="Cannon St E">
-                        <option value="Locke St South">
-                        <option value="Queenston Rd Corridor">
-                        <option value="Kenilworth Ave">
-                        <option value="Upper James & Mohawk">
-                        <option value="Concession St / Hospital Zone">
-                        <option value="Oriole Crescent Sector">
-                        <option value="East 14th Street">
-                    </datalist>
+                
+                <!-- Google Maps Style Live Geocoding Autocomplete Input -->
+                <div class="space-y-1 relative">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Street / Intersection (Live Directions Search)</label>
+                    <input type="text" id="hazard-location-input" autocomplete="off" placeholder="Start typing any Hamilton street or address..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none focus:border-amber-500" required>
+                    <!-- Suggestions Dropdown Box -->
+                    <div id="address-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
+                    <!-- Hidden coordinate storage -->
+                    <input type="hidden" id="selected-lat" value="43.2570">
+                    <input type="hidden" id="selected-lng" value="-79.8700">
                 </div>
+
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (Drug Use, Needles, Weapons, Hazards)</label>
-                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none" required></textarea>
+                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Attach or Take Photo (Optional)</label>
                     <input type="file" id="hazard-image-input" accept="image/*" capture="environment" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
                 </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-98">
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-98">
                     Deploy Field Report
                 </button>
             </form>
@@ -301,8 +301,8 @@
         let markersLayer = L.layerGroup().addTo(map);
         let heatLayer = null;
 
-        function createPulsingPinIcon(colorHex, shadowHex, isConfirmed) {
-            let pulseHtml = isConfirmed ? `<div class="confirmed-pulse"></div>` : '';
+        function createCustomPinIcon(colorHex, shadowHex, isPulsing) {
+            let pulseHtml = isPulsing ? `<div class="confirmed-pulse"></div>` : '';
             return L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-slate-900" style="background-color: ${colorHex}; box-shadow: 0 0 14px ${shadowHex};">
@@ -314,9 +314,10 @@
             });
         }
 
-        const greenIcon = createPulsingPinIcon('#10b981', 'rgba(16,185,129,0.7)', true);  
-        const blueIcon = createPulsingPinIcon('#3b82f6', 'rgba(59,130,246,0.7)', false);   
-        const redIcon = createPulsingPinIcon('#e11d48', 'rgba(225,29,72,0.7)', false);    
+        const greenIcon = createCustomPinIcon('#10b981', 'rgba(16,185,129,0.7)', true);  
+        const blueIcon = createCustomPinIcon('#3b82f6', 'rgba(59,130,246,0.7)', false);   
+        const redIcon = createCustomPinIcon('#e11d48', 'rgba(225,29,72,0.7)', false);    
+        const amberIcon = createCustomPinIcon('#fbbf24', 'rgba(251,191,36,0.8)', true);
 
         function formatTimestamp(ts) {
             if (!ts) return 'Just now';
@@ -335,12 +336,13 @@
             }
         }
 
-        let currentAppData = { emergency: [], news: [], unverified: [], street: [] };
+        let currentAppData = { emergency: [], news: [], unverified: [], user_report: [], street: [] };
 
         function renderData(appData) {
             markersLayer.clearLayers();
             
             const listElements = {
+                user_reports: document.getElementById('user-reports-list'),
                 emergency: document.getElementById('emergency-list'),
                 news: document.getElementById('news-list'),
                 unverified: document.getElementById('unverified-list')
@@ -350,12 +352,14 @@
 
             document.getElementById('count-badge-em').innerText = appData.emergency.length;
             document.getElementById('count-badge-ne').innerText = appData.news.length;
-            document.getElementById('count-badge-un').innerText = appData.unverified.length + (appData.street?.length || 0);
+            document.getElementById('count-badge-user').innerText = (appData.user_report || []).length;
+            document.getElementById('count-badge-un').innerText = appData.unverified.length;
 
             let heatPoints = [];
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
             const config = {
+                user_report: { icon: amberIcon, heat: 3.5, colorClass: 'amber', title: 'User Field Report' },
                 emergency: { icon: greenIcon, heat: 3.0, colorClass: 'emerald', title: 'Official Police Dispatch (Verified)' },
                 news: { icon: blueIcon, heat: 1.8, colorClass: 'blue', title: 'Local News Report' },
                 unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Word on the Street / Community (Unverified)' },
@@ -379,6 +383,48 @@
                 spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Syncing field logs...</div>`;
             }
 
+            (appData.user_report || []).forEach(inc => {
+                if (inc.hasPin && inc.lat && inc.lng) {
+                    heatPoints.push([inc.lat, inc.lng, config.user_report.heat]);
+                    const marker = L.marker([inc.lat, inc.lng], { icon: config.user_report.icon }).addTo(markersLayer);
+                    
+                    let imageHtml = inc.imageUrl ? `<div class="mt-2"><img src="${inc.imageUrl}" class="w-full h-32 object-cover rounded-lg border border-amber-500/30"></div>` : '';
+                    let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
+                    
+                    marker.bindPopup(`
+                        <div class="p-0.5 font-sans min-w-[200px]">
+                            <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                <strong class="text-[10px] text-amber-400 uppercase tracking-widest">User Field Report</strong>
+                            </div>
+                            <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
+                            <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
+                            <p class="text-xs text-slate-300 mt-3 leading-relaxed">${inc.description}</p>
+                            ${imageHtml}
+                            ${linkHtml}
+                        </div>
+                    `);
+                }
+
+                const nodeItem = document.createElement('div');
+                nodeItem.className = `slide-hover bg-amber-950/20 hover:bg-amber-950/40 p-3 rounded-r-xl border border-amber-500/30 border-l-4 border-l-amber-400 cursor-pointer flex flex-col gap-1.5 shadow-md`;
+                let imageThumbnail = inc.imageUrl ? `<div class="mt-1"><img src="${inc.imageUrl}" class="w-full h-24 object-cover rounded-md border border-amber-500/20"></div>` : '';
+                nodeItem.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <span class="text-[11px] font-extrabold text-amber-300 uppercase tracking-wide leading-tight flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> ${inc.source}
+                        </span>
+                        <span class="text-[9px] font-mono text-amber-400/80 shrink-0 mt-0.5">${formatTimestamp(inc.timestamp)}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-200 line-clamp-2 leading-snug">${inc.description}</div>
+                    ${imageThumbnail}
+                `;
+                if (inc.hasPin && inc.lat && inc.lng) {
+                    nodeItem.onclick = () => { map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); };
+                }
+                listElements.user_reports.appendChild(nodeItem);
+            });
+
             ['emergency', 'news', 'unverified', 'street'].forEach(category => {
                 const targetKey = category === 'street' ? 'unverified' : category;
                 const targetEl = listElements[targetKey];
@@ -390,6 +436,7 @@
                         heatPoints.push([inc.lat, inc.lng, cfg.heat]);
                         const marker = L.marker([inc.lat, inc.lng], { icon: cfg.icon }).addTo(markersLayer);
                         
+                        let imageHtml = inc.imageUrl ? `<div class="mt-2"><img src="${inc.imageUrl}" class="w-full h-32 object-cover rounded-lg border border-slate-700"></div>` : '';
                         let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-${cfg.colorClass}-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
                         
                         marker.bindPopup(`
@@ -401,6 +448,7 @@
                                 <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
                                 <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
                                 <p class="text-xs text-slate-300 mt-3 leading-relaxed">${inc.description}</p>
+                                ${imageHtml}
                                 ${linkHtml}
                             </div>
                         `);
@@ -409,6 +457,7 @@
                     const nodeItem = document.createElement('div');
                     nodeItem.className = `slide-hover bg-slate-900/40 hover:bg-slate-800/80 p-3 rounded-r-xl border border-transparent border-l-2 border-l-${cfg.colorClass}-500 border-b-slate-800/60 cursor-pointer flex flex-col gap-1.5 shadow-sm`;
                     let sourceLinkIcon = inc.url ? `<a href="${inc.url}" target="_blank" class="text-[9px] text-amber-400 hover:underline ml-auto" onclick="event.stopPropagation()">[Source Post]</a>` : '';
+                    let imageThumbnail = inc.imageUrl ? `<div class="mt-1"><img src="${inc.imageUrl}" class="w-full h-24 object-cover rounded-md border border-slate-800"></div>` : '';
                     nodeItem.innerHTML = `
                         <div class="flex items-start justify-between gap-2">
                             <span class="text-[11px] font-bold text-${cfg.colorClass}-400 uppercase tracking-wide leading-tight">${inc.source}</span>
@@ -418,11 +467,10 @@
                             </div>
                         </div>
                         <div class="text-[11px] text-slate-300 line-clamp-2 leading-snug">${inc.description}</div>
+                        ${imageThumbnail}
                     `;
                     if (inc.hasPin && inc.lat && inc.lng) {
-                        nodeItem.onclick = () => { 
-                            map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); 
-                        };
+                        nodeItem.onclick = () => { map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); };
                     }
                     targetEl.appendChild(nodeItem);
                 });
@@ -447,7 +495,7 @@
         }
 
         onSnapshot(collection(db, "reports"), (snapshot) => {
-            let newData = { emergency: [], news: [], unverified: [], street: [] };
+            let newData = { emergency: [], news: [], unverified: [], user_report: [], street: [] };
             
             snapshot.forEach((doc) => {
                 const data = doc.data();
@@ -489,6 +537,60 @@
             }, { enableHighAccuracy: true });
         });
 
+        // Google Maps Style Live Geocoding Autocomplete Search for Hamilton Streets
+        let searchTimeout = null;
+        const locationInput = document.getElementById('hazard-location-input');
+        const suggestionsBox = document.getElementById('address-suggestions');
+        const selectedLatInput = document.getElementById('selected-lat');
+        const selectedLngInput = document.getElementById('selected-lng');
+
+        locationInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length < 3) {
+                suggestionsBox.classList.add('hidden');
+                return;
+            }
+
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                try {
+                    // Query Nominatim restricted to Hamilton, Ontario bounds
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Hamilton, Ontario")}&viewbox=-80.1,43.4,-79.6,43.1&bounded=1&limit=5`);
+                    const results = await res.json();
+                    
+                    if (results.length > 0) {
+                        suggestionsBox.innerHTML = results.map(place => `
+                            <div class="p-2.5 hover:bg-slate-800 text-xs text-slate-200 cursor-pointer border-b border-slate-800 last:border-0 truncate" data-lat="${place.lat}" data-lon="${place.lon}" data-name="${place.display_name}">
+                                📍 ${place.display_name}
+                            </div>
+                        `).join('');
+                        suggestionsBox.classList.remove('hidden');
+
+                        // Click handler for suggestions
+                        suggestionsBox.querySelectorAll('div').forEach(el => {
+                            el.onclick = () => {
+                                locationInput.value = el.getAttribute('data-name').split(',')[0];
+                                selectedLatInput.value = el.getAttribute('data-lat');
+                                selectedLngInput.value = el.getAttribute('data-lon');
+                                suggestionsBox.classList.add('hidden');
+                            };
+                        });
+                    } else {
+                        suggestionsBox.classList.add('hidden');
+                    }
+                } catch (err) {
+                    console.error("Geocoding lookup failed:", err);
+                }
+            }, 300);
+        });
+
+        // Hide suggestions on outside click
+        document.addEventListener('click', (e) => {
+            if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.classList.add('hidden');
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             fetchWeather();
 
@@ -506,27 +608,41 @@
             
             document.getElementById('hazard-form').onsubmit = async (e) => {
                 e.preventDefault();
-                const loc = document.getElementById('hazard-location-input').value;
+                const locInput = locationInput.value;
                 const desc = document.getElementById('hazard-desc-input').value;
-                
-                try {
-                    await addDoc(collection(db, "reports"), {
-                        category: 'unverified',
-                        hasPin: true,
-                        lat: 43.2570,
-                        lng: -79.8700,
-                        source: `Field Report (${loc})`,
-                        description: desc,
-                        url: '',
-                        timestamp: serverTimestamp(),
-                        createdAt: serverTimestamp(),
-                        active: true
-                    });
-                    closeModal();
-                    document.getElementById('hazard-form').reset();
-                } catch (err) {
-                    alert("Write failed: Ensure Firestore security rules allow public writes (`allow read, write: if true;`).");
-                    console.error(err);
+                const imageFile = document.getElementById('hazard-image-input').files[0];
+                const lat = parseFloat(selectedLatInput.value) || 43.2570;
+                const lng = parseFloat(selectedLngInput.value) || -79.8700;
+
+                const processSubmission = async (imageUrl = '') => {
+                    try {
+                        await addDoc(collection(db, "reports"), {
+                            category: 'user_report',
+                            hasPin: true,
+                            lat: lat,
+                            lng: lng,
+                            source: `Field Report (${locInput})`,
+                            description: desc,
+                            imageUrl: imageUrl,
+                            url: '',
+                            timestamp: serverTimestamp(),
+                            createdAt: serverTimestamp(),
+                            active: true
+                        });
+                        closeModal();
+                        document.getElementById('hazard-form').reset();
+                    } catch (err) {
+                        alert("Write failed: Ensure Firestore rules allow public writes (`allow read, write: if true;`).");
+                        console.error(err);
+                    }
+                };
+
+                if (imageFile) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => { processSubmission(reader.result); };
+                    reader.readAsDataURL(imageFile);
+                } else {
+                    processSubmission('');
                 }
             };
         });
