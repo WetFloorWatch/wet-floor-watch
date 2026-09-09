@@ -9,78 +9,96 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .leaflet-container { background: #f1f5f9 !important; }
+        body { -webkit-font-smoothing: antialiased; font-family: ui-sans-serif, system-ui, sans-serif; }
+        .leaflet-container { background: #020617 !important; }
+        .leaflet-tile {
+            filter: brightness(0.55) invert(1) contrast(2.6) hue-rotate(200deg) saturate(0.25);
+        }
         .custom-div-icon { background: transparent; border: none; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f8fafc; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .leaflet-popup-content-wrapper {
-            background: #ffffff !important;
-            color: #0f172a !important;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.15);
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: #0f172a !important;
+            color: #f8fafc !important;
+            border: 1px solid #1e293b;
+            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.7);
             border-radius: 0.75rem;
         }
-        .leaflet-popup-content { margin: 14px; line-height: 1.5; }
-        .leaflet-container a.leaflet-popup-close-button { color: #64748b; }
+        .leaflet-popup-content { margin: 12px; line-height: 1.5; }
+        .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
     </style>
 </head>
-<body class="h-full bg-slate-100 text-slate-900 flex flex-col overflow-hidden">
+<body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden selection:bg-amber-500/30 selection:text-amber-200">
 
     <!-- DISCLAIMER MODAL -->
-    <div id="disclaimer-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
-        <div class="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div class="flex items-center space-x-3 border-b border-slate-100 pb-3">
-                <div class="bg-amber-500 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs">WFW</div>
-                <h2 class="text-base font-bold tracking-tight text-slate-950">Hamilton Intelligence Map</h2>
+    <div id="disclaimer-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
+                <div class="bg-amber-500/20 p-2 rounded-lg border border-amber-500/30">
+                    <svg class="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch <span class="text-amber-500 text-sm block font-mono">INTELLIGENCE GRID</span></h2>
             </div>
-            <p class="text-xs text-slate-600 leading-relaxed">
-                This platform maps real-world street events, dispatches, drug hazards, and social media intel. For immediate emergencies, call 911.
+            <p class="text-sm text-slate-300 leading-relaxed">
+                <strong class="text-rose-400">CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency, <strong>call 911 immediately</strong>. 
+                <br><br>
+                This platform maps real-world street events, dispatches, drug hazards, and social media intel across Hamilton.
             </p>
-            <button id="accept-disclaimer-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow">
-                Accept & Open Map Grid
+            <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                Access Intelligence Map Grid
             </button>
         </div>
     </div>
 
     <!-- HEADER TOOLBAR -->
-    <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 z-20 flex-shrink-0 shadow-sm">
+    <header class="bg-slate-950/80 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-4 z-20 flex-shrink-0 shadow-sm">
         <div class="flex items-center space-x-3">
-            <div class="bg-amber-500 text-slate-950 p-2 rounded-lg font-black text-sm tracking-wider">WFW</div>
+            <div class="bg-amber-500/10 p-2 rounded-xl border border-amber-500/20 shadow-inner">
+                <svg class="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/><path d="M11 10h2v4h-2zm0 6h2v2h-2z"/></svg>
+            </div>
             <div>
-                <h1 class="font-bold text-base text-slate-900 tracking-tight flex items-center gap-2">
+                <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
                     Wet Floor Watch 
-                    <span class="text-xs font-normal text-slate-500 hidden sm:inline">| Community Intelligence Grid</span>
+                    <span class="text-emerald-400 font-mono text-[10px] uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 tracking-wider">Tactical Grid</span>
                 </h1>
+                <p class="text-[11px] text-slate-400 font-medium hidden sm:block tracking-wide uppercase">Hamilton Threat & Awareness Platform</p>
             </div>
         </div>
         <div class="flex items-center space-x-3">
-            <button id="open-report-modal" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg shadow-sm transition flex items-center gap-1.5">
+            <button id="open-report-modal" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-lg transition active:scale-95 flex items-center gap-1.5">
                 <span>+</span> Broadcast Field Report
             </button>
-            <button id="locate-me-btn" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-3.5 py-2.5 rounded-lg border border-slate-200 transition">
-                📍 GPS Verify
+            <button id="locate-me-btn" class="bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+                📍 <span class="hidden sm:inline">GPS Verify</span>
+            </button>
+            <button id="sidebar-toggle" class="md:hidden bg-slate-900 text-slate-300 p-2 rounded-xl border border-slate-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
             </button>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <div class="flex-1 flex relative overflow-hidden bg-slate-100">
+    <div class="flex-1 flex relative overflow-hidden bg-slate-950">
         
-        <!-- SIDEBAR ANALYTICS & FILTER PANEL -->
-        <aside class="w-[400px] bg-white border-r border-slate-200 flex flex-col shadow-sm z-10 flex-shrink-0">
-            <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Map Analytics & Filters</span>
-                <span id="active-count" class="text-xs font-mono bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0 events</span>
+        <!-- SIDEBAR ANALYTICS & CRIMEMAP FILTERS -->
+        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[410px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+                <h2 class="font-bold text-slate-200 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    Map Analytics & Filters
+                </h2>
+                <button id="sidebar-close" class="md:hidden text-slate-500 hover:text-white transition p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
 
-            <div class="p-4 border-b border-slate-200 space-y-4">
+            <div class="p-4 border-b border-slate-800 space-y-4 bg-slate-950/20">
                 <!-- Date Range Selector -->
                 <div class="space-y-1.5">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Date Range</label>
-                    <select id="date-range-filter" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-xs text-slate-800 font-medium outline-none focus:border-amber-500">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date Range Filter</label>
+                    <select id="date-range-filter" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-mono outline-none focus:border-amber-500">
                         <option value="all">All Recorded History</option>
                         <option value="1">Past 24 Hours</option>
                         <option value="7" selected>Past 7 Days</option>
@@ -89,35 +107,50 @@
                     </select>
                 </div>
 
-                <!-- Category Checkboxes -->
+                <!-- Category Checkbox Filters -->
                 <div class="space-y-2">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wide block">Event Selection Filters</label>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
-                            <input type="checkbox" id="filter-emergency" checked class="accent-amber-500">
-                            <span class="font-medium text-slate-700">Police Dispatch</span>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Event Selection Filters</label>
+                    <div class="grid grid-cols-1 gap-2 text-xs font-semibold">
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                Official Police Dispatch
+                            </span>
+                            <input type="checkbox" id="filter-emergency" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </label>
-                        <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
-                            <input type="checkbox" id="filter-news" checked class="accent-amber-500">
-                            <span class="font-medium text-slate-700">Local News</span>
+
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                                Local News Reports
+                            </span>
+                            <input type="checkbox" id="filter-news" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </label>
-                        <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
-                            <input type="checkbox" id="filter-user" checked class="accent-amber-500">
-                            <span class="font-medium text-slate-700">Field Reports</span>
+
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+                                User Field Reports
+                            </span>
+                            <input type="checkbox" id="filter-user" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </label>
-                        <label class="flex items-center gap-2 p-2 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer">
-                            <input type="checkbox" id="filter-street" checked class="accent-amber-500">
-                            <span class="font-medium text-slate-700">Social / Street</span>
+
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
+                            <span class="flex items-center gap-2 text-slate-200">
+                                <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span>
+                                Social Media / Street Intel
+                            </span>
+                            <input type="checkbox" id="filter-street" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- Feed List -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+            <!-- Feed List with Source / Social Links -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Filtered Incident Feed</h3>
-                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-600 hover:underline">@interventionintersection2026 &rarr;</a>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 events matching</span>
+                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-400 hover:underline">@interventionintersection &rarr;</a>
                 </div>
                 <div id="feed-list" class="space-y-2.5"></div>
             </div>
@@ -126,34 +159,39 @@
         <!-- MAP CONTAINER -->
         <main class="flex-1 h-full relative">
             <div id="map" class="w-full h-full z-10"></div>
+            
+            <!-- MOBILE FAB -->
+            <button id="floating-report-btn" class="md:hidden absolute bottom-6 right-6 z-40 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black p-4 rounded-full shadow-2xl flex items-center justify-center active:scale-95">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </button>
         </main>
     </div>
 
     <!-- REPORT MODAL -->
-    <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
-        <div class="bg-white border border-slate-200 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="font-bold text-base text-slate-900">Broadcast Field Report</h3>
-                <button id="close-report-modal" class="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
+    <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-lg text-white">Broadcast Field Report</h3>
+                <button id="close-report-modal" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
             </div>
             <form id="hazard-form" class="space-y-3.5 relative">
                 <div class="space-y-1 relative">
-                    <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Street / Intersection</label>
-                    <input type="text" id="hazard-location-input" autocomplete="off" placeholder="Start typing street (e.g. King, Barton, York)..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 font-mono outline-none focus:border-amber-500" required>
-                    <div id="address-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto hidden"></div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Street / Intersection (Predictive Index)</label>
+                    <input type="text" id="hazard-location-input" autocomplete="off" placeholder="Start typing street (e.g. King, Barton, York)..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 text-sm text-slate-200 font-mono outline-none focus:border-amber-500" required>
+                    <div id="address-suggestions" class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto hidden"></div>
                     <input type="hidden" id="selected-lat" value="43.2570">
                     <input type="hidden" id="selected-lng" value="-79.8700">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Description (5-400 characters)</label>
-                    <textarea id="hazard-desc-input" placeholder="Incident specifics..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 outline-none resize-none focus:border-amber-500" required></textarea>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (5-400 characters)</label>
+                    <textarea id="hazard-desc-input" placeholder="Incident specifics, drug hazards, weapons..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Social Media / News Link (Facebook, Instagram, News URL)</label>
-                    <input type="url" id="hazard-url-input" placeholder="https://instagram.com/p/..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-mono outline-none focus:border-amber-500">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Social Media / News Link (Facebook, Instagram, News URL)</label>
+                    <input type="url" id="hazard-url-input" placeholder="https://facebook.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 font-mono outline-none focus:border-amber-500">
                 </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs transition shadow-sm">
-                    Submit Report to Map Grid
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl text-xs transition shadow-lg active:scale-98">
+                    Submit Report to Intelligence Grid
                 </button>
             </form>
         </div>
@@ -183,31 +221,32 @@
 
         let markersLayer = L.layerGroup().addTo(map);
 
-        function createPinIcon(colorHex) {
+        function createPinIcon(colorHex, shadowHex) {
             return L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div class="flex items-center justify-center w-6 h-6 rounded-full border-2 border-white shadow-md" style="background-color: ${colorHex};">
-                         <div class="w-2 h-2 rounded-full bg-white"></div>
+                html: `<div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-slate-900" style="background-color: ${colorHex}; box-shadow: 0 0 14px ${shadowHex};">
+                         <div class="w-1.5 h-1.5 rounded-full bg-slate-950/60 z-10"></div>
                        </div>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
             });
         }
 
         const icons = {
-            emergency: createPinIcon('#10b981'),
-            news: createPinIcon('#3b82f6'),
-            user_report: createPinIcon('#f59e0b'),
-            street: createPinIcon('#ef4444')
+            emergency: createPinIcon('#10b981', 'rgba(16,185,129,0.7)'),
+            news: createPinIcon('#3b82f6', 'rgba(59,130,246,0.7)'),
+            user_report: createPinIcon('#fbbf24', 'rgba(251,191,36,0.8)'),
+            street: createPinIcon('#e11d48', 'rgba(225,29,72,0.7)')
         };
 
         function formatTimestamp(ts) {
             if (!ts) return 'Just now';
             if (ts.toDate) return ts.toDate().toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            if (ts instanceof Date) return ts.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             return 'Recent Record';
         }
 
-        // Default Seed Data representing verified Hamilton dispatches, news, and social intelligence
+        // Verified 2026 Hamilton Threat & Incident Seed Database with Social/News Links
         const defaultSeedData = {
             emergency: [
                 {
@@ -216,21 +255,21 @@
                     hasPin: true,
                     lat: 43.2557,
                     lng: -79.8711,
-                    source: 'Hamilton Police Dispatch (Downtown Core)',
-                    description: 'Police investigating multiple stabbing incidents in downtown core near King St & MacNab St transit terminal.',
-                    url: 'https://hamiltonpolice.on.ca',
-                    timestamp: new Date(Date.now() - 3600000 * 4)
+                    source: 'Hamilton Police Dispatch (Main St W & Frid St)',
+                    description: 'Homicide unit investigated fatal overnight stabbing incident near King Street West and Paradise Road North.',
+                    url: 'https://hamiltonpolice.on.ca/news/hamilton-police-investigating-overnight-homicide/',
+                    timestamp: new Date(Date.now() - 3600000 * 12)
                 },
                 {
                     id: 'seed-em-2',
                     category: 'emergency',
                     hasPin: true,
-                    lat: 43.2580,
-                    lng: -79.8520,
-                    source: 'Hamilton Police Dispatch (Barton St E)',
-                    description: 'Response to targeted stabbing incident near Barton St E and Barnsdale Ave N. Suspect apprehended.',
-                    url: 'https://hamiltonpolice.on.ca/news/barton-and-barnesdale/',
-                    timestamp: new Date(Date.now() - 3600000 * 24)
+                    lat: 43.2350,
+                    lng: -79.8400,
+                    source: 'Hamilton Police Dispatch (Oriole Crescent)',
+                    description: 'Shots fired at residential dwelling; Hamilton Police recovered spent casings and appealed for neighborhood security footage.',
+                    url: 'https://hamiltonpolice.on.ca/news/hamilton-police-seek-witnesses-in-overnight-shooting-in-oriole-crescent/',
+                    timestamp: new Date(Date.now() - 3600000 * 36)
                 }
             ],
             news: [
@@ -238,10 +277,10 @@
                     id: 'seed-news-1',
                     category: 'news',
                     hasPin: true,
-                    lat: 43.2520,
-                    lng: -79.8660,
-                    source: 'Global News Hamilton Report',
-                    description: 'Homicide investigation launched following early morning altercation near Main St W and Frid St.',
+                    lat: 43.2510,
+                    lng: -79.8500,
+                    source: 'Global News Hamilton',
+                    description: 'Fatal stabbing marks 9th homicide of 2026; residents urged to submit dashcam footage near downtown corridors.',
                     url: 'https://globalnews.ca/news/12014980/hamilton-homicide-stabbing/',
                     timestamp: new Date(Date.now() - 3600000 * 48)
                 }
@@ -254,9 +293,9 @@
                     lat: 43.2575,
                     lng: -79.8580,
                     source: 'Field Report (Beasley Park Zone)',
-                    description: 'Discarded drug paraphernalia and needle hazard reported near Mary St & Wilson St playground perimeter.',
+                    description: 'Discarded biohazard needles and open-air drug paraphernalia reported along playground perimeter.',
                     url: '',
-                    timestamp: new Date(Date.now() - 3600000 * 12)
+                    timestamp: new Date(Date.now() - 3600000 * 8)
                 }
             ],
             street: [
@@ -267,7 +306,7 @@
                     lat: 43.2585,
                     lng: -79.8660,
                     source: '@interventionintersection2026',
-                    description: 'Active community street watch log documenting open air narcotics activity and safety concerns at Rebecca St & James St N.',
+                    description: 'Active community street watch log documenting open narcotics activity and safety concerns at Rebecca St & James St N.',
                     url: 'https://www.instagram.com/interventionintersection2026',
                     timestamp: new Date(Date.now() - 3600000 * 6)
                 }
@@ -296,7 +335,7 @@
                 emergency: { color: 'emerald', label: 'Police Dispatch' },
                 news: { color: 'blue', label: 'Local News' },
                 user_report: { color: 'amber', label: 'Field Report' },
-                street: { color: 'rose', label: 'Social Intel' }
+                street: { color: 'rose', label: 'Social / Street Intel' }
             };
 
             let visibleCount = 0;
@@ -312,13 +351,13 @@
 
                     if (item.lat && item.lng) {
                         const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
-                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-2.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-lg transition">🔗 View Source / Social Link &rarr;</a>` : '';
+                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition">🔗 Access Source & Social Intel &rarr;</a>` : '';
                         
                         marker.bindPopup(`
                             <div class="font-sans min-w-[220px]">
-                                <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-600 tracking-wider">${configs[cat].label}</span>
-                                <strong class="text-sm text-slate-900 block my-1">${item.source}</strong>
-                                <p class="text-xs text-slate-600 mb-2">${item.description}</p>
+                                <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-400 tracking-wider">${configs[cat].label}</span>
+                                <strong class="text-sm text-white block my-1">${item.source}</strong>
+                                <p class="text-xs text-slate-300 mb-2">${item.description}</p>
                                 <span class="text-[10px] text-slate-400 font-mono">${formatTimestamp(item.timestamp)}</span>
                                 ${socialLink}
                             </div>
@@ -326,15 +365,15 @@
                     }
 
                     const card = document.createElement('div');
-                    card.className = `p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-amber-400 cursor-pointer space-y-1.5 transition`;
+                    card.className = `slide-hover p-3.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-xl cursor-pointer space-y-1.5 transition`;
                     card.innerHTML = `
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-600">${configs[cat].label}</span>
-                            <span class="text-[10px] font-mono text-slate-400">${formatTimestamp(item.timestamp)}</span>
+                            <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-400">${configs[cat].label}</span>
+                            <span class="text-[9px] font-mono text-slate-500">${formatTimestamp(item.timestamp)}</span>
                         </div>
-                        <p class="text-xs font-semibold text-slate-900 line-clamp-1">${item.source}</p>
-                        <p class="text-xs text-slate-600 line-clamp-2">${item.description}</p>
-                        ${item.url ? `<a href="${item.url}" target="_blank" class="text-[11px] font-bold text-amber-600 hover:underline block pt-1" onclick="event.stopPropagation()">🔗 Open Social / Media Link</a>` : ''}
+                        <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.source}</p>
+                        <p class="text-xs text-slate-400 line-clamp-2">${item.description}</p>
+                        ${item.url ? `<a href="${item.url}" target="_blank" class="text-[10px] text-amber-400 hover:underline font-mono block pt-1" onclick="event.stopPropagation()">🔗 Open Social / News Link</a>` : ''}
                     `;
                     if (item.lat && item.lng) {
                         card.onclick = () => map.flyTo([item.lat, item.lng], 16, { duration: 1 });
@@ -343,10 +382,9 @@
                 });
             });
 
-            document.getElementById('active-count').innerText = `${visibleCount} events`;
+            document.getElementById('active-count').innerText = `${visibleCount} events matching`;
         }
 
-        // Merge seed data with Firestore live data
         onSnapshot(collection(db, "reports"), (snapshot) => {
             let data = { 
                 emergency: [...defaultSeedData.emergency], 
@@ -361,8 +399,7 @@
             });
             rawAppData = data;
             filterAndRender();
-        }, (error) => {
-            // Fallback if offline or permissions restrict
+        }, () => {
             rawAppData = defaultSeedData;
             filterAndRender();
         });
@@ -372,13 +409,13 @@
             document.getElementById(id).onchange = filterAndRender;
         });
 
-        // Hamilton Index Autocomplete
+        // Hamilton Street Master Index for Autocomplete
         const HAMILTON_INDEX = [
             { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8660 },
             { name: "King St W & MacNab St N", lat: 43.2557, lng: -79.8711 },
-            { name: "King St E & Victoria Ave S", lat: 43.2510, lng: -79.8500 },
-            { name: "Barton St E & Ottawa St N", lat: 43.2480, lng: -79.8185 },
             { name: "Main St W & Frid St", lat: 43.2520, lng: -79.8660 },
+            { name: "Oriole Crescent Sector", lat: 43.2350, lng: -79.8400 },
+            { name: "Barton St E & Ottawa St N", lat: 43.2480, lng: -79.8185 },
             { name: "Beasley Park (Mary St & Wilson St)", lat: 43.2575, lng: -79.8580 }
         ];
 
@@ -389,7 +426,7 @@
             const q = e.target.value.toLowerCase();
             if (q.length < 2) { suggestionsBox.classList.add('hidden'); return; }
             const matches = HAMILTON_INDEX.filter(i => i.name.toLowerCase().includes(q));
-            suggestionsBox.innerHTML = matches.map(m => `<div class="p-2.5 hover:bg-slate-50 text-xs text-slate-800 cursor-pointer border-b border-slate-100 last:border-0" data-lat="${m.lat}" data-lng="${m.lng}" data-name="${m.name}">📍 ${m.name}</div>`).join('');
+            suggestionsBox.innerHTML = matches.map(m => `<div class="p-3 hover:bg-slate-800 text-xs text-slate-200 cursor-pointer border-b border-slate-800 last:border-0" data-lat="${m.lat}" data-lng="${m.lng}" data-name="${m.name}">📍 ${m.name}</div>`).join('');
             suggestionsBox.classList.remove('hidden');
             suggestionsBox.querySelectorAll('div').forEach(el => {
                 el.onclick = () => {
@@ -439,7 +476,10 @@
 
         document.getElementById('accept-disclaimer-btn').onclick = () => document.getElementById('disclaimer-modal').classList.add('hidden');
         document.getElementById('open-report-modal').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
+        document.getElementById('floating-report-btn').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
         document.getElementById('close-report-modal').onclick = () => document.getElementById('report-modal').classList.add('hidden');
+        document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        document.getElementById('sidebar-close').onclick = () => document.getElementById('sidebar').classList.add('-translate-x-full');
         document.getElementById('locate-me-btn').onclick = () => navigator.geolocation?.getCurrentPosition(p => map.flyTo([p.coords.latitude, p.coords.longitude], 16));
     </script>
 </body>
