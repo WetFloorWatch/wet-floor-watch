@@ -17,7 +17,7 @@ const MAX_GEMINI_CALLS = 3;
 
 const parser = new Parser({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/15.0',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/16.0',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
@@ -25,12 +25,13 @@ const parser = new Parser({
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const FEEDS = [
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(drug+OR+weapons+OR+assault+OR+stabbing+OR+abduction+OR+arrest)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com)+(abduction+OR+kidnap+OR+attempted+OR+warning+OR+witness+OR+assault+OR+needle+OR+drug+OR+encampment)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Facebook Neighbourhood Watch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(needle+OR+syringe+OR+paraphernalia+OR+pipe+OR+overdose+OR+tent+OR+encampment)+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Community Public Hazard Watch" },
+  // Combined historical baseline & recent live feeds (Dated + Recent coverage)
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(drug+OR+weapons+OR+assault+OR+stabbing+OR+abduction+OR+arrest)+when:2y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com)+(abduction+OR+kidnap+OR+attempted+OR+warning+OR+witness+OR+assault+OR+needle+OR+drug+OR+encampment)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Facebook Neighbourhood Watch" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+(needle+OR+syringe+OR+paraphernalia+OR+pipe+OR+overdose+OR+tent+OR+encampment)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Community Public Hazard Watch" },
   { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "unverified", sourceName: "@interventionintersection2026" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+weapons+OR+abduction+OR+assault+OR+drug)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" }
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+weapons+OR+abduction+OR+assault+OR+drug)+when:2y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=all", type: "unverified", sourceName: "Reddit r/Hamilton" }
 ];
 
 const EXACT_STREET_WHITELIST = [
@@ -85,8 +86,9 @@ async function verifyAndExtract(item, feedType, sourceName) {
     }
   }
 
+  // Corrected fallback corridor name (Barton St E & James St N Corridor)
   if (!matchedCorridor && sourceName === "@interventionintersection2026") {
-      matchedCorridor = { name: "Barton & James Corridor", lat: 43.2618, lng: -79.8660 };
+      matchedCorridor = { name: "Barton St E & James St N Corridor", lat: 43.2618, lng: -79.8660 };
   } else if (!matchedCorridor) {
       return null;
   }
