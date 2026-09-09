@@ -1,4 +1,5 @@
-const admin = require("firebase-admin");
+const adminModule = require("firebase-admin");
+const admin = adminModule.default || adminModule;
 const Parser = require("rss-parser");
 const Groq = require("groq-sdk");
 
@@ -6,7 +7,7 @@ const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 const db = admin.firestore();
 
-// Free AI Layer: Groq SDK (OpenAI-compatible, 14,400 free requests/day)
+// Free AI Layer: Groq SDK (14,400 free requests/day)
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const parser = new Parser({
@@ -19,7 +20,6 @@ const parser = new Parser({
 const FEEDS = [
   { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+homicide+OR+shooting&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
   { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
-  // Public social web search query tracking public Facebook/Instagram safety reports indexed in news/search
   { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com+OR+site:instagram.com)+(safety+OR+needle+OR+encampment+OR+police+OR+assault)+when:1m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Public Social Feed" }
 ];
 
@@ -47,13 +47,12 @@ async function aiVerifyAndExtract(item, feedType, sourceName) {
     return null; 
   }
 
-  // Use Groq's free LLM inference to validate safety relevance and weed out noise instantly
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
           role: "system",
-          content: "You are a strict safety data classifier. Reply ONLY with JSON: {\"valid\": true/false, \"category\": \"emergency\"|\"verified\"|\n\"news\"|\"unverified\"}"
+          content: "You are a strict safety data classifier. Reply ONLY with valid JSON matching this structure: {\"valid\": true, \"category\": \"emergency\"}"
         },
         {
           role: "user",
@@ -65,12 +64,13 @@ async function aiVerifyAndExtract(item, feedType, sourceName) {
       max_tokens: 50
     });
 
-    const result = JSON.parse(chatCompletion.choices[0]?.message?.content || "{\"valid\": false}");
-    if (!result.valid) return null;
+    const content = chatCompletion.choices[0]?.message?.content || "{\"valid\": false}";
+    const cleanContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
+    const result = JSON.parse(cleanContent);
     
+    if (!result.valid) return null;
     if (result.category) feedType = result.category;
   } catch (e) {
-    // Fallback if API rate limit is ever approached
     const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets'];
     if (blacklist.some(term => leadText.includes(term))) return null;
   }
@@ -83,7 +83,6 @@ async function aiVerifyAndExtract(item, feedType, sourceName) {
     }
   }
 
-  // Zero-Tolerance Policy: Strict location matching required
   if (!matchedCorridor) return null;
 
   let articleDate = item.pubDate ? new Date(item.pubDate) : new Date();
@@ -93,8 +92,8 @@ async function aiVerifyAndExtract(item, feedType, sourceName) {
 
   return {
     category: feedType,
-    lat: matchedCorractor.lat,
-    lng: matchedCorractor.lng,
+    lat: matchedCorridor.lat,
+    lng: matchedCorridor.lng,
     source: `${sourceName} • ${matchedCorridor.name}`,
     description: cleanDesc,
     url: String(item.link),
@@ -109,7 +108,7 @@ async function run() {
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
-      for (const item of (parsedFeed.items || []).slice(0, 40)) {
+      for (const item of (parsedFeed.items || []).slice(0, 30)) {
         const intel = await aiVerifyAndExtract(item, feed.type, feed.sourceName);
         if (!intel) continue;
 
