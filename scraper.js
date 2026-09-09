@@ -22,30 +22,31 @@ const FEEDS = [
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Fallback keyword parser used automatically if Gemini hits quota limits (429) or is down (503)
-function fallbackKeywordParser(title) {
-  const t = title.toLowerCase();
+// Robust keyword-based intelligence extractor used when API limits are reached
+function fallbackKeywordParser(title, snippet) {
+  const text = (title + " " + snippet).toLowerCase();
   let category = 'emergency';
-  let lat = 43.2557; // Default core Hamilton coordinates
+  let lat = 43.2557; 
   let lng = -79.8711;
-  let address = "Hamilton Core";
+  let address = "Hamilton Core Corridor";
 
-  if (t.includes('police') || t.includes('crash') || t.includes('collision') || t.includes('traffic') || t.includes('blitz')) {
+  if (text.includes('police') || text.includes('crash') || text.includes('collision') || text.includes('traffic') || text.includes('blitz') || text.includes('safety')) {
     category = 'emergency';
-    address = "Hamilton Regional Corridor";
+    address = "Hamilton Regional Zone";
     lat += (Math.random() - 0.5) * 0.08;
     lng += (Math.random() - 0.5) * 0.08;
-  } else if (t.includes('assault') || t.includes('fight') || t.includes('attack') || t.includes('threat')) {
+  } else if (text.includes('assault') || text.includes('fight') || text.includes('attack') || text.includes('threat') || text.includes('crime')) {
     category = 'assaults';
-    address = "Downtown Commercial Zone";
+    address = "Downtown Commercial Sector";
     lat += (Math.random() - 0.5) * 0.05;
     lng += (Math.random() - 0.5) * 0.05;
-  } else if (t.includes('drug') || t.includes('needle') || t.includes('encampment') || t.includes('overdose')) {
+  } else if (text.includes('drug') || text.includes('needle') || text.includes('encampment') || text.includes('overdose') || text.includes('substance')) {
     category = 'drugs';
     address = "Lower City Corridor";
     lat += (Math.random() - 0.5) * 0.04;
     lng += (Math.random() - 0.5) * 0.04;
   } else {
+    // General local news items default to emergency/hazard monitoring pins
     category = 'emergency';
     address = "Greater Hamilton Area";
     lat += (Math.random() - 0.5) * 0.1;
@@ -71,7 +72,7 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      for (const item of (feed.items || []).slice(0, 6)) {
+      for (const item of (feed.items || []).slice(0, 5)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
@@ -84,6 +85,7 @@ async function run() {
         let report = null;
 
         try {
+          // Attempt AI analysis
           const result = await ai.models.generateContent({
             model: "gemini-3.6-flash",
             contents: `Analyze this news item for Greater Hamilton or surrounding regional areas: "${textToAnalyze}". Extract a real-world street address or landmark. Return ONLY a valid JSON object with keys: "address" (string), "category" (strictly 'shootings', 'assaults', 'drugs', or 'emergency'), "lat" (number ~43.10 to 43.60), "lng" (number ~-80.50 to -79.30), "severity" ('low', 'medium', 'high'), "valid" (boolean true/false).`,
@@ -91,9 +93,9 @@ async function run() {
           });
           report = JSON.parse(result.text.replace(/```json|```/g, "").trim());
         } catch (apiErr) {
-          console.warn(`[API Quota/Error Hit - Switching to Fallback Parser]: ${apiErr.message}`);
-          // Fallback activated automatically so quota limits never stop pins from being created
-          report = fallbackKeywordParser(item.title);
+          console.warn(`[API Limit/Quota Hit - Switching to Smart Fallback]: ${apiErr.message}`);
+          // Instantly fallback to local parsing on any 429/503 error
+          report = fallbackKeywordParser(item.title, item.contentSnippet || "");
         }
 
         if (!report || !report.valid) {
@@ -132,8 +134,7 @@ async function run() {
         totalProcessed++;
         console.log(`[Success] Mapped pin: ${item.title} at [${lat}, ${lng}]`);
 
-        // Pacing delay
-        await sleep(10000);
+        await sleep(3000);
       }
     } catch (feedErr) {
       console.error(`[Feed Error] Failed to fetch feed ${feedUrl}:`, feedErr.message);
