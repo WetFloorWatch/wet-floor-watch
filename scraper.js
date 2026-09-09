@@ -14,12 +14,11 @@ const parser = new Parser({
 });
 
 const FEEDS = [
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(missing+OR+police+OR+fire+OR+EMS+OR+drug+OR+assault+OR+stabbing+OR+homicide)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+suspicious+OR+homicide&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(missing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+police+OR+fire+OR+EMS+OR+drug+OR+assault+OR+homicide)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+suspicious+OR+homicide+OR+shooting&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
 ];
 
-// Verified Hamilton Geographic Whitelist with exact coordinates
 const VERIFIED_CORRIDORS = [
   { keywords: ['fruitland'], name: "Fruitland Rd Corridor", lat: 43.2144, lng: -79.7135 },
   { keywords: ['rymal', 'whitedeer'], name: "Rymal Rd E & Whitedeer Rd", lat: 43.1850, lng: -79.8150 },
@@ -36,12 +35,24 @@ const VERIFIED_CORRIDORS = [
 
 function strictExtractThreat(item, feedType, sourceName) {
   const text = (item.title + " " + (item.contentSnippet || item.content || "")).toLowerCase();
+  const urlLower = (item.link || '').toLowerCase();
 
-  // Ruthless Blacklist
+  // 1. CRITICAL LEGAL FIX: Reject any URL that points to an archive, search tag, or category index page
+  if (
+    urlLower.includes('/archive') || 
+    urlLower.includes('/tag') || 
+    urlLower.includes('/search') || 
+    urlLower.includes('/category') ||
+    urlLower === 'https://hamiltonpolice.on.ca'
+  ) {
+    return null; 
+  }
+
+  // 2. Strict Blacklist
   const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'lake ontario', 'blitz', 'education', 'bulldogs', 'concert'];
   if (blacklist.some(term => text.includes(term))) return null;
 
-  // Strict Location Search: Must find an explicit match in our whitelist, otherwise reject completely
+  // 3. Strict Location Search
   let matchedCorridor = VERIFIED_CORRIDORS.find(c => c.keywords.every(kw => text.includes(kw)));
   if (!matchedCorridor) {
     matchedCorridor = VERIFIED_CORRIDORS.find(c => c.keywords.some(kw => text.includes(kw)));
@@ -72,22 +83,21 @@ function strictExtractThreat(item, feedType, sourceName) {
     lng: matchedCorridor.lng,
     source: `${sourceName} • ${matchedCorridor.name}`,
     description: cleanDesc,
-    url: String(item.link || 'https://www.hamilton.ca/'),
+    url: String(item.link),
     timestamp: admin.firestore.Timestamp.fromDate(articleDate)
   };
 }
 
 async function run() {
-  console.log("Executing zero-fallback geo-matched intelligence ingestion...");
+  console.log("Executing anti-archive geo-matched ingestion...");
   let count = 0;
 
-  // Clear existing old collection data first if desired, or let the scraper upsert
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
       for (const item of (parsedFeed.items || []).slice(0, 50)) {
         const intel = strictExtractThreat(item, feed.type, feed.sourceName);
-        if (!intel) continue; // Safely drops unverified/unmapped stories
+        if (!intel) continue;
 
         const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + Date.now());
         await db.collection("reports").doc(docId).set({
@@ -103,13 +113,13 @@ async function run() {
         });
 
         count++;
-        console.log(`[Verified Geo-Pin] ${intel.category} -> ${intel.source}`);
+        console.log(`[Verified Unique Article] ${intel.category} -> ${intel.source} (${intel.url})`);
       }
     } catch (e) {
       console.error(`Feed Error:`, e.message);
     }
   }
-  console.log(`Ingestion complete. Deployed ${count} strictly verified safety pins.`);
+  console.log(`Ingestion complete. Deployed ${count} legally sound unique article pins.`);
 }
 
 run().catch(err => {
