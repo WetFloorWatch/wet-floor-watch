@@ -17,7 +17,7 @@ const MAX_GEMINI_CALLS = 3;
 
 const parser = new Parser({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/13.0',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch-Precision/14.0',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
@@ -38,11 +38,11 @@ const FEEDS = [
   // X (Twitter) & Instagram Public Mentions
   { url: "https://news.google.com/rss/search?q=Hamilton+(site:twitter.com+OR+site:x.com+OR+site:instagram.com)+(danger+OR+needle+OR+drug+OR+tent+OR+police+OR+warning)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "X / Social Media Feed" },
 
-  // Dedicated Intervention Intersection Target
-  { url: "https://news.google.com/rss/search?q=%22interventionintersection2026%22+OR+%22intervention+intersection%22+Hamilton+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Intervention Intersection Watch" },
-
   // Reddit Chatter
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" }
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+encampment+OR+tent+OR+assault+OR+weapons+OR+abduction&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
+
+  // EXACT INSTAGRAM FEED FOR INTERVENTION INTERSECTION
+  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "unverified", sourceName: "@interventionintersection2026" }
 ];
 
 const EXACT_STREET_WHITELIST = [
@@ -113,7 +113,14 @@ async function verifyAndExtract(item, feedType, sourceName) {
     return null; 
   }
 
-  const valid = await isSafetyRelated(leadText);
+  // Bypass AI filtering for Intervention Intersection to ensure all his posts make it through
+  let valid = false;
+  if (sourceName === "@interventionintersection2026") {
+    valid = true;
+  } else {
+    valid = await isSafetyRelated(leadText);
+  }
+  
   if (!valid) return null;
 
   let matchedCorridor = null;
@@ -124,14 +131,18 @@ async function verifyAndExtract(item, feedType, sourceName) {
     }
   }
 
-  if (!matchedCorridor) return null;
+  // If a specific street isn't mentioned in his post, pin it to the downtown core by default
+  if (!matchedCorridor && sourceName === "@interventionintersection2026") {
+      matchedCorridor = { name: "Downtown Core (General)", lat: 43.2557, lng: -79.8711 };
+  } else if (!matchedCorridor) {
+      return null;
+  }
 
   let articleDate = item.pubDate ? new Date(item.pubDate) : new Date();
   if (isNaN(articleDate.getTime())) articleDate = new Date();
 
   return {
     category: feedType,
-    // EXACT LAT/LNG WITHOUT RANDOM SCATTER SO PINS LAND PERFECTLY ON STREET CORRIDORS
     lat: matchedCorridor.lat,
     lng: matchedCorridor.lng,
     source: `${sourceName} • ${matchedCorridor.name}`,
