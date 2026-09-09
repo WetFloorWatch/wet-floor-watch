@@ -14,6 +14,11 @@
         .leaflet-container { background: #07090e !important; font-family: ui-sans-serif, system-ui, sans-serif; }
         .custom-div-icon { background: transparent; border: none; }
         
+        /* Token-free Dark Mode Map Filter via Standard OpenStreetMap */
+        .leaflet-tile {
+            filter: brightness(0.6) invert(1) contrast(2.5) hue-rotate(200deg) saturate(0.3);
+        }
+        
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -31,7 +36,6 @@
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
         .leaflet-container a.leaflet-popup-close-button:hover { color: #f8fafc; }
 
-        /* Animations */
         @keyframes pulse-ring { 0% { transform: scale(0.85); opacity: 0.8; } 50% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(0.85); opacity: 0; } }
         .user-pulse { animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.6, 1); }
         .slide-hover { transition: transform 0.2s ease, background-color 0.2s ease; }
@@ -253,11 +257,10 @@
         const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         
-        // Free open dark mode tile layer (Stamen / Stadia / OpenStreetMap dark variant via Carto standard free tier or Stamen)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
+        // 100% Free, Token-Free Standard OpenStreetMap with CSS Dark Filter applied
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
             maxZoom: 19,
-            subdomains: 'abcd',
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
         let markersLayer = L.layerGroup().addTo(map);
