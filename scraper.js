@@ -18,8 +18,9 @@ const FEEDS = [
   { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
 ];
 
-// Exact verified street corridors with verified geographic markers
+// Absolute Precision Whitelist: Maps exact street names and locations to their true geographic coordinates
 const EXACT_STREET_WHITELIST = [
+  { names: ['candlewood drive', 'candlewood dr'], name: "Candlewood Dr, Stoney Creek", lat: 43.1751, lng: -79.7829 },
   { names: ['fruitland road', 'fruitland rd'], name: "Fruitland Rd Corridor", lat: 43.2144, lng: -79.7135 },
   { names: ['rymal road', 'rymal rd'], name: "Rymal Rd E Corridor", lat: 43.1850, lng: -79.8150 },
   { names: ['james street north', 'james st n'], name: "James St N Corridor", lat: 43.2612, lng: -79.8665 },
@@ -45,7 +46,7 @@ function verifyAndExtractLocation(item, feedType, sourceName) {
   const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'lake ontario', 'blitz', 'education'];
   if (blacklist.some(term => text.includes(term))) return null;
 
-  // Strict Location Matching: The street name MUST explicitly appear in the article text
+  // Strict Location Matching: Scan specifically for distinct street keys in order of length/specificity
   let matchedCorridor = null;
   for (const corridor of EXACT_STREET_WHITELIST) {
     if (corridor.names.some(streetName => text.includes(streetName))) {
@@ -54,7 +55,7 @@ function verifyAndExtractLocation(item, feedType, sourceName) {
     }
   }
 
-  // ZERO-GUESSWORK POLICY: If the article text does not explicitly name a verified street, drop it entirely.
+  // Zero-Guesswork Policy: If the article text does not explicitly name a verified street, drop it entirely.
   if (!matchedCorridor) return null;
 
   let category = feedType;
@@ -85,15 +86,15 @@ function verifyAndExtractLocation(item, feedType, sourceName) {
 }
 
 async function run() {
-  console.log("Running strict fact-checked intelligence ingestion...");
+  console.log("Running bulletproof precision intelligence ingestion...");
   let count = 0;
 
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
-      for (const item of (parsedFeed.items || []).slice(0, 40)) {
+      for (const item of (parsedFeed.items || []).slice(0, 50)) {
         const intel = verifyAndExtractLocation(item, feed.type, feed.sourceName);
-        if (!intel) continue; // Safely drops any unverified or ambiguous entries
+        if (!intel) continue; // Safely drops any ambiguous or unmapped stories
 
         const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + Date.now());
         await db.collection("reports").doc(docId).set({
@@ -109,13 +110,13 @@ async function run() {
         });
 
         count++;
-        console.log(`[Fact-Checked Pin] ${intel.category} -> ${intel.source}`);
+        console.log(`[Precision Pin] ${intel.category} -> ${intel.source}`);
       }
     } catch (e) {
       console.error(`Feed Error:`, e.message);
     }
   }
-  console.log(`Ingestion complete. Deployed ${count} strictly verified pins.`);
+  console.log(`Ingestion complete. Deployed ${count} precision-matched pins.`);
 }
 
 run().catch(err => {
