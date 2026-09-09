@@ -1,4 +1,3 @@
-<!-- index.html - Ultimate Tactical Frontend Interface -->
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
@@ -53,7 +52,7 @@
             <p class="text-sm text-slate-300 leading-relaxed">
                 <strong class="text-rose-400">CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency or are in real danger, <strong>call 911 immediately</strong>. 
                 <br><br>
-                Wet Floor Watch is an independent crowdsourced intelligence grid. Data is aggregated from official police dispatches, local news networks, and anonymous community word-of-mouth reports for informational purposes only.
+                Wet Floor Watch is an independent crowdsourced intelligence grid. Data is aggregated from official police dispatches, local news networks, and community intelligence feeds for informational purposes only.
             </p>
             <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
                 I Understand & Agree
@@ -110,7 +109,7 @@
                 <div class="space-y-3">
                     <button id="open-report-modal" class="w-full group relative flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-amber-500/50 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all active:scale-95">
                         <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Broadcast Anonymous Report
+                        Broadcast Field Report
                     </button>
 
                     <!-- Storm Radar Controls -->
@@ -144,12 +143,12 @@
                         <span class="text-slate-500 font-mono" id="count-badge-ne">0</span>
                     </div>
                     <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span> Anonymous Reports / Word of Mouth</span>
+                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span> Word on the Street / Community</span>
                         <span class="text-slate-500 font-mono" id="count-badge-un">0</span>
                     </div>
                 </div>
 
-                <!-- ON THE STREET REPORTING FEED TAB (Amber/Gold Theme) -->
+                <!-- ON THE STREET REPORTING FEED TAB (@interventionintersection2026) -->
                 <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
                         <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -188,7 +187,7 @@
                     </div>
 
                     <div class="space-y-2 pt-2">
-                        <h3 class="text-[10px] font-bold text-rose-500 uppercase tracking-widest pl-1">Anonymous Reports / Word on the Street</h3>
+                        <h3 class="text-[10px] font-bold text-rose-500 uppercase tracking-widest pl-1">Word on the Street / Community Chatter</h3>
                         <div id="unverified-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 pb-4"></div>
                     </div>
                 </div>
@@ -206,14 +205,14 @@
     <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-lg text-white">Broadcast Anonymous Report</h3>
+                <h3 class="font-bold text-lg text-white">Broadcast Field Report</h3>
                 <button id="close-report-modal" class="text-slate-500 hover:text-white transition p-1 bg-slate-800 rounded-md">✕</button>
             </div>
             <form id="hazard-form" class="space-y-4">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Report Classification</label>
                     <select id="hazard-type" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none">
-                        <option value="unverified" selected>Anonymous Report / Word on the Street (Red - Unverified)</option>
+                        <option value="unverified" selected>Word on the Street / Community (Red - Unverified)</option>
                     </select>
                 </div>
                 <div class="space-y-1">
@@ -225,7 +224,7 @@
                     <textarea id="hazard-desc-input" placeholder="Detailed incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none" required></textarea>
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg">
-                    Deploy Anonymous Report
+                    Deploy Field Report
                 </button>
             </form>
         </div>
@@ -291,7 +290,7 @@
             }
         }
 
-        let currentAppData = { emergency: [], news: [], unverified: [] };
+        let currentAppData = { emergency: [], news: [], unverified: [], street: [] };
 
         function renderData(appData) {
             markersLayer.clearLayers();
@@ -306,7 +305,7 @@
 
             document.getElementById('count-badge-em').innerText = appData.emergency.length;
             document.getElementById('count-badge-ne').innerText = appData.news.length;
-            document.getElementById('count-badge-un').innerText = appData.unverified.length;
+            document.getElementById('count-badge-un').innerText = appData.unverified.length + (appData.street?.length || 0);
 
             let heatPoints = [];
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
@@ -314,30 +313,31 @@
             const config = {
                 emergency: { icon: greenIcon, heat: 3.0, colorClass: 'emerald', title: 'Official Police Dispatch (Verified)' },
                 news: { icon: blueIcon, heat: 1.8, colorClass: 'blue', title: 'Local News Report' },
-                unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Anonymous Report / Word of Mouth (Unverified)' }
+                unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Word on the Street / Community (Unverified)' },
+                street: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: '@interventionintersection2026' }
             };
 
-            const allItems = [...appData.unverified, ...appData.news, ...appData.emergency];
-            const streetReports = allItems.filter(i => i.source.includes('Anonymous Street Report') || i.source.includes('Instagram')).slice(0, 5);
-
+            // Populate On The Street Reporting Tab specifically for @interventionintersection2026
+            const streetReports = appData.street || [];
             const spotlightContainer = document.getElementById('intervention-feed-container');
             if (streetReports.length > 0) {
-                spotlightContainer.innerHTML = streetReports.map(item => `
-                    <a href="${item.url || 'https://hamiltonpolice.on.ca/news/'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
+                spotlightContainer.innerHTML = streetReports.slice(0, 5).map(item => `
+                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-amber-400 truncate">${item.source}</span>
+                            <span class="font-bold text-amber-400 truncate">@interventionintersection2026</span>
                             <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
                         </div>
                         <p class="text-slate-300 line-clamp-2 leading-snug">${item.description}</p>
-                        <span class="text-[9px] font-bold text-amber-400 uppercase tracking-wider block pt-1">View Source &rarr;</span>
+                        <span class="text-[9px] font-bold text-amber-400 uppercase tracking-wider block pt-1">View Post &rarr;</span>
                     </a>
                 `).join('');
             } else {
                 spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Syncing field logs...</div>`;
             }
 
-            ['emergency', 'news', 'unverified'].forEach(category => {
-                const targetEl = listElements[category];
+            ['emergency', 'news', 'unverified', 'street'].forEach(category => {
+                const targetKey = category === 'street' ? 'unverified' : category;
+                const targetEl = listElements[targetKey];
                 if (!targetEl) return;
                 const cfg = config[category];
 
@@ -403,7 +403,7 @@
         }
 
         onSnapshot(collection(db, "reports"), (snapshot) => {
-            let newData = { emergency: [], news: [], unverified: [] };
+            let newData = { emergency: [], news: [], unverified: [], street: [] };
             
             snapshot.forEach((doc) => {
                 const data = doc.data();
@@ -466,7 +466,7 @@
                         hasPin: true,
                         lat: 43.2570,
                         lng: -79.8700,
-                        source: `Anonymous Report (${loc})`,
+                        source: `Field Report (${loc})`,
                         description: desc,
                         url: '',
                         timestamp: serverTimestamp(),
