@@ -3,6 +3,7 @@ const { getFirestore, Timestamp, FieldValue } = require("firebase-admin/firestor
 const Parser = require("rss-parser");
 const Groq = require("groq-sdk");
 const { GoogleGenAI } = require("@google/genai");
+const crypto = require("crypto");
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 initializeApp({ credential: cert(serviceAccount) });
@@ -16,48 +17,42 @@ const MAX_GEMINI_CALLS = 3;
 
 const parser = new Parser({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WetFloorWatch/10.0',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
 
-// Expanded multi-source feed collection for broad historical and recent coverage
+// Highly targeted feeds focusing explicitly on drugs, needles, paraphernalia, encampments, and assaults
 const FEEDS = [
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+homicide+OR+shooting+OR+fire+OR+ems+OR+downtown+OR+Barton+OR+James&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide+OR+drug)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com+OR+site:instagram.com)+(safety+OR+needle+OR+encampment+OR+police+OR+assault+OR+shooting+OR+downtown)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Public Social Feed (FB/IG)" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+police+OR+fire+OR+EMS+OR+drug+OR+encampment+OR+overdose+OR+hazard)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" }
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+needle+OR+paraphernalia+OR+encampment+OR+tent+OR+overdose+OR+assault+OR+stabbing+OR+weapons+OR+harassment&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton Safety Log" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(drug+OR+needle+OR+encampment+OR+overdose+OR+assault+OR+stabbing+OR+weapons+OR+safety)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Watch" },
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+(drug+OR+weapons+OR+assault+OR+stabbing+OR+arrest+OR+investigation)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Hamilton Police Official Log" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+(site:facebook.com+OR+site:instagram.com)+(needle+OR+drug+OR+encampment+OR+assault+OR+hazard)+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "unverified", sourceName: "Community Social Report" }
 ];
 
-// Expanded Whitelist incorporating neighborhoods, major corridors, and specific intersections to maximize valid pin density
 const EXACT_STREET_WHITELIST = [
-  { names: ['candlewood', 'stoney creek'], name: "Candlewood Dr, Stoney Creek", lat: 43.1751, lng: -79.7829 },
-  { names: ['fruitland'], name: "Fruitland Rd Corridor", lat: 43.2144, lng: -79.7135 },
-  { names: ['rymal'], name: "Rymal Rd Corridor", lat: 43.1850, lng: -79.8150 },
-  { names: ['james st n', 'james street north', 'james north', 'james & barton'], name: "James St N Corridor", lat: 43.2612, lng: -79.8665 },
-  { names: ['barton st', 'barton street', 'barton'], name: "Barton St Corridor", lat: 43.2450, lng: -79.8150 },
-  { names: ['king st', 'king street', 'king corp', 'jackson square', 'gore park'], name: "King St Corridor / Jackson Square", lat: 43.2557, lng: -79.8711 },
-  { names: ['main st', 'main street', 'corktown'], name: "Main St Corridor", lat: 43.2500, lng: -79.8500 },
-  { names: ['upper james', 'mohawk'], name: "Upper James & Mohawk", lat: 43.2280, lng: -79.8780 },
-  { names: ['hess st', 'hess village', 'hess'], name: "Hess Village Corridor", lat: 43.2530, lng: -79.8795 },
-  { names: ['ottawa st', 'ottawa street', 'ottawa'], name: "Ottawa St Corridor", lat: 43.2430, lng: -79.8200 },
-  { names: ['concession st', 'concession street', 'concession'], name: "Concession St Corridor", lat: 43.2350, lng: -79.8400 },
-  { names: ['beasley', 'beasley park'], name: "Beasley Park Zone", lat: 43.2575, lng: -79.8580 },
-  { names: ['durand'], name: "Durand Neighborhood", lat: 43.2490, lng: -79.8750 },
-  { names: ['westdale', 'mcmaster'], name: "Westdale / McMaster Perimeter", lat: 43.2600, lng: -79.9100 },
-  { names: ['LOCKE ST', 'locke street'], name: "Locke St Corridor", lat: 43.2550, lng: -79.8850 }
+  { names: ['james st n', 'james street north', 'james north', 'barton & james', 'james & barton'], name: "James St N & Barton Corridor", lat: 43.2612, lng: -79.8665 },
+  { names: ['york', 'bay st', 'bay street', 'shelter'], name: "York Blvd & Bay St Shelter Corridor", lat: 43.2625, lng: -79.8732 },
+  { names: ['jackson square', 'king st w', 'king west', 'gore park'], name: "Jackson Square / King St W", lat: 43.2557, lng: -79.8711 },
+  { names: ['beasley', 'beasley park'], name: "Beasley Park Encampment Zone", lat: 43.2575, lng: -79.8580 },
+  { names: ['hess st', 'hess village'], name: "Hess Village Corridor", lat: 43.2530, lng: -79.8795 },
+  { names: ['central memorial', 'Wellington st'], name: "Central Memorial Park", lat: 43.2490, lng: -79.8520 },
+  { names: ['ottawa st', 'ottawa street', 'barton & ottawa'], name: "Ottawa St N & Barton", lat: 43.2435, lng: -79.8185 },
+  { names: ['main st e', 'victoria ave', 'st. joseph'], name: "Main St E & Victoria Ave", lat: 43.2500, lng: -79.8500 },
+  { names: ['gage park', 'gage ave'], name: "Gage Park Sector", lat: 43.2450, lng: -79.8350 },
+  { names: ['cannon st', 'mary st'], name: "Cannon St E & Mary St", lat: 43.2600, lng: -79.8660 }
 ];
 
 async function evaluateWithAI(leadText) {
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [
-        { role: "system", content: "Reply ONLY with JSON: {\"valid\": true, \"category\": \"emergency\"}" },
-        { role: "user", content: `Analyze text for Hamilton safety threats, drugs, needles, tents, assaults, police, fire, or emergency incidents: "${leadText}"` }
+        { role: "system", content: "You are a strict safety intelligence classifier for public awareness. Reply ONLY with JSON: {\"valid\": true, \"category\": \"emergency\"}" },
+        { role: "user", content: `Does this text report open-air drug use, needles, paraphernalia, bent spoons, encampments, tents, assaults, harassment, or street danger in Hamilton? Text: "${leadText}"` }
       ],
       model: "llama-3.1-8b-instant",
       temperature: 0.1,
-      max_tokens: 40
+      max_tokens: 50
     });
     const res = JSON.parse(chatCompletion.choices[0]?.message?.content.replace(/```json/g, "").replace(/```/g, "").trim() || "{\"valid\": false}");
     if (res.valid) return res.category;
@@ -68,16 +63,15 @@ async function evaluateWithAI(leadText) {
       geminiCallCount++;
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `Is this a Hamilton safety threat, drug incident, encampment, or emergency? Reply JSON: {"valid": true, "category": "emergency"}. Text: "${leadText}"`
+        contents: `Does this report drug use, needles, paraphernalia, tents, assaults, or safety hazards in Hamilton? Reply JSON: {"valid": true, "category": "emergency"}. Text: "${leadText}"`
       });
       const geminiRes = JSON.parse(response.text().replace(/```json/g, "").replace(/```/g, "").trim());
       if (geminiRes.valid) return geminiRes.category;
     } catch (e) {}
   }
 
-  // Fallback keyword check if AI limits are hit so valid local reports aren't dropped
-  const safetyKeywords = ['drug', 'needle', 'encampment', 'tent', 'police', 'fire', 'ems', 'assault', 'stabbing', 'shooting', 'hazard', 'overdose', 'paramedic', 'arrest'];
-  if (safetyKeywords.some(k => leadText.includes(k))) {
+  const dangerKeywords = ['drug', 'needle', 'paraphernalia', 'spoon', 'syringe', 'encampment', 'tent', 'overdose', 'substance', 'assault', 'weapon', 'stabbing', 'shooting', 'hazard', 'threat', 'harass', 'police', 'ems'];
+  if (dangerKeywords.some(k => leadText.includes(k))) {
     return 'unverified';
   }
 
@@ -112,8 +106,8 @@ async function verifyAndExtract(item, feedType, sourceName) {
 
   return {
     category: verifiedCategory,
-    lat: matchedCorridor.lat + (Math.random() - 0.5) * 0.001, // Slight micro-offset to prevent overlapping duplicate pins
-    lng: matchedCorridor.lng + (Math.random() - 0.5) * 0.001,
+    lat: matchedCorridor.lat + (Math.random() - 0.5) * 0.0015,
+    lng: matchedCorridor.lng + (Math.random() - 0.5) * 0.0015,
     source: `${sourceName} • ${matchedCorridor.name}`,
     description: (item.contentSnippet || item.title || '').replace(/(<([^>]+)>)/gi, "").substring(0, 160) + '...',
     url: String(item.link),
@@ -122,17 +116,20 @@ async function verifyAndExtract(item, feedType, sourceName) {
 }
 
 async function run() {
-  console.log("Running High-Density Multi-Source Ingestion...");
+  console.log("Running High-Density Drug & Safety Awareness Ingestion...");
   let count = 0;
 
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
-      for (const item of (parsedFeed.items || []).slice(0, 40)) {
+      for (const item of (parsedFeed.items || []).slice(0, 50)) {
         const intel = await verifyAndExtract(item, feed.type, feed.sourceName);
         if (!intel) continue;
 
-        const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + count);
+        // Unique MD5 hash based on URL or title to prevent duplicate entries completely
+        const uniqueString = (item.link || item.title) + '-' + intel.source;
+        const docId = crypto.createHash('md5').update(uniqueString).digest('hex');
+
         await db.collection("reports").doc(docId).set({
           category: intel.category,
           source: intel.source,
@@ -146,13 +143,13 @@ async function run() {
         });
 
         count++;
-        console.log(`[High-Density Pin] ${intel.category} -> ${intel.source}`);
+        console.log(`[Awareness Pin Mapped] ${intel.category} -> ${intel.source}`);
       }
     } catch (e) {
       console.error(`Feed Error (${feed.url}):`, e.message);
     }
   }
-  console.log(`Ingestion complete. Deployed ${count} verified pins. Gemini calls used: ${geminiCallCount}/${MAX_GEMINI_CALLS}`);
+  console.log(`Ingestion complete. Deployed ${count} unique safety and drug awareness pins. Gemini calls used: ${geminiCallCount}/${MAX_GEMINI_CALLS}`);
 }
 
 run().catch(err => {
