@@ -14,9 +14,8 @@
         .leaflet-container { background: #07090e !important; font-family: ui-sans-serif, system-ui, sans-serif; }
         .custom-div-icon { background: transparent; border: none; }
         
-        /* Token-free Dark Mode Map Filter via Standard OpenStreetMap */
         .leaflet-tile {
-            filter: brightness(0.6) invert(1) contrast(2.5) hue-rotate(200deg) saturate(0.3);
+            filter: brightness(0.55) invert(1) contrast(2.6) hue-rotate(200deg) saturate(0.25);
         }
         
         ::-webkit-scrollbar { width: 5px; }
@@ -24,20 +23,17 @@
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
 
-        /* Custom Leaflet Dark Popups */
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
             background: #0f172a !important;
             color: #f8fafc !important;
             border: 1px solid #1e293b;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.7);
             border-radius: 0.75rem;
         }
         .leaflet-popup-content { margin: 12px; line-height: 1.5; }
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
         .leaflet-container a.leaflet-popup-close-button:hover { color: #f8fafc; }
 
-        @keyframes pulse-ring { 0% { transform: scale(0.85); opacity: 0.8; } 50% { transform: scale(1.5); opacity: 0; } 100% { transform: scale(0.85); opacity: 0; } }
-        .user-pulse { animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.6, 1); }
         .slide-hover { transition: transform 0.2s ease, background-color 0.2s ease; }
         .slide-hover:hover { transform: translateX(4px); }
     </style>
@@ -56,7 +52,7 @@
             <p class="text-sm text-slate-300 leading-relaxed">
                 <strong class="text-rose-400">CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency or are in real danger, <strong>call 911 immediately</strong>. 
                 <br><br>
-                Wet Floor Watch is an independent crowdsourced intelligence grid. Data is aggregated from public records, dispatches, news, and community chatter for informational purposes only. Operators assume zero liability for actions taken based on this platform.
+                Wet Floor Watch is an independent crowdsourced intelligence grid. Data is aggregated from public records, police dispatches, social watch groups, and local intelligence feeds for informational purposes only.
             </p>
             <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-amber-500/20 active:scale-[0.98]">
                 I Understand & Agree
@@ -97,7 +93,7 @@
     <div class="flex-1 flex relative overflow-hidden bg-slate-950">
         
         <!-- SIDEBAR -->
-        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[400px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
+        <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[410px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
             <div class="p-4 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/30">
                 <h2 class="font-bold text-slate-300 text-xs uppercase tracking-widest flex items-center gap-2">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -120,7 +116,7 @@
                     <div class="bg-slate-950/50 border border-slate-800/80 p-3 rounded-xl flex items-center justify-between">
                         <div class="flex flex-col">
                             <span class="text-xs font-bold text-slate-200">Fluid Density Heatmap</span>
-                            <span class="text-[10px] text-slate-500">Toggle thermal intelligence</span>
+                            <span class="text-[10px] text-slate-500">Aggressive thermal overlay</span>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="heatmap-toggle" checked class="sr-only peer">
@@ -154,12 +150,24 @@
                     </div>
                 </div>
 
-                <!-- Socials & Support -->
+                <!-- DEDICATED @interventionintersection2026 SPOTLIGHT & SOCIALS -->
+                <div class="bg-slate-900 border border-pink-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.20 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            Intervention Feed
+                        </span>
+                        <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-400 hover:underline">@interventionintersection2026 &rarr;</a>
+                    </div>
+                    <!-- Live Spotlight Container pulled from recent DB records matching intervention tag -->
+                    <div id="intervention-spotlight" class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-300 space-y-1">
+                        <p class="font-mono text-[10px] text-pink-400">STATUS: Live Feed Synchronized</p>
+                        <p class="line-clamp-2 text-slate-400">Monitoring open-air drug hazards, encampments, and street-level intelligence...</p>
+                    </div>
+                </div>
+
+                <!-- Support Buttons -->
                 <div class="grid grid-cols-2 gap-2">
-                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="col-span-2 bg-gradient-to-r from-purple-900/40 to-pink-900/40 hover:from-purple-800/50 hover:to-pink-800/50 border border-pink-500/20 py-2.5 px-3 rounded-xl text-xs font-bold text-pink-200 flex items-center justify-center gap-2 transition">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.20 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                        Community Feed
-                    </a>
                     <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 font-bold text-xs py-2.5 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
                         ☕ Ko-fi
                     </a>
@@ -186,7 +194,7 @@
                     </div>
 
                     <div class="space-y-2 pt-2">
-                        <h3 class="text-[10px] font-bold text-rose-500 uppercase tracking-widest pl-1">Community Chatter</h3>
+                        <h3 class="text-[10px] font-bold text-rose-500 uppercase tracking-widest pl-1">Community Chatter & Socials</h3>
                         <div id="unverified-list" class="space-y-2 max-h-64 overflow-y-auto pr-1 pb-4"></div>
                     </div>
                 </div>
@@ -257,7 +265,6 @@
         const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         
-        // 100% Free, Token-Free Standard OpenStreetMap with CSS Dark Filter applied
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -269,18 +276,18 @@
         function createColoredPinIcon(colorHex, shadowHex) {
             return L.divIcon({
                 className: 'custom-div-icon',
-                html: `<div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-slate-900" style="background-color: ${colorHex}; box-shadow: 0 0 12px ${shadowHex};">
-                         <div class="w-1.5 h-1.5 rounded-full bg-slate-950/50"></div>
+                html: `<div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-slate-900" style="background-color: ${colorHex}; box-shadow: 0 0 14px ${shadowHex};">
+                         <div class="w-1.5 h-1.5 rounded-full bg-slate-950/60"></div>
                        </div>`,
                 iconSize: [20, 20],
                 iconAnchor: [10, 10]
             });
         }
 
-        const greenIcon = createColoredPinIcon('#10b981', 'rgba(16,185,129,0.5)');  
-        const orangeIcon = createColoredPinIcon('#f97316', 'rgba(249,115,22,0.5)'); 
-        const blueIcon = createColoredPinIcon('#3b82f6', 'rgba(59,130,246,0.5)');   
-        const redIcon = createColoredPinIcon('#e11d48', 'rgba(225,29,72,0.5)');    
+        const greenIcon = createColoredPinIcon('#10b981', 'rgba(16,185,129,0.7)');  
+        const orangeIcon = createColoredPinIcon('#f97316', 'rgba(249,115,22,0.7)'); 
+        const blueIcon = createColoredPinIcon('#3b82f6', 'rgba(59,130,246,0.7)');   
+        const redIcon = createColoredPinIcon('#e11d48', 'rgba(225,29,72,0.7)');    
 
         function formatTimestamp(ts) {
             if (!ts) return 'Just now';
@@ -322,11 +329,21 @@
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
             const config = {
-                emergency: { icon: greenIcon, heat: 1.5, colorClass: 'emerald', title: 'Official Police/Fire/EMS' },
-                verified: { icon: orangeIcon, heat: 1.0, colorClass: 'orange', title: 'Verified Report' },
-                news: { icon: blueIcon, heat: 0.8, colorClass: 'blue', title: 'Local News Report' },
-                unverified: { icon: redIcon, heat: 0.6, colorClass: 'rose', title: 'Community Chatter' }
+                emergency: { icon: greenIcon, heat: 2.0, colorClass: 'emerald', title: 'Official Police/Fire/EMS' },
+                verified: { icon: orangeIcon, heat: 1.5, colorClass: 'orange', title: 'Verified Report' },
+                news: { icon: blueIcon, heat: 1.2, colorClass: 'blue', title: 'Local News Report' },
+                unverified: { icon: redIcon, heat: 1.0, colorClass: 'rose', title: 'Community Chatter & Socials' }
             };
+
+            // Update Intervention Spotlight with latest matching record if available
+            const allItems = [...appData.unverified, ...appData.news, ...appData.verified, ...appData.emergency];
+            const interventionItem = allItems.find(i => i.source.toLowerCase().includes('intervention') || i.description.toLowerCase().includes('intervention') || i.description.toLowerCase().includes('needle') || i.description.toLowerCase().includes('tent'));
+            if (interventionItem) {
+                document.getElementById('intervention-spotlight').innerHTML = `
+                    <p class="font-mono text-[10px] text-pink-400 font-bold">${interventionItem.source}</p>
+                    <p class="text-slate-300 line-clamp-2">${interventionItem.description}</p>
+                `;
+            }
 
             ['emergency', 'verified', 'news', 'unverified'].forEach(category => {
                 const cfg = config[category];
@@ -369,11 +386,13 @@
 
             if (heatLayer) map.removeLayer(heatLayer);
             if (showHeatmap && heatPoints.length > 0) {
+                // MASSIVE, DRASTIC, HIGH-INTENSITY HEATMAP OVERLAY CONFIGURATION
                 heatLayer = L.heatLayer(heatPoints, { 
-                    radius: 25, 
-                    blur: 15, 
+                    radius: 45, 
+                    blur: 25, 
                     maxZoom: 18,
-                    gradient: { 0.2: '#1e3a8a', 0.4: '#10b981', 0.6: '#eab308', 0.8: '#f97316', 1.0: '#e11d48' }
+                    max: 1.0,
+                    gradient: { 0.1: '#1e3a8a', 0.3: '#10b981', 0.5: '#eab308', 0.7: '#f97316', 1.0: '#ff0000' }
                 }).addTo(map);
             }
         }
@@ -440,8 +459,8 @@
                 try {
                     await addDoc(collection(db, "reports"), {
                         category: category,
-                        lat: 43.2570 + (Math.random() - 0.5) * 0.02,
-                        lng: -79.8700 + (Math.random() - 0.5) * 0.02,
+                        lat: 43.2570,
+                        lng: -79.8700,
                         source: `Live Broadcast (${loc})`,
                         description: desc,
                         url: '',
