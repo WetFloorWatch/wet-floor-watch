@@ -10,9 +10,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
     <style>
-        /* Base & Scrollbars */
         body { -webkit-font-smoothing: antialiased; }
-        .leaflet-container { background: #020617 !important; font-family: ui-sans-serif, system-ui, sans-serif; }
+        .leaflet-container { background: #07090e !important; font-family: ui-sans-serif, system-ui, sans-serif; }
         .custom-div-icon { background: transparent; border: none; }
         
         ::-webkit-scrollbar { width: 5px; }
@@ -82,7 +81,7 @@
             </button>
             <div id="weather-pill" class="hidden md:flex items-center space-x-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="weather-text" class="font-mono">Syncing...</span>
+                <span id="weather-text" class="font-mono">Hamilton: Syncing...</span>
             </div>
             <button id="sidebar-toggle" class="md:hidden bg-slate-800 hover:bg-slate-700 p-2 rounded-lg text-slate-200 border border-slate-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -251,13 +250,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Dark map base styling applied via CSS, Map initialization
         const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
-        // Using a dark CartoDB tile layer for a better tactical look
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
+        
+        // Free open dark mode tile layer (Stamen / Stadia / OpenStreetMap dark variant via Carto standard free tier or Stamen)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
             maxZoom: 19,
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+            subdomains: 'abcd',
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         }).addTo(map);
 
         let markersLayer = L.layerGroup().addTo(map);
@@ -290,9 +290,9 @@
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.2557&longitude=-79.8711&current=temperature_2m');
                 const data = await res.json();
-                document.getElementById('weather-text').innerText = `YHM: ${Math.round(data.current.temperature_2m)}°C`;
+                document.getElementById('weather-text').innerText = `Hamilton: ${Math.round(data.current.temperature_2m)}°C`;
             } catch (e) {
-                document.getElementById('weather-text').innerText = `GRID ACTIVE`;
+                document.getElementById('weather-text').innerText = `Hamilton: GRID ACTIVE`;
             }
         }
 
@@ -310,7 +310,6 @@
 
             Object.values(listElements).forEach(el => el.innerHTML = '');
 
-            // Update Badges
             document.getElementById('count-badge-em').innerText = appData.emergency.length;
             document.getElementById('count-badge-ve').innerText = appData.verified.length;
             document.getElementById('count-badge-ne').innerText = appData.news.length;
@@ -335,11 +334,10 @@
                     
                     let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-${cfg.colorClass}-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
                     
-                    // Styled Popup
                     marker.bindPopup(`
                         <div class="p-0.5 font-sans min-w-[200px]">
                             <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
-                                <span class="w-2 h-2 rounded-full bg-${cfg.colorClass}-500 shadow-[0_0_8px_rgba(var(--tw-colors-${cfg.colorClass}-500),0.8)]"></span>
+                                <span class="w-2 h-2 rounded-full bg-${cfg.colorClass}-500"></span>
                                 <strong class="text-[10px] text-${cfg.colorClass}-400 uppercase tracking-widest">${cfg.title}</strong>
                             </div>
                             <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
@@ -349,7 +347,6 @@
                         </div>
                     `);
 
-                    // Styled Sidebar Node
                     const nodeItem = document.createElement('div');
                     nodeItem.className = `slide-hover bg-slate-900/40 hover:bg-slate-800/80 p-3 rounded-r-xl border border-transparent border-l-2 border-l-${cfg.colorClass}-500 border-b-slate-800/60 cursor-pointer flex flex-col gap-1.5 shadow-sm`;
                     nodeItem.innerHTML = `
@@ -378,7 +375,6 @@
             }
         }
 
-        // Live Firebase Ingestion Pipeline
         onSnapshot(collection(db, "reports"), (snapshot) => {
             let newData = { emergency: [], verified: [], news: [], unverified: [] };
             
@@ -390,7 +386,6 @@
                 }
             });
 
-            // Sort newest first based on timestamp
             Object.keys(newData).forEach(key => {
                 newData[key].sort((a, b) => {
                     const timeA = a.timestamp?.toMillis ? a.timestamp.toMillis() : 0;
