@@ -18,10 +18,10 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install firebase-admin rss-parser @google/genai
+        run: npm install firebase-admin rss-parser groq-sdk
 
       - name: Run Scraper Script
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: node scraper.js
