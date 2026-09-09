@@ -18,7 +18,7 @@ const FEEDS = [
   { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
 ];
 
-// Absolute Precision Whitelist: Maps exact street names and locations to their true geographic coordinates
+// Absolute Precision Whitelist with true coordinates
 const EXACT_STREET_WHITELIST = [
   { names: ['candlewood drive', 'candlewood dr'], name: "Candlewood Dr, Stoney Creek", lat: 43.1751, lng: -79.7829 },
   { names: ['fruitland road', 'fruitland rd'], name: "Fruitland Rd Corridor", lat: 43.2144, lng: -79.7135 },
@@ -27,41 +27,43 @@ const EXACT_STREET_WHITELIST = [
   { names: ['barton street', 'barton st'], name: "Barton St Corridor", lat: 43.2450, lng: -79.8150 },
   { names: ['king street', 'king st'], name: "King St Corridor", lat: 43.2557, lng: -79.8711 },
   { names: ['main street', 'main st'], name: "Main St Corridor", lat: 43.2500, lng: -79.8500 },
-  { names: ['upper james'], name: "Upper James St", lat: 43.2280, lng: -79.8780 },
+  { names: ['upper james', 'upper james st'], name: "Upper James St", lat: 43.2280, lng: -79.8780 },
   { names: ['hess street', 'hess st'], name: "Hess Village", lat: 43.2530, lng: -79.8795 },
   { names: ['ottawa street', 'ottawa st'], name: "Ottawa St N", lat: 43.2430, lng: -79.8200 },
   { names: ['concession street', 'concession st'], name: "Concession St", lat: 43.2350, lng: -79.8400 }
 ];
 
-function verifyAndExtractLocation(item, feedType, sourceName) {
-  const text = (item.title + " " + (item.contentSnippet || item.content || "")).toLowerCase();
-  const urlLower = (item.link || '').toLowerCase();
+function strictVerifyLeadLocation(item, feedType, sourceName) {
+  const title = (item.title || "").toLowerCase();
+  
+  // ISOLATE LEAD TEXT ONLY: Read title + first 200 chars of snippet. Ignores footers/related stories.
+  const rawSnippet = (item.contentSnippet || item.content || "").toLowerCase();
+  const leadText = title + " " + rawSnippet.substring(0, 200);
 
-  // Reject archives, tags, or general search index pages
+  const urlLower = (item.link || '').toLowerCase();
   if (urlLower.includes('/archive') || urlLower.includes('/tag') || urlLower.includes('/search') || urlLower.includes('/category')) {
     return null; 
   }
 
-  // Strict blacklist to eliminate noise
   const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'lake ontario', 'blitz', 'education'];
-  if (blacklist.some(term => text.includes(term))) return null;
+  if (blacklist.some(term => leadText.includes(term))) return null;
 
-  // Strict Location Matching: Scan specifically for distinct street keys in order of length/specificity
+  // Match strictly against lead text
   let matchedCorridor = null;
   for (const corridor of EXACT_STREET_WHITELIST) {
-    if (corridor.names.some(streetName => text.includes(streetName))) {
+    if (corridor.names.some(streetName => leadText.includes(streetName))) {
       matchedCorridor = corridor;
       break;
     }
   }
 
-  // Zero-Guesswork Policy: If the article text does not explicitly name a verified street, drop it entirely.
+  // Zero-Tolerance Policy: If street is not in the lead text, drop the pin entirely.
   if (!matchedCorridor) return null;
 
   let category = feedType;
-  if (text.includes('shooting') || text.includes('gun') || text.includes('stabbing') || text.includes('armed') || text.includes('police') || text.includes('homicide')) {
+  if (leadText.includes('shooting') || leadText.includes('gun') || leadText.includes('stabbing') || leadText.includes('armed') || leadText.includes('police') || leadText.includes('homicide')) {
     category = 'emergency';
-  } else if (text.includes('roadwork') || text.includes('pothole')) {
+  } else if (leadText.includes('roadwork') || leadText.includes('pothole')) {
     category = 'verified';
   } else if (feedType === 'unverified') {
     category = 'unverified';
@@ -86,15 +88,15 @@ function verifyAndExtractLocation(item, feedType, sourceName) {
 }
 
 async function run() {
-  console.log("Running bulletproof precision intelligence ingestion...");
+  console.log("Running lead-verified intelligence ingestion...");
   let count = 0;
 
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
       for (const item of (parsedFeed.items || []).slice(0, 50)) {
-        const intel = verifyAndExtractLocation(item, feed.type, feed.sourceName);
-        if (!intel) continue; // Safely drops any ambiguous or unmapped stories
+        const intel = strictVerifyLeadLocation(item, feed.type, feed.sourceName);
+        if (!intel) continue;
 
         const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + Date.now());
         await db.collection("reports").doc(docId).set({
@@ -110,13 +112,13 @@ async function run() {
         });
 
         count++;
-        console.log(`[Precision Pin] ${intel.category} -> ${intel.source}`);
+        console.log(`[Lead-Verified Pin] ${intel.category} -> ${intel.source}`);
       }
     } catch (e) {
       console.error(`Feed Error:`, e.message);
     }
   }
-  console.log(`Ingestion complete. Deployed ${count} precision-matched pins.`);
+  console.log(`Ingestion complete. Deployed ${count} lead-verified pins.`);
 }
 
 run().catch(err => {
