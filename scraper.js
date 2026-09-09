@@ -7,13 +7,19 @@ const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 const db = admin.firestore();
-const parser = new Parser();
+
+// Fixed: Added custom headers so CBC and other feeds don't return 406 errors
+const parser = new Parser({
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+  }
+});
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Expanded RSS feed sources across Greater Hamilton
 const FEEDS = [
-  "https://rss.cbc.ca/lineup/canada-hamilton.xml",
-  // Additional regional RSS aggregators can be added here
+  "https://rss.cbc.ca/lineup/canada-hamilton.xml"
 ];
 
 async function run() {
@@ -25,7 +31,6 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      // Increased scan capacity to capture maximum records per run
       for (const item of (feed.items || []).slice(0, 35)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
@@ -61,7 +66,6 @@ async function run() {
             continue;
           }
 
-          // Broadened coordinate bounds covering all of Greater Hamilton (Stoney Creek to Flamborough / Ancaster)
           const lat = Number(report.lat);
           const lng = Number(report.lng);
           if (isNaN(lat) || isNaN(lng) || lat < 43.12 || lat > 43.50 || lng < -80.35 || lng > -79.50) {
