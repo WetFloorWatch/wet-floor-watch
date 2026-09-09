@@ -148,7 +148,7 @@
                     </div>
                 </div>
 
-                <!-- SORTED THEMES: ON THE STREET REPORTING FEED -->
+                <!-- ON THE STREET REPORTING FEED TAB -->
                 <div class="bg-slate-900 border border-pink-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
                         <span class="text-xs font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -205,9 +205,7 @@
     <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-lg text-white flex items-center gap-2">
-                    Broadcast Intel
-                </h3>
+                <h3 class="font-bold text-lg text-white">Broadcast Intel</h3>
                 <button id="close-report-modal" class="text-slate-500 hover:text-white transition p-1 bg-slate-800 rounded-md">✕</button>
             </div>
             <form id="hazard-form" class="space-y-4">
@@ -309,26 +307,25 @@
 
             document.getElementById('count-badge-em').innerText = appData.emergency.length;
             document.getElementById('count-badge-ne').innerText = appData.news.length;
-            document.getElementById('count-badge-un').innerText = appData.unverified.length + (appData.verified?.length || 0);
+            document.getElementById('count-badge-un').innerText = appData.unverified.length;
 
             let heatPoints = [];
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
             const config = {
                 emergency: { icon: greenIcon, heat: 3.0, colorClass: 'emerald', title: 'Official Police Dispatch' },
-                verified: { icon: blueIcon, heat: 2.2, colorClass: 'blue', title: 'Word on the Street' },
                 news: { icon: blueIcon, heat: 1.8, colorClass: 'blue', title: 'Local News Report' },
-                unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Community Chatter & Socials' }
+                unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Community Chatter & Socials (Unverified)' }
             };
 
-            // On The Street Reporting Feed Spotlight
-            const allItems = [...appData.unverified, ...(appData.verified || []), ...appData.news, ...appData.emergency];
-            const streetReports = allItems.filter(i => i.source.includes('Instagram') || i.source.includes('Facebook') || i.source.includes('X / Social')).slice(0, 4);
+            // Populate On The Street Reporting Tab from Instagram/Social Feeds
+            const allItems = [...appData.unverified, ...appData.news, ...appData.emergency];
+            const streetReports = allItems.filter(i => i.source.includes('@interventionintersection2026') || i.source.includes('Instagram')).slice(0, 5);
 
             const spotlightContainer = document.getElementById('intervention-feed-container');
             if (streetReports.length > 0) {
                 spotlightContainer.innerHTML = streetReports.map(item => `
-                    <a href="${item.url || '#'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-pink-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
+                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-pink-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-pink-400 truncate">${item.source}</span>
                             <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
@@ -338,35 +335,37 @@
                     </a>
                 `).join('');
             } else {
-                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Syncing street logs...</div>`;
+                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Syncing field logs...</div>`;
             }
 
-            ['emergency', 'verified', 'news', 'unverified'].forEach(category => {
-                const targetKey = category === 'verified' ? 'unverified' : category;
-                const targetEl = listElements[targetKey];
+            ['emergency', 'news', 'unverified'].forEach(category => {
+                const targetEl = listElements[category];
                 if (!targetEl) return;
+                const cfg = config[category];
 
-                const cfg = config[category] || config['unverified'];
-                
                 appData[category].forEach(inc => {
-                    heatPoints.push([inc.lat, inc.lng, cfg.heat]); 
-                    const marker = L.marker([inc.lat, inc.lng], { icon: cfg.icon }).addTo(markersLayer);
-                    
-                    let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-${cfg.colorClass}-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
-                    
-                    marker.bindPopup(`
-                        <div class="p-0.5 font-sans min-w-[200px]">
-                            <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
-                                <span class="w-2 h-2 rounded-full bg-${cfg.colorClass}-500"></span>
-                                <strong class="text-[10px] text-${cfg.colorClass}-400 uppercase tracking-widest">${cfg.title} (Unverified Word of Mouth)</strong>
+                    // Only drop map pins if hasPin is true and coordinates are verified
+                    if (inc.hasPin && inc.lat && inc.lng) {
+                        heatPoints.push([inc.lat, inc.lng, cfg.heat]);
+                        const marker = L.marker([inc.lat, inc.lng], { icon: cfg.icon }).addTo(markersLayer);
+                        
+                        let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-${cfg.colorClass}-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition-colors">Access Source Intel</a>` : '';
+                        
+                        marker.bindPopup(`
+                            <div class="p-0.5 font-sans min-w-[200px]">
+                                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
+                                    <span class="w-2 h-2 rounded-full bg-${cfg.colorClass}-500"></span>
+                                    <strong class="text-[10px] text-${cfg.colorClass}-400 uppercase tracking-widest">${cfg.title}</strong>
+                                </div>
+                                <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
+                                <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
+                                <p class="text-xs text-slate-300 mt-3 leading-relaxed">${inc.description}</p>
+                                ${linkHtml}
                             </div>
-                            <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
-                            <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
-                            <p class="text-xs text-slate-300 mt-3 leading-relaxed">${inc.description}</p>
-                            ${linkHtml}
-                        </div>
-                    `);
+                        `);
+                    }
 
+                    // Render sidebar feed item regardless of pin status
                     const nodeItem = document.createElement('div');
                     nodeItem.className = `slide-hover bg-slate-900/40 hover:bg-slate-800/80 p-3 rounded-r-xl border border-transparent border-l-2 border-l-${cfg.colorClass}-500 border-b-slate-800/60 cursor-pointer flex flex-col gap-1.5 shadow-sm`;
                     let sourceLinkIcon = inc.url ? `<a href="${inc.url}" target="_blank" class="text-[9px] text-amber-400 hover:underline ml-auto" onclick="event.stopPropagation()">[Source Post]</a>` : '';
@@ -380,10 +379,11 @@
                         </div>
                         <div class="text-[11px] text-slate-300 line-clamp-2 leading-snug">${inc.description}</div>
                     `;
-                    nodeItem.onclick = () => { 
-                        map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); 
-                        setTimeout(() => marker.openPopup(), 500); 
-                    };
+                    if (inc.hasPin && inc.lat && inc.lng) {
+                        nodeItem.onclick = () => { 
+                            map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); 
+                        };
+                    }
                     targetEl.appendChild(nodeItem);
                 });
             });
@@ -406,12 +406,8 @@
             }
         }
 
-        window.mapFlyTo = (lat, lng) => {
-            map.flyTo([lat, lng], 16, { duration: 1.5 });
-        };
-
         onSnapshot(collection(db, "reports"), (snapshot) => {
-            let newData = { emergency: [], verified: [], news: [], unverified: [] };
+            let newData = { emergency: [], news: [], unverified: [] };
             
             snapshot.forEach((doc) => {
                 const data = doc.data();
@@ -472,9 +468,10 @@
                 try {
                     await addDoc(collection(db, "reports"), {
                         category: category,
+                        hasPin: true,
                         lat: 43.2570,
                         lng: -79.8700,
-                        source: `Word on the Street (${loc})`,
+                        source: `Field Report (${loc})`,
                         description: desc,
                         url: '',
                         timestamp: serverTimestamp(),
