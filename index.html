@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wet Floor Watch | Full Regional Safety Intelligence & Live Ingest</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f59e0b'><path d='M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z'/><path d='M11 10h2v4h-2zm0 6h2v2h-2z'/></svg>">
+    <title>Wet Floor Watch | Master Precision Intelligence Grid (Hamilton)</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2'><path d='M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z'/><path d='M11 10h2v4h-2zm0 6h2v2h-2z'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -31,18 +31,18 @@
 </head>
 <body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
 
-    <!-- LEGAL DISCLAIMER MODAL -->
+    <!-- LEGAL DISCLAIMER & LIABILITY MODAL -->
     <div id="disclaimer-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-4 cursor-pointer">
         <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 cursor-default">
             <div class="flex items-center space-x-3 text-amber-400">
-                <svg class="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/><path d="M11 10h2v4h-2zm0 6h2v2h-2z" fill="#0f172a"/></svg>
-                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch • Tactical Threat Intelligence</h2>
+                <svg class="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/><path d="M11 10h2v4h-2zm0 6h2v2h-2z"/></svg>
+                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch • Liability & Terms Notice</h2>
             </div>
             <p class="text-xs text-slate-300 leading-relaxed">
-                <strong>CRITICAL SAFETY NOTICE:</strong> If you face an immediate emergency, **call 911 immediately**. Wet Floor Watch maps verified public hazard data, open-air drug activity, encampments, hazards, and tactical security telemetry across Greater Hamilton. Operators assume zero liability.
+                <strong>CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency or are in real danger, **call 911 immediately**. Wet Floor Watch is an independent crowdsourced intelligence grid and mapping utility. All data is aggregated from public records, official emergency dispatches, local news outlets, and community submissions for informational purposes only. Operators assume zero liability.
             </p>
             <button id="accept-disclaimer-btn" class="w-full mt-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold py-3 px-4 rounded-xl transition cursor-pointer">
-                I Understand & Access Threat Grid
+                I Understand, Agree & Enter Grid
             </button>
         </div>
     </div>
@@ -51,13 +51,13 @@
     <header class="bg-slate-900/95 backdrop-blur border-b border-slate-800 h-16 flex items-center justify-between px-4 z-20 flex-shrink-0">
         <div class="flex items-center space-x-3">
             <div class="bg-amber-500/10 p-2 rounded-xl border border-amber-500/40 flex items-center justify-center">
-                <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/><path d="M11 10h2v4h-2zm0 6h2v2h-2z" fill="#0f172a"/></svg>
+                <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/><path d="M11 10h2v4h-2zm0 6h2v2h-2z"/></svg>
             </div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
-                    Wet Floor Watch <span class="text-amber-400 font-mono text-xs uppercase bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/30">100+ Loaded Feed</span>
+                    Wet Floor Watch <span class="text-emerald-400 font-mono text-xs uppercase bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30">Live Grid</span>
                 </h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Full Regional Safety Intelligence & Live Ingest</p>
+                <p class="text-xs text-slate-400 hidden sm:block">Massive Multi-Source Intelligence & Heatmap Engine</p>
             </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -66,7 +66,7 @@
             </button>
             <div id="weather-pill" class="hidden md:flex items-center space-x-2 bg-slate-800/80 border border-slate-700/60 rounded-full px-3 py-1 text-xs text-slate-300">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="weather-text">Hamilton: 25°C • Clear Skies</span>
+                <span id="weather-text">Hamilton Weather Loading...</span>
             </div>
             <button id="sidebar-toggle" class="md:hidden bg-slate-800 hover:bg-slate-700 p-2 rounded-xl text-slate-200">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
@@ -80,61 +80,65 @@
         <!-- SIDEBAR -->
         <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[420px] bg-slate-900/95 md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col">
             <div class="p-4 border-b border-slate-800 flex items-center justify-between">
-                <h2 class="font-semibold text-slate-200 text-sm uppercase tracking-wider">Live Control Center</h2>
+                <h2 class="font-semibold text-slate-200 text-sm uppercase tracking-wider">Intelligence Control Center</h2>
                 <button id="sidebar-close" class="md:hidden text-slate-400 hover:text-white cursor-pointer">✕</button>
             </div>
 
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                <button id="open-report-modal" class="w-full bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg cursor-pointer flex items-center justify-center gap-2">
-                    <span>+ Broadcast Live Safety Report</span>
+                <button id="open-report-modal" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg cursor-pointer">
+                    Broadcast Street Report
                 </button>
 
-                <!-- INTELLIGENCE FILTER INDEX -->
-                <div class="bg-slate-800/40 border border-slate-700/60 p-3 rounded-xl space-y-2.5">
-                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Intelligence Filter Index</span>
-                    <div class="grid grid-cols-1 gap-2 text-xs">
-                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-900/80 p-2 rounded-lg border border-slate-800 hover:border-purple-500/50">
-                            <input type="checkbox" id="filter-stalking" checked class="rounded border-slate-700 text-purple-500 focus:ring-0">
-                            <span class="text-purple-300 font-medium">Stalking, Harassment, & Following</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-900/80 p-2 rounded-lg border border-slate-800 hover:border-red-500/50">
-                            <input type="checkbox" id="filter-shootings" checked class="rounded border-slate-700 text-red-500 focus:ring-0">
-                            <span class="text-red-400 font-medium">Shootings, Stabbings & Assaults</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-900/80 p-2 rounded-lg border border-slate-800 hover:border-yellow-500/50">
-                            <input type="checkbox" id="filter-tents" checked class="rounded border-slate-700 text-yellow-500 focus:ring-0">
-                            <span class="text-yellow-400 font-medium">Parks, Tents & Encampments</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-900/80 p-2 rounded-lg border border-slate-800 hover:border-amber-500/50">
-                            <input type="checkbox" id="filter-drugs" checked class="rounded border-slate-700 text-amber-500 focus:ring-0">
-                            <span class="text-amber-400 font-medium">Open-Air Drug Activity & Disorder</span>
-                        </label>
-                        <label class="flex items-center space-x-2 cursor-pointer bg-slate-900/80 p-2 rounded-lg border border-slate-800 hover:border-blue-500/50">
-                            <input type="checkbox" id="filter-infrastructure" checked class="rounded border-slate-700 text-blue-500 focus:ring-0">
-                            <span class="text-blue-400 font-medium">Potholes, Roadwork & Infrastructure</span>
-                        </label>
+                <!-- HEATMAP TOGGLE CONTROL -->
+                <div class="bg-slate-800/50 border border-slate-700/60 p-3 rounded-xl flex items-center justify-between">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-200">Fluid Density Heatmap Overlay</span>
+                        <span class="text-[10px] text-slate-400">Hotspots (Red/Yellow) vs Cool Zones (Blue)</span>
                     </div>
-                </div>
-
-                <!-- OVERLAYS & HEATMAP TOGGLE -->
-                <div class="bg-slate-800/50 border border-slate-700/60 p-3 rounded-xl space-y-3">
-                    <label class="flex items-center justify-between cursor-pointer">
-                        <span class="text-xs font-bold text-slate-200">Strict Danger Zone Overlays</span>
-                        <input type="checkbox" id="zones-toggle" checked class="rounded border-slate-700 text-amber-500 focus:ring-0">
-                    </label>
-                    <label class="flex items-center justify-between cursor-pointer">
-                        <span class="text-xs font-bold text-slate-200">Fluid Density Heatmap</span>
-                        <input type="checkbox" id="heatmap-toggle" checked class="rounded border-slate-700 text-amber-500 focus:ring-0">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="heatmap-toggle" checked class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-900 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
                     </label>
                 </div>
 
-                <!-- REAL-TIME FEED SECTION -->
+                <!-- PIN LEGEND -->
+                <div class="bg-slate-800/30 border border-slate-700/50 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-[10px] font-semibold">
+                    <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Official Police/Fire/EMS</span>
+                    <span class="flex items-center gap-1.5 text-orange-400"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Verified Reports</span>
+                    <span class="flex items-center gap-1.5 text-blue-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Local News</span>
+                    <span class="flex items-center gap-1.5 text-red-400"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Unverified / Reddit</span>
+                </div>
+
+                <!-- FEED SECTION 1: OFFICIAL EMERGENCY (POLICE/FIRE/EMS) -->
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Real-Time Feed</h3>
-                        <span id="feed-counter" class="text-[10px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded">0 VISIBLE</span>
-                    </div>
-                    <div id="realtime-feed-list" class="space-y-2 max-h-96 overflow-y-auto pr-1"></div>
+                    <h3 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Official Police / Fire / EMS (<span id="emergency-count">0</span>)</span>
+                    </h3>
+                    <div id="emergency-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- FEED SECTION 2: VERIFIED MUNICIPAL / INFRASTRUCTURE -->
+                <div class="space-y-2 border-t border-slate-800 pt-3">
+                    <h3 class="text-xs font-semibold text-orange-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Verified Reports & Roadwork (<span id="verified-count">0</span>)</span>
+                    </h3>
+                    <div id="verified-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- FEED SECTION 3: LOCAL NEWS REPORTS -->
+                <div class="space-y-2 border-t border-slate-800 pt-3">
+                    <h3 class="text-xs font-semibold text-blue-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Local News Feeds (<span id="news-count">0</span>)</span>
+                    </h3>
+                    <div id="news-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- FEED SECTION 4: UNVERIFIED / SOCIAL / REDDIT -->
+                <div class="space-y-2 border-t border-slate-800 pt-3">
+                    <h3 class="text-xs font-semibold text-red-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Unverified / Reddit Chatter (<span id="unverified-count">0</span>)</span>
+                    </h3>
+                    <div id="unverified-list" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
                 </div>
             </div>
         </aside>
@@ -149,25 +153,24 @@
     <div id="report-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between">
-                <h3 class="font-bold text-lg text-white">Broadcast Safety Report</h3>
+                <h3 class="font-bold text-lg text-white">Broadcast Street Report</h3>
                 <button id="close-report-modal" class="text-slate-400 cursor-pointer">✕</button>
             </div>
             <form id="hazard-form" class="space-y-3">
                 <select id="hazard-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200">
-                    <option value="stalking">Stalking, Harassment, & Following</option>
-                    <option value="shootings">Shootings, Stabbings & Assaults</option>
-                    <option value="tents">Parks, Tents & Encampments</option>
-                    <option value="drugs">Open-Air Drug Activity & Disorder</option>
-                    <option value="infrastructure">Potholes, Roadwork & Infrastructure</option>
+                    <option value="emergency">Official Police / Fire / EMS (Green Pin)</option>
+                    <option value="verified">Verified Report / Roadwork (Orange Pin)</option>
+                    <option value="news">Local News Report (Blue Pin)</option>
+                    <option value="unverified">Unverified / Social Warning (Red Pin)</option>
                 </select>
-                <input type="text" id="hazard-location-input" placeholder="Location e.g. James St N & Barton" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 font-mono" required>
-                <input type="text" id="hazard-desc-input" placeholder="Detailed description of threat..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200" required>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl cursor-pointer">Broadcast Live Threat</button>
+                <input type="text" id="hazard-location-input" placeholder="Street Intersection e.g. James St N & Barton St E" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200 font-mono" required>
+                <input type="text" id="hazard-desc-input" placeholder="Detailed incident or safety concern..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-200" required>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl cursor-pointer">Publish to Intersection Grid</button>
             </form>
         </div>
     </div>
 
-    <!-- FIREBASE AND MAP LOGIC -->
+    <!-- FIREBASE AND MAP APP LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -185,145 +188,187 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 14);
+        const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
         let markersLayer = L.layerGroup().addTo(map);
         let heatLayer = null;
-        let zonesLayer = L.layerGroup().addTo(map);
 
-        function getCategoryColor(cat) {
-            switch(cat) {
-                case 'stalking': return '#a855f7'; // Purple
-                case 'shootings': return '#dc2626'; // Red
-                case 'tents': return '#eab308'; // Yellow
-                case 'drugs': return '#f59e0b'; // Amber
-                case 'infrastructure': return '#3b82f6'; // Blue
-                default: return '#10b981';
+        function createColoredPinIcon(colorHex) {
+            return L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="relative flex items-center justify-center w-6 h-6 rounded-full shadow-lg border-2 border-white" style="background-color: ${colorHex};">
+                         <div class="w-2 h-2 rounded-full bg-slate-950"></div>
+                       </div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+        }
+
+        const greenIcon = createColoredPinIcon('#22c55e');  // Official Police/Fire/EMS
+        const orangeIcon = createColoredPinIcon('#f97316'); // Verified
+        const blueIcon = createColoredPinIcon('#3b82f6');   // News
+        const redIcon = createColoredPinIcon('#dc2626');    // Unverified
+
+        function formatTimestamp(ts) {
+            if (!ts) return 'Just now';
+            if (typeof ts === 'string') return ts;
+            if (ts.toDate) return ts.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+            return 'Verified Record';
+        }
+
+        async function fetchWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.2557&longitude=-79.8711&current=temperature_2m');
+                const data = await res.json();
+                document.getElementById('weather-text').innerText = `Hamilton: ${Math.round(data.current.temperature_2m)}°C • Clear Skies`;
+            } catch (e) {
+                document.getElementById('weather-text').innerText = `Hamilton: Live Grid Active`;
             }
         }
 
-        function renderData(reports) {
+        let currentAppData = { emergency: [], verified: [], news: [], unverified: [] };
+
+        function renderData(appData) {
             markersLayer.clearLayers();
-            zonesLayer.clearLayers();
-            const feedList = document.getElementById('realtime-feed-list');
-            feedList.innerHTML = '';
+            
+            const emergencyList = document.getElementById('emergency-list');
+            const verifiedList = document.getElementById('verified-list');
+            const newsList = document.getElementById('news-list');
+            const unverifiedList = document.getElementById('unverified-list');
+            
+            emergencyList.innerHTML = '';
+            verifiedList.innerHTML = '';
+            newsList.innerHTML = '';
+            unverifiedList.innerHTML = '';
+
+            document.getElementById('emergency-count').innerText = appData.emergency.length;
+            document.getElementById('verified-count').innerText = appData.verified.length;
+            document.getElementById('news-count').innerText = appData.news.length;
+            document.getElementById('unverified-count').innerText = appData.unverified.length;
 
             let heatPoints = [];
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
-            const showZones = document.getElementById('zones-toggle').checked;
 
-            const filters = {
-                stalking: document.getElementById('filter-stalking').checked,
-                shootings: document.getElementById('filter-shootings').checked,
-                tents: document.getElementById('filter-tents').checked,
-                drugs: document.getElementById('filter-drugs').checked,
-                infrastructure: document.getElementById('filter-infrastructure').checked
-            };
+            // Render Emergency (Green)
+            appData.emergency.forEach(inc => {
+                heatPoints.push([inc.lat, inc.lng, 1.5]);
+                const marker = L.marker([inc.lat, inc.lng], { icon: greenIcon }).addTo(markersLayer);
+                let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-2 px-2 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] rounded transition">&rarr; Official Dispatch Record</a>` : '';
+                marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-emerald-600 uppercase font-bold">Official Police/Fire/EMS (Green)</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p>${linkHtml}</div>`);
 
-            let visibleCount = 0;
-
-            reports.forEach(doc => {
-                const data = doc.data();
-                const cat = data.category || 'drugs';
-                if (filters[cat] !== false) {
-                    visibleCount++;
-                    const color = getCategoryColor(cat);
-
-                    // Heatmap weight
-                    heatPoints.push([data.lat, data.lng, data.intensity || 0.8]);
-
-                    // Danger Zone Overlay Circles
-                    if (showZones) {
-                        L.circle([data.lat, data.lng], {
-                            color: color,
-                            fillColor: color,
-                            fillOpacity: 0.18,
-                            radius: data.radius || 90,
-                            weight: 1.5
-                        }).addTo(zonesLayer);
-                    }
-
-                    // Marker
-                    const marker = L.marker([data.lat, data.lng], {
-                        icon: L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div class="w-4 h-4 rounded-full border-2 border-white shadow-lg animate-pulse" style="background-color: ${color};"></div>`,
-                            iconSize: [16, 16],
-                            iconAnchor: [8, 8]
-                        })
-                    }).addTo(markersLayer);
-
-                    let sourceHtml = data.url ? `<a href="${data.url}" target="_blank" class="text-amber-400 underline text-xs">Source Link</a>` : '';
-                    marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs uppercase font-bold" style="color:${color};">${cat}</strong><br><strong class="text-xs text-slate-900">${data.source || 'Verified Report'}</strong><p class="text-xs text-slate-800 mt-1">${data.description}</p><div class="mt-2">${sourceHtml}</div></div>`);
-
-                    // Sidebar Feed Item
-                    const item = document.createElement('div');
-                    item.className = 'bg-slate-950/75 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-amber-500/50 transition flex flex-col gap-1';
-                    item.innerHTML = `
-                        <div class="flex items-center justify-between"><span class="text-[11px] font-bold uppercase" style="color:${color};">${cat}</span><span class="text-[9px] font-mono text-slate-400">Live</span></div>
-                        <div class="text-xs text-slate-200 font-medium">${data.description}</div>
-                        <div class="text-[10px] text-slate-400 truncate">${data.source}</div>
-                    `;
-                    item.onclick = () => map.setView([data.lat, data.lng], 16);
-                    feedList.appendChild(item);
-                }
+                const nodeItem = document.createElement('div');
+                nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-emerald-400">${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 16); marker.openPopup(); };
+                emergencyList.appendChild(nodeItem);
             });
 
-            document.getElementById('feed-counter').innerText = `${visibleCount} VISIBLE`;
+            // Render Verified (Orange)
+            appData.verified.forEach(inc => {
+                heatPoints.push([inc.lat, inc.lng, 1.0]);
+                const marker = L.marker([inc.lat, inc.lng], { icon: orangeIcon }).addTo(markersLayer);
+                let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-2 px-2 py-1 bg-orange-500 hover:bg-orange-400 text-slate-950 font-bold text-[11px] rounded transition">&rarr; Official Source Record</a>` : '';
+                marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-orange-600 uppercase font-bold">Verified Report (Orange)</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p>${linkHtml}</div>`);
 
+                const nodeItem = document.createElement('div');
+                nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-orange-400">${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 16); marker.openPopup(); };
+                verifiedList.appendChild(nodeItem);
+            });
+
+            // Render News (Blue)
+            appData.news.forEach(inc => {
+                heatPoints.push([inc.lat, inc.lng, 0.8]);
+                const marker = L.marker([inc.lat, inc.lng], { icon: blueIcon }).addTo(markersLayer);
+                let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-2 px-2 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] rounded transition">&rarr; Read Local News Article</a>` : '';
+                marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-blue-500 uppercase font-bold">Local News Report (Blue)</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p>${linkHtml}</div>`);
+
+                const nodeItem = document.createElement('div');
+                nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-blue-400">${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 16); marker.openPopup(); };
+                newsList.appendChild(nodeItem);
+            });
+
+            // Render Unverified (Red)
+            appData.unverified.forEach(inc => {
+                heatPoints.push([inc.lat, inc.lng, 0.6]);
+                const marker = L.marker([inc.lat, inc.lng], { icon: redIcon }).addTo(markersLayer);
+                let linkHtml = inc.url ? `<a href="${inc.url}" target="_blank" class="block text-center mt-2 px-2 py-1 bg-red-600 hover:bg-red-500 text-white font-bold text-[11px] rounded transition">&rarr; View Source Discussion</a>` : '';
+                marker.bindPopup(`<div class="p-1 font-sans max-w-xs"><strong class="text-xs text-red-500 uppercase font-bold">Unverified / Social Chatter (Red)</strong><br><strong class="text-xs text-slate-900">${inc.source}</strong><br><span class="text-[11px] text-slate-500">${formatTimestamp(inc.timestamp)}</span><p class="text-xs text-slate-800 mt-1">${inc.description}</p>${linkHtml}</div>`);
+
+                const nodeItem = document.createElement('div');
+                nodeItem.className = 'bg-slate-950/65 border border-slate-800 p-2 rounded-lg cursor-pointer hover:bg-slate-800 transition flex flex-col gap-1';
+                nodeItem.innerHTML = `<div class="flex items-center justify-between"><span class="text-[11px] font-bold text-red-400">${inc.source}</span><span class="text-[9px] font-mono text-slate-400">${formatTimestamp(inc.timestamp)}</span></div><div class="text-[10px] text-slate-300 truncate">${inc.description}</div>`;
+                nodeItem.onclick = () => { map.setView([inc.lat, inc.lng], 16); marker.openPopup(); };
+                unverifiedList.appendChild(nodeItem);
+            });
+
+            // Heatmap layer
             if (heatLayer) map.removeLayer(heatLayer);
             if (showHeatmap && heatPoints.length > 0) {
-                heatLayer = L.heatLayer(heatPoints, {
-                    radius: 75,
-                    blur: 50,
+                heatLayer = L.heatLayer(heatPoints, { 
+                    radius: 25, 
+                    blur: 15, 
                     maxZoom: 18,
-                    max: 1.0,
-                    gradient: { 0.2: '#3b82f6', 0.5: '#eab308', 0.8: '#f97316', 1.0: '#dc2626' }
+                    gradient: { 0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 0.8: 'orange', 1.0: 'red' }
                 }).addTo(map);
             }
         }
 
+        // Real-time Firestore Sync
         onSnapshot(collection(db, "reports"), (snapshot) => {
-            let docs = [];
-            snapshot.forEach(doc => docs.push(doc));
-            renderData(docs);
+            let newData = { emergency: [], verified: [], news: [], unverified: [] };
+            
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const cat = data.category || 'news';
+                if (newData[cat]) {
+                    newData[cat].push({ id: doc.id, ...data });
+                }
+            });
+
+            currentAppData = newData;
+            renderData(currentAppData);
         });
 
         document.getElementById('locate-me-btn').addEventListener('click', () => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
-                    map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                    const latLng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                    map.setView(latLng, 16);
+                    L.marker(latLng).addTo(map).bindPopup("You are here").openPopup();
                 });
             }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            fetchWeather();
+
+            document.getElementById('heatmap-toggle').addEventListener('change', () => renderData(currentAppData));
             document.getElementById('accept-disclaimer-btn').onclick = () => document.getElementById('disclaimer-modal').classList.add('hidden');
             document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
             document.getElementById('sidebar-close').onclick = () => document.getElementById('sidebar').classList.add('-translate-x-full');
             document.getElementById('open-report-modal').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
             document.getElementById('close-report-modal').onclick = () => document.getElementById('report-modal').classList.add('hidden');
-
-            ['heatmap-toggle', 'zones-toggle', 'filter-stalking', 'filter-shootings', 'filter-tents', 'filter-drugs', 'filter-infrastructure'].forEach(id => {
-                document.getElementById(id).addEventListener('change', () => {
-                    // Triggers re-render via snapshot or local state
-                });
-            });
-
+            
             document.getElementById('hazard-form').onsubmit = async (e) => {
                 e.preventDefault();
+                const category = document.getElementById('hazard-type').value; 
+                const loc = document.getElementById('hazard-location-input').value;
+                const desc = document.getElementById('hazard-desc-input').value;
+                
                 try {
                     await addDoc(collection(db, "reports"), {
-                        category: document.getElementById('hazard-type').value,
+                        category: category,
                         lat: 43.2570 + (Math.random() - 0.5) * 0.02,
                         lng: -79.8700 + (Math.random() - 0.5) * 0.02,
-                        source: "Crowdsourced Mobile Field Report",
-                        description: document.getElementById('hazard-desc-input').value,
-                        intensity: 0.9,
-                        radius: 100,
-                        url: "",
+                        source: `Live Broadcast (${loc})`,
+                        description: desc,
+                        url: '',
                         timestamp: serverTimestamp(),
                         createdAt: serverTimestamp(),
                         active: true
@@ -331,7 +376,8 @@
                     document.getElementById('report-modal').classList.add('hidden');
                     document.getElementById('hazard-form').reset();
                 } catch (err) {
-                    alert("Submission failed.");
+                    alert("Write failed: Check Firestore Rules or console.");
+                    console.error(err);
                 }
             };
         });
