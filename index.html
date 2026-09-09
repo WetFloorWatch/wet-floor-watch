@@ -9,6 +9,17 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script>
+        // Performance patch to silence leaflet-heat canvas readback warnings
+        const originalGetContext = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function(type, attributes) {
+            if (type === '2d') {
+                attributes = attributes || {};
+                attributes.willReadFrequently = true;
+            }
+            return originalGetContext.call(this, type, attributes);
+        };
+    </script>
     <style>
         .leaflet-container { background: #07090e !important; font-family: ui-sans-serif, system-ui, sans-serif; }
         .custom-div-icon { background: transparent; border: none; }
@@ -81,7 +92,7 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-4">
                 <!-- Action Button -->
                 <button id="open-report-modal" class="w-full bg-gradient-to-r from-amber-500 to-red-600 hover:from-amber-400 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg cursor-pointer">
-                    Submit Verified Field Report
+                    Submit Crowdsourced Field Report
                 </button>
 
                 <!-- MACRO WEATHER RADAR HEAT CLOUD TOGGLE -->
@@ -177,7 +188,7 @@
     <div id="report-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between">
-                <h3 class="font-bold text-lg text-white">Submit Verified Field Report</h3>
+                <h3 class="font-bold text-lg text-white">Submit Crowdsourced Field Report</h3>
                 <button id="close-report-modal" class="text-slate-400 cursor-pointer">✕</button>
             </div>
             <form id="hazard-form" class="space-y-3">
@@ -436,7 +447,7 @@
                         category: category,
                         lat: 43.2570 + (Math.random() - 0.5) * 0.03,
                         lng: -79.8700 + (Math.random() - 0.5) * 0.03,
-                        source: `Verified Field Report (${loc})`,
+                        source: `Crowdsourced Field Report (${loc})`, // Updated to accurately reflect unvetted user entries
                         description: desc,
                         timestamp: serverTimestamp(),
                         createdAt: serverTimestamp()
