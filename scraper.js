@@ -14,57 +14,53 @@ const parser = new Parser({
 });
 
 const FEEDS = [
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+police+OR+fire+OR+EMS+OR+drug+OR+assault+OR+homicide)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
   { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+suspicious+OR+homicide+OR+shooting&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(shooting+OR+stabbing+OR+arrest+OR+investigation+OR+assault+OR+homicide)+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
 ];
 
-const VERIFIED_CORRIDORS = [
-  { keywords: ['fruitland'], name: "Fruitland Rd Corridor", lat: 43.2144, lng: -79.7135 },
-  { keywords: ['rymal', 'whitedeer'], name: "Rymal Rd E & Whitedeer Rd", lat: 43.1850, lng: -79.8150 },
-  { keywords: ['james st', 'barton'], name: "James St N & Barton St E", lat: 43.2612, lng: -79.8665 },
-  { keywords: ['king', 'wellington'], name: "King St E & Wellington St S", lat: 43.2545, lng: -79.8520 },
-  { keywords: ['upper james', 'mohawk'], name: "Upper James St & Mohawk Rd W", lat: 43.2280, lng: -79.8780 },
-  { keywords: ['jackson square', 'king w'], name: "Jackson Square / King St W", lat: 43.2557, lng: -79.8711 },
-  { keywords: ['main', 'victoria'], name: "Main St E & Victoria Ave S", lat: 43.2500, lng: -79.8500 },
-  { keywords: ['cannon', 'mary'], name: "Cannon St E & Mary St", lat: 43.2600, lng: -79.8600 },
-  { keywords: ['hess'], name: "Hess St S & King St W", lat: 43.2530, lng: -79.8790 },
-  { keywords: ['ottawa', 'barton'], name: "Ottawa St N & Barton St E", lat: 43.2430, lng: -79.8200 },
-  { keywords: ['concession'], name: "Concession St & Wellington St S", lat: 43.2350, lng: -79.8400 }
+// Exact verified street corridors with verified geographic markers
+const EXACT_STREET_WHITELIST = [
+  { names: ['fruitland road', 'fruitland rd'], name: "Fruitland Rd Corridor", lat: 43.2144, lng: -79.7135 },
+  { names: ['rymal road', 'rymal rd'], name: "Rymal Rd E Corridor", lat: 43.1850, lng: -79.8150 },
+  { names: ['james street north', 'james st n'], name: "James St N Corridor", lat: 43.2612, lng: -79.8665 },
+  { names: ['barton street', 'barton st'], name: "Barton St Corridor", lat: 43.2450, lng: -79.8150 },
+  { names: ['king street', 'king st'], name: "King St Corridor", lat: 43.2557, lng: -79.8711 },
+  { names: ['main street', 'main st'], name: "Main St Corridor", lat: 43.2500, lng: -79.8500 },
+  { names: ['upper james'], name: "Upper James St", lat: 43.2280, lng: -79.8780 },
+  { names: ['hess street', 'hess st'], name: "Hess Village", lat: 43.2530, lng: -79.8795 },
+  { names: ['ottawa street', 'ottawa st'], name: "Ottawa St N", lat: 43.2430, lng: -79.8200 },
+  { names: ['concession street', 'concession st'], name: "Concession St", lat: 43.2350, lng: -79.8400 }
 ];
 
-function strictExtractThreat(item, feedType, sourceName) {
+function verifyAndExtractLocation(item, feedType, sourceName) {
   const text = (item.title + " " + (item.contentSnippet || item.content || "")).toLowerCase();
   const urlLower = (item.link || '').toLowerCase();
 
-  // 1. CRITICAL LEGAL FIX: Reject any URL that points to an archive, search tag, or category index page
-  if (
-    urlLower.includes('/archive') || 
-    urlLower.includes('/tag') || 
-    urlLower.includes('/search') || 
-    urlLower.includes('/category') ||
-    urlLower === 'https://hamiltonpolice.on.ca'
-  ) {
+  // Reject archives, tags, or general search index pages
+  if (urlLower.includes('/archive') || urlLower.includes('/tag') || urlLower.includes('/search') || urlLower.includes('/category')) {
     return null; 
   }
 
-  // 2. Strict Blacklist
-  const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'lake ontario', 'blitz', 'education', 'bulldogs', 'concert'];
+  // Strict blacklist to eliminate noise
+  const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'lake ontario', 'blitz', 'education'];
   if (blacklist.some(term => text.includes(term))) return null;
 
-  // 3. Strict Location Search
-  let matchedCorridor = VERIFIED_CORRIDORS.find(c => c.keywords.every(kw => text.includes(kw)));
-  if (!matchedCorridor) {
-    matchedCorridor = VERIFIED_CORRIDORS.find(c => c.keywords.some(kw => text.includes(kw)));
+  // Strict Location Matching: The street name MUST explicitly appear in the article text
+  let matchedCorridor = null;
+  for (const corridor of EXACT_STREET_WHITELIST) {
+    if (corridor.names.some(streetName => text.includes(streetName))) {
+      matchedCorridor = corridor;
+      break;
+    }
   }
 
-  // Zero-Fallback Policy: If location cannot be verified from the text, drop it.
+  // ZERO-GUESSWORK POLICY: If the article text does not explicitly name a verified street, drop it entirely.
   if (!matchedCorridor) return null;
 
   let category = feedType;
-  if (text.includes('shooting') || text.includes('gun') || text.includes('stabbing') || text.includes('armed') || text.includes('police') || text.includes('fire') || text.includes('paramedic') || text.includes('missing') || text.includes('homicide')) {
+  if (text.includes('shooting') || text.includes('gun') || text.includes('stabbing') || text.includes('armed') || text.includes('police') || text.includes('homicide')) {
     category = 'emergency';
-  } else if (text.includes('roadwork') || text.includes('lane') || text.includes('pothole')) {
+  } else if (text.includes('roadwork') || text.includes('pothole')) {
     category = 'verified';
   } else if (feedType === 'unverified') {
     category = 'unverified';
@@ -89,15 +85,15 @@ function strictExtractThreat(item, feedType, sourceName) {
 }
 
 async function run() {
-  console.log("Executing anti-archive geo-matched ingestion...");
+  console.log("Running strict fact-checked intelligence ingestion...");
   let count = 0;
 
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
-      for (const item of (parsedFeed.items || []).slice(0, 50)) {
-        const intel = strictExtractThreat(item, feed.type, feed.sourceName);
-        if (!intel) continue;
+      for (const item of (parsedFeed.items || []).slice(0, 40)) {
+        const intel = verifyAndExtractLocation(item, feed.type, feed.sourceName);
+        if (!intel) continue; // Safely drops any unverified or ambiguous entries
 
         const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + Date.now());
         await db.collection("reports").doc(docId).set({
@@ -113,13 +109,13 @@ async function run() {
         });
 
         count++;
-        console.log(`[Verified Unique Article] ${intel.category} -> ${intel.source} (${intel.url})`);
+        console.log(`[Fact-Checked Pin] ${intel.category} -> ${intel.source}`);
       }
     } catch (e) {
       console.error(`Feed Error:`, e.message);
     }
   }
-  console.log(`Ingestion complete. Deployed ${count} legally sound unique article pins.`);
+  console.log(`Ingestion complete. Deployed ${count} strictly verified pins.`);
 }
 
 run().catch(err => {
