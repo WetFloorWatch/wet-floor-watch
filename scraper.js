@@ -1,11 +1,13 @@
-const adminModule = require("firebase-admin");
-const admin = adminModule.default || adminModule;
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore, Timestamp, FieldValue } = require("firebase-admin/firestore");
 const Parser = require("rss-parser");
 const Groq = require("groq-sdk");
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-const db = admin.firestore();
+initializeApp({
+  credential: cert(serviceAccount)
+});
+const db = getFirestore();
 
 // Free AI Layer: Groq SDK (14,400 free requests/day)
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -97,7 +99,7 @@ async function aiVerifyAndExtract(item, feedType, sourceName) {
     source: `${sourceName} • ${matchedCorridor.name}`,
     description: cleanDesc,
     url: String(item.link),
-    timestamp: admin.firestore.Timestamp.fromDate(articleDate)
+    timestamp: Timestamp.fromDate(articleDate)
   };
 }
 
@@ -121,7 +123,7 @@ async function run() {
           lng: intel.lng,
           url: intel.url,
           timestamp: intel.timestamp,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          createdAt: FieldValue.serverTimestamp(),
           active: true
         });
 
