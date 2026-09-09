@@ -247,7 +247,7 @@
                     </select>
                 </div>
                 
-                <!-- Google Maps Style Instant Street Index Autocomplete Input -->
+                <!-- Instant Predictive Search Input -->
                 <div class="space-y-1 relative">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Street / Intersection (Instant Predictive Search)</label>
                     <input type="text" id="hazard-location-input" autocomplete="off" placeholder="Start typing street (e.g. King, Barton, York, Rebecca)..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none focus:border-amber-500" required>
@@ -260,11 +260,12 @@
 
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (Drug Use, Needles, Weapons, Hazards)</label>
-                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
+                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics (5-400 characters)..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Attach or Take Photo (Optional)</label>
-                    <input type="file" id="hazard-image-input" accept="image/*" capture="environment" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
+                    <input type="file" id="hazard-image-input" accept="image/jpeg,image/png,image/webp" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
+                    <span class="text-[10px] text-slate-500 block pt-0.5">Accepted formats: JPG, PNG, WEBP (Max compressed size &lt; 800KB)</span>
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-98">
                     Deploy Field Report
@@ -537,8 +538,10 @@
             }, { enableHighAccuracy: true });
         });
 
-        // Comprehensive Hamilton Street & Intersection Master Index (Google Maps Style Predictive Autocomplete)
+        // Comprehensive Hamilton Street & Intersection Master Index
         const HAMILTON_STREET_INDEX = [
+            { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8660 },
+            { name: "Rebecca St & Wellington St N", lat: 43.2490, lng: -79.8520 },
             { name: "King St W & MacNab St N (Jackson Square Core)", lat: 43.2557, lng: -79.8711 },
             { name: "King St E & James St S", lat: 43.2550, lng: -79.8660 },
             { name: "King St E & Victoria Ave S", lat: 43.2510, lng: -79.8500 },
@@ -559,8 +562,6 @@
             { name: "Cannon St E & Hughson St N", lat: 43.2590, lng: -79.8640 },
             { name: "Cannon St E & Wellington St N", lat: 43.2560, lng: -79.8520 },
             { name: "Cannon St E & Ottawa St N", lat: 43.2450, lng: -79.8185 },
-            { name: "Rebecca St & Wellington St N", lat: 43.2490, lng: -79.8520 },
-            { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8660 },
             { name: "James St N & Cannon St W", lat: 43.2600, lng: -79.8660 },
             { name: "James St S & Hunter St W", lat: 43.2510, lng: -79.8670 },
             { name: "Locke St S & King St W", lat: 43.2550, lng: -79.8850 },
@@ -615,7 +616,7 @@
                 suggestionsBox.innerHTML = `<div class="p-3 text-xs text-slate-400 font-mono">Custom location recorded (will map to central core)</div>`;
                 suggestionsBox.classList.remove('hidden');
                 selectedLatInput.value = "43.2570";
-                selectedLngInput.value = "-79.8700";
+                selectedLngInput.value = -79.8700;
             }
         });
 
@@ -624,6 +625,48 @@
                 suggestionsBox.classList.add('hidden');
             }
         });
+
+        // Curated Profanity & Slang Blacklist Filter
+        const PROFANITY_BLACKLIST = ['nsfw', 'porn', 'xxx', 'dick', 'cock', 'pussy', 'slut', 'whore', 'fag', 'nigger', 'cuck', 'shit', 'asshole', 'fuck', 'bitch'];
+
+        function containsProfanity(text) {
+            const lower = text.toLowerCase();
+            return PROFANITY_BLACKLIST.some(word => {
+                const regex = new RegExp(`\\b${word}\\b`, 'i');
+                return regex.test(lower) || lower.includes(word);
+            });
+        }
+
+        // Image Compression Helper
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+                    callback(compressedDataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchWeather();
@@ -642,11 +685,33 @@
             
             document.getElementById('hazard-form').onsubmit = async (e) => {
                 e.preventDefault();
+
+                // 1. Spam Cooldown Validation (60 Seconds)
+                const lastSubmit = localStorage.getItem('wfw_last_submit');
+                const now = Date.now();
+                if (lastSubmit && (now - lastSubmit < 60000)) {
+                    const secondsLeft = Math.ceil((60000 - (now - lastSubmit)) / 1000);
+                    alert(`Rate limit active: Please wait ${secondsLeft} seconds before broadcasting another report.`);
+                    return;
+                }
+
                 const locInput = locationInput.value;
-                const desc = document.getElementById('hazard-desc-input').value;
+                const desc = document.getElementById('hazard-desc-input').value.trim();
                 const imageFile = document.getElementById('hazard-image-input').files[0];
                 const lat = parseFloat(selectedLatInput.value) || 43.2570;
                 const lng = parseFloat(selectedLngInput.value) || -79.8700;
+
+                // 2. Character Length Validation
+                if (desc.length < 5 || desc.length > 400) {
+                    alert("Description must be between 5 and 400 characters.");
+                    return;
+                }
+
+                // 3. Profanity & Slang Validation Check
+                if (containsProfanity(desc) || containsProfanity(locInput)) {
+                    alert("Submission rejected: Content violates community guidelines regarding profanity or prohibited language.");
+                    return;
+                }
 
                 const processSubmission = async (imageUrl = '') => {
                     try {
@@ -663,18 +728,22 @@
                             createdAt: serverTimestamp(),
                             active: true
                         });
+                        
+                        // Set cooldown timestamp in localStorage
+                        localStorage.setItem('wfw_last_submit', Date.now());
+
                         closeModal();
                         document.getElementById('hazard-form').reset();
                     } catch (err) {
-                        alert("Write failed: Ensure Firestore rules allow public writes (`allow read, write: if true;`).");
+                        alert("Write failed: Ensure Firestore rules allow public writes and image size is within limits.");
                         console.error(err);
                     }
                 };
 
                 if (imageFile) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => { processSubmission(reader.result); };
-                    reader.readAsDataURL(imageFile);
+                    compressImage(imageFile, (compressedUrl) => {
+                        processSubmission(compressedUrl);
+                    });
                 } else {
                     processSubmission('');
                 }
