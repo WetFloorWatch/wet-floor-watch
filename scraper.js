@@ -56,8 +56,9 @@ async function run() {
         - "valid": boolean (true only if it is genuinely located in Greater Hamilton and pertains to safety, hazards, or incidents, false otherwise)`;
 
         try {
+          // Updated to use the active gemini-3.6-flash model
           const result = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.6-flash",
             contents: prompt,
             config: { responseMimeType: "application/json" }
           });
