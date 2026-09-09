@@ -2,13 +2,11 @@ const admin = require("firebase-admin");
 const Parser = require("rss-parser");
 const { GoogleGenAI } = require("@google/genai");
 
-// Initialize Firebase Admin securely from GitHub Secret
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 const db = admin.firestore();
 
-// Configured with correct regional URLs and browser headers to bypass 406 blocks
 const parser = new Parser({
   headers: {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -18,15 +16,15 @@ const parser = new Parser({
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// Multiple reliable RSS feeds covering Hamilton and broader regional safety/news
 const FEEDS = [
-  "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews",
-  "https://www.cbc.ca/webfeed/rss/rss-canada-toronto",
-  "https://www.cbc.ca/webfeed/rss/rss-canada"
+  "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews"
 ];
 
+// Helper function to pause execution and avoid rate limits (429 errors)
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function run() {
-  console.log("Starting maxed-out Greater Hamilton safety intelligence scraper...");
+  console.log("Starting paced Greater Hamilton safety intelligence scraper...");
   let totalProcessed = 0;
 
   for (const feedUrl of FEEDS) {
@@ -34,11 +32,13 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      for (const item of (feed.items || []).slice(0, 30)) {
+      // Limited to 4 items per run to stay safely within free tier rate limits
+      for (const item of (feed.items || []).slice(0, 4)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
         if ((await docRef.get()).exists) {
+          console.log(`[Skipped - Already Exists]: ${item.title}`);
           continue;
         }
 
@@ -56,7 +56,6 @@ async function run() {
         - "valid": boolean (true only if it is genuinely located in Greater Hamilton and pertains to safety, hazards, or incidents, false otherwise)`;
 
         try {
-          // Updated to use the active gemini-3.6-flash model
           const result = await ai.models.generateContent({
             model: "gemini-3.6-flash",
             contents: prompt,
@@ -67,6 +66,7 @@ async function run() {
           const report = JSON.parse(responseText);
 
           if (!report.valid || typeof report.lat !== 'number' || typeof report.lng !== 'number') {
+            console.log(`[AI Filtered Out]: ${item.title}`);
             continue;
           }
 
@@ -103,6 +103,10 @@ async function run() {
         } catch (parseErr) {
           console.warn(`[AI Parse Skip] Failed to parse item "${item.title}":`, parseErr.message);
         }
+
+        // Wait 12 seconds between each AI call to stay under the free tier 5-requests-per-minute limit
+        console.log("Waiting 12 seconds to respect API rate limits...");
+        await sleep(12000);
       }
     } catch (feedErr) {
       console.error(`[Feed Error] Failed to fetch feed ${feedUrl}:`, feedErr.message);
