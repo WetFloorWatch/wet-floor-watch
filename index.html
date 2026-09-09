@@ -112,7 +112,7 @@
                         Broadcast Street Report
                     </button>
 
-                    <!-- Storm Radar Style Controls -->
+                    <!-- Storm Radar Controls -->
                     <div class="bg-slate-950/50 border border-slate-800/80 p-3 rounded-xl space-y-3">
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
@@ -123,12 +123,6 @@
                                 <input type="checkbox" id="heatmap-toggle" checked class="sr-only peer">
                                 <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
                             </label>
-                        </div>
-                        <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1 border-t border-slate-800/80">
-                            <span class="text-sky-400">Low Risk (Blue)</span>
-                            <span class="text-emerald-400">Moderate</span>
-                            <span class="text-amber-400">High</span>
-                            <span class="text-rose-500 font-bold">Critical (Red)</span>
                         </div>
                     </div>
                 </div>
@@ -141,36 +135,31 @@
                 <!-- Legend -->
                 <div class="bg-slate-950/40 border border-slate-800 p-3 rounded-xl grid grid-cols-1 gap-2.5 text-[11px] font-semibold tracking-wide">
                     <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Police/Fire/EMS</span>
+                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Official Police Dispatch</span>
                         <span class="text-slate-500 font-mono" id="count-badge-em">0</span>
-                    </div>
-                    <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]"></span> Verified Reports</span>
-                        <span class="text-slate-500 font-mono" id="count-badge-ve">0</span>
                     </div>
                     <div class="flex items-center justify-between px-1">
                         <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span> Local News</span>
                         <span class="text-slate-500 font-mono" id="count-badge-ne">0</span>
                     </div>
                     <div class="flex items-center justify-between px-1">
-                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span> Unverified / Social</span>
+                        <span class="flex items-center gap-2 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span> Community Chatter & Socials</span>
                         <span class="text-slate-500 font-mono" id="count-badge-un">0</span>
                     </div>
                 </div>
 
-                <!-- INTERVENTION SPOTLIGHT CARD -->
+                <!-- SORTED THEMES: ON THE STREET REPORTING FEED -->
                 <div class="bg-slate-900 border border-pink-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
                         <span class="text-xs font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.20 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                            Intervention Feed
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
+                            On The Street Reporting
                         </span>
                         <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-400 hover:underline">@interventionintersection2026 &rarr;</a>
                     </div>
-                    
                     <div id="intervention-feed-container" class="space-y-2 max-h-48 overflow-y-auto pr-1">
                         <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">
-                            Awaiting live feed sync...
+                            Syncing field logs...
                         </div>
                     </div>
                 </div>
@@ -185,16 +174,11 @@
                     </a>
                 </div>
 
-                <!-- Feed Lists -->
+                <!-- Feed Lists Sorted by Theme -->
                 <div class="space-y-4 pt-4 border-t border-slate-800">
                     <div class="space-y-2">
-                        <h3 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest pl-1">Official Police & Fire</h3>
+                        <h3 class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest pl-1">Official Police Dispatch</h3>
                         <div id="emergency-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
-                    </div>
-
-                    <div class="space-y-2 pt-2">
-                        <h3 class="text-[10px] font-bold text-orange-500 uppercase tracking-widest pl-1">Verified Reports</h3>
-                        <div id="verified-list" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
                     </div>
 
                     <div class="space-y-2 pt-2">
@@ -222,32 +206,28 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
                 <h3 class="font-bold text-lg text-white flex items-center gap-2">
-                    <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
                     Broadcast Intel
                 </h3>
-                <button id="close-report-modal" class="text-slate-500 hover:text-white transition p-1 bg-slate-800 rounded-md">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
+                <button id="close-report-modal" class="text-slate-500 hover:text-white transition p-1 bg-slate-800 rounded-md">✕</button>
             </div>
             <form id="hazard-form" class="space-y-4">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Threat Level</label>
-                    <select id="hazard-type" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none transition">
-                        <option value="emergency">Official Police / Fire / EMS (Green)</option>
-                        <option value="verified">Verified Report (Orange)</option>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Source Type</label>
+                    <select id="hazard-type" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none">
+                        <option value="emergency">Official Police Dispatch (Green)</option>
                         <option value="news">Local News Report (Blue)</option>
-                        <option value="unverified" selected>Social Warning / Chatter (Red)</option>
+                        <option value="unverified" selected>Word on the Street / Social Chatter (Red)</option>
                     </select>
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Intersection / Zone</label>
-                    <input type="text" id="hazard-location-input" placeholder="e.g. King St W & MacNab" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none transition" required>
+                    <input type="text" id="hazard-location-input" placeholder="e.g. York Blvd & Bay St" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 font-mono outline-none" required>
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description</label>
-                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none transition resize-none" required></textarea>
+                    <textarea id="hazard-desc-input" placeholder="Detailed incident specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-sm text-slate-200 outline-none resize-none" required></textarea>
                 </div>
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-[0.98]">
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg">
                     Deploy to Grid
                 </button>
             </form>
@@ -276,7 +256,7 @@
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
         let markersLayer = L.layerGroup().addTo(map);
@@ -294,7 +274,6 @@
         }
 
         const greenIcon = createColoredPinIcon('#10b981', 'rgba(16,185,129,0.7)');  
-        const orangeIcon = createColoredPinIcon('#f97316', 'rgba(249,115,22,0.7)'); 
         const blueIcon = createColoredPinIcon('#3b82f6', 'rgba(59,130,246,0.7)');   
         const redIcon = createColoredPinIcon('#e11d48', 'rgba(225,29,72,0.7)');    
 
@@ -302,7 +281,7 @@
             if (!ts) return 'Just now';
             if (typeof ts === 'string') return ts;
             if (ts.toDate) return ts.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
-            return 'Verified Record';
+            return 'Recent Record';
         }
 
         async function fetchWeather() {
@@ -322,7 +301,6 @@
             
             const listElements = {
                 emergency: document.getElementById('emergency-list'),
-                verified: document.getElementById('verified-list'),
                 news: document.getElementById('news-list'),
                 unverified: document.getElementById('unverified-list')
             };
@@ -330,44 +308,45 @@
             Object.values(listElements).forEach(el => el.innerHTML = '');
 
             document.getElementById('count-badge-em').innerText = appData.emergency.length;
-            document.getElementById('count-badge-ve').innerText = appData.verified.length;
             document.getElementById('count-badge-ne').innerText = appData.news.length;
-            document.getElementById('count-badge-un').innerText = appData.unverified.length;
+            document.getElementById('count-badge-un').innerText = appData.unverified.length + (appData.verified?.length || 0);
 
             let heatPoints = [];
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
             const config = {
-                emergency: { icon: greenIcon, heat: 3.0, colorClass: 'emerald', title: 'Official Police/Fire/EMS' },
-                verified: { icon: orangeIcon, heat: 2.2, colorClass: 'orange', title: 'Verified Report' },
+                emergency: { icon: greenIcon, heat: 3.0, colorClass: 'emerald', title: 'Official Police Dispatch' },
+                verified: { icon: blueIcon, heat: 2.2, colorClass: 'blue', title: 'Word on the Street' },
                 news: { icon: blueIcon, heat: 1.8, colorClass: 'blue', title: 'Local News Report' },
                 unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Community Chatter & Socials' }
             };
 
-            // DYNAMICALLY FILTER INTERVENTION POSTS FOR SIDEBAR SPOTLIGHT
-            const allItems = [...appData.unverified, ...appData.news, ...appData.verified, ...appData.emergency];
-            const interventionItems = allItems.filter(i => 
-                i.source.includes('@interventionintersection2026')
-            ).slice(0, 3);
+            // On The Street Reporting Feed Spotlight
+            const allItems = [...appData.unverified, ...(appData.verified || []), ...appData.news, ...appData.emergency];
+            const streetReports = allItems.filter(i => i.source.includes('Instagram') || i.source.includes('Facebook') || i.source.includes('X / Social')).slice(0, 4);
 
             const spotlightContainer = document.getElementById('intervention-feed-container');
-            if (interventionItems.length > 0) {
-                spotlightContainer.innerHTML = interventionItems.map(item => `
-                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-pink-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
+            if (streetReports.length > 0) {
+                spotlightContainer.innerHTML = streetReports.map(item => `
+                    <a href="${item.url || '#'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-pink-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-pink-400 truncate">${item.source}</span>
                             <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
                         </div>
                         <p class="text-slate-300 line-clamp-2 leading-snug">${item.description}</p>
-                        <span class="text-[9px] font-bold text-amber-400 uppercase tracking-wider block pt-1">View Source Post &rarr;</span>
+                        <span class="text-[9px] font-bold text-amber-400 uppercase tracking-wider block pt-1">View Post &rarr;</span>
                     </a>
                 `).join('');
             } else {
-                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Awaiting live feed sync...</div>`;
+                spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Syncing street logs...</div>`;
             }
 
             ['emergency', 'verified', 'news', 'unverified'].forEach(category => {
-                const cfg = config[category];
+                const targetKey = category === 'verified' ? 'unverified' : category;
+                const targetEl = listElements[targetKey];
+                if (!targetEl) return;
+
+                const cfg = config[category] || config['unverified'];
                 
                 appData[category].forEach(inc => {
                     heatPoints.push([inc.lat, inc.lng, cfg.heat]); 
@@ -379,7 +358,7 @@
                         <div class="p-0.5 font-sans min-w-[200px]">
                             <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-800">
                                 <span class="w-2 h-2 rounded-full bg-${cfg.colorClass}-500"></span>
-                                <strong class="text-[10px] text-${cfg.colorClass}-400 uppercase tracking-widest">${cfg.title}</strong>
+                                <strong class="text-[10px] text-${cfg.colorClass}-400 uppercase tracking-widest">${cfg.title} (Unverified Word of Mouth)</strong>
                             </div>
                             <strong class="text-sm text-slate-100 leading-tight block mb-1">${inc.source}</strong>
                             <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">${formatTimestamp(inc.timestamp)}</span>
@@ -405,7 +384,7 @@
                         map.flyTo([inc.lat, inc.lng], 16, { duration: 1.5 }); 
                         setTimeout(() => marker.openPopup(), 500); 
                     };
-                    listElements[category].appendChild(nodeItem);
+                    targetEl.appendChild(nodeItem);
                 });
             });
 
@@ -495,7 +474,7 @@
                         category: category,
                         lat: 43.2570,
                         lng: -79.8700,
-                        source: `Live Broadcast (${loc})`,
+                        source: `Word on the Street (${loc})`,
                         description: desc,
                         url: '',
                         timestamp: serverTimestamp(),
