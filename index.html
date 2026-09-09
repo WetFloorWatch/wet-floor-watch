@@ -354,13 +354,14 @@
             const spotlightContainer = document.getElementById('intervention-feed-container');
             if (interventionItems.length > 0) {
                 spotlightContainer.innerHTML = interventionItems.map(item => `
-                    <div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] space-y-1 cursor-pointer hover:border-pink-500/40 transition" onclick="window.mapFlyTo(${item.lat}, ${item.lng})">
+                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-pink-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-pink-400 truncate">${item.source.split('•')[1] || item.source}</span>
                             <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
                         </div>
                         <p class="text-slate-300 line-clamp-2 leading-snug">${item.description}</p>
-                    </div>
+                        <span class="text-[9px] font-bold text-amber-400 uppercase tracking-wider block pt-1">View Source Post &rarr;</span>
+                    </a>
                 `).join('');
             } else {
                 spotlightContainer.innerHTML = `<div class="bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-[11px] text-slate-400 font-mono">Awaiting live feed sync...</div>`;
@@ -390,10 +391,14 @@
 
                     const nodeItem = document.createElement('div');
                     nodeItem.className = `slide-hover bg-slate-900/40 hover:bg-slate-800/80 p-3 rounded-r-xl border border-transparent border-l-2 border-l-${cfg.colorClass}-500 border-b-slate-800/60 cursor-pointer flex flex-col gap-1.5 shadow-sm`;
+                    let sourceLinkIcon = inc.url ? `<a href="${inc.url}" target="_blank" class="text-[9px] text-amber-400 hover:underline ml-auto" onclick="event.stopPropagation()">[Source Post]</a>` : '';
                     nodeItem.innerHTML = `
                         <div class="flex items-start justify-between gap-2">
                             <span class="text-[11px] font-bold text-${cfg.colorClass}-400 uppercase tracking-wide leading-tight">${inc.source}</span>
-                            <span class="text-[9px] font-mono text-slate-500 shrink-0 mt-0.5">${formatTimestamp(inc.timestamp)}</span>
+                            <div class="flex items-center gap-2 shrink-0">
+                                ${sourceLinkIcon}
+                                <span class="text-[9px] font-mono text-slate-500 mt-0.5">${formatTimestamp(inc.timestamp)}</span>
+                            </div>
                         </div>
                         <div class="text-[11px] text-slate-300 line-clamp-2 leading-snug">${inc.description}</div>
                     `;
