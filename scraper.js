@@ -8,93 +8,72 @@ const db = admin.firestore();
 
 const parser = new Parser({
   headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
 
 const FEEDS = [
-  "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews",
-  "https://www.reddit.com/r/Hamilton/new/.rss"
+  { url: "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews", type: "news" },
+  { url: "https://www.reddit.com/r/Hamilton/new/.rss", type: "unverified" }
 ];
 
-function strictClassifyThreat(item) {
+function filterAndCategorize(item, feedType) {
   const text = (item.title + " " + (item.contentSnippet || item.content || "")).toLowerCase();
 
-  // Strict Blacklist: Instantly drop ads, rentals, school updates, sports, weather, and general fluff
-  const blacklist = [
-    'rent', 'rental', 'gym', 'church rental', 'inline skating', 'school', 'student', 
-    'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'lake ontario', 'history', 
-    'sturgeon', 'belugas', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'traffic safety blitz'
+  // STRICT FLUFF FILTER: Immediately reject anything related to these topics
+  const rejectList = [
+    'rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 
+    'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 
+    'home opener', 'policy', 'lake ontario', 'sturgeon', 'belugas', 'blitz', 'education'
   ];
-  if (blacklist.some(term => text.includes(term))) {
-    return null;
+  if (rejectList.some(term => text.includes(term))) {
+    return null; // Skip non-safety fluff
   }
 
-  let category = '';
-  let intensity = 0.8;
-  let radius = 90;
+  // CATEGORY ROUTING matching index.html lists
+  let category = feedType; // Default to 'news' or 'unverified' based on feed origin
 
-  // Strict Safety Ingestion Rules matching index.html filters exactly
-  if (text.includes('shooting') || text.includes('gun') || text.includes('weapon') || text.includes('stabbing') || text.includes('knife') || text.includes('armed')) {
-    category = 'shootings';
-    intensity = 1.0;
-    radius = 140;
-  } else if (text.includes('assault') || text.includes('fight') || text.includes('attack') || text.includes('threat') || text.includes('harass') || text.includes('robbery') || text.includes('stalk') || text.includes('following')) {
-    category = 'stalking';
-    intensity = 0.85;
-    radius = 90;
-  } else if (text.includes('tent') || text.includes('encampment') || text.includes('unsung') || text.includes('tarp')) {
-    category = 'tents';
-    intensity = 0.90;
-    radius = 110;
-  } else if (text.includes('drug') || text.includes('needle') || text.includes('overdose') || text.includes('substance') || text.includes('paraphernalia') || text.includes('pipes') || text.includes('open-air')) {
-    category = 'drugs';
-    intensity = 0.88;
-    radius = 100;
-  } else if (text.includes('pothole') || text.includes('sinkhole') || text.includes('water main') || text.includes('hazard') || text.includes('road collapse')) {
-    category = 'infrastructure';
-    intensity = 0.6;
-    radius = 60;
-  } else {
-    // Drop any news article that isn't a direct safety threat
-    return null;
+  if (text.includes('shooting') || text.includes('gun') || text.includes('stabbing') || text.includes('armed') || text.includes('police') || text.includes('fire') || text.includes('paramedic')) {
+    category = 'emergency'; // Overrides to Green Pin
+  } else if (text.includes('roadwork') || text.includes('lane restriction') || text.includes('pothole') || text.includes('infrastructure')) {
+    category = 'verified'; // Overrides to Orange Pin
+  } else if (!text.includes('drug') && !text.includes('assault') && !text.includes('crime') && !text.includes('danger') && !text.includes('hazard')) {
+    // If it passed the reject filter but isn't explicitly safety related, keep as general news/unverified
+    if (feedType === 'news') category = 'news';
   }
 
-  // Exact high-risk Hamilton core locations
+  // Realistic coordinate snapping for Hamilton
   const hotzones = [
-    { name: "York Blvd & Bay St N Shelter Corridor", lat: 43.2625, lng: -79.8732 },
-    { name: "James St N & Barton St E Cathedral Zone", lat: 43.2612, lng: -79.8665 },
-    { name: "Jackson Square Concourse / King St W", lat: 43.2557, lng: -79.8711 },
-    { name: "Beasley Park Encampment Zone", lat: 43.2575, lng: -79.8580 },
-    { name: "Hess Village Alleyway", lat: 43.2530, lng: -79.8795 },
-    { name: "Central Memorial Park Perimeter", lat: 43.2490, lng: -79.8520 }
+    { name: "York Blvd & Bay St N", lat: 43.2625, lng: -79.8732 },
+    { name: "James St N & Barton St E", lat: 43.2612, lng: -79.8665 },
+    { name: "Jackson Square / King St W", lat: 43.2557, lng: -79.8711 },
+    { name: "Main St E & Victoria Ave", lat: 43.2500, lng: -79.8500 },
+    { name: "Cannon St E & Mary St", lat: 43.2600, lng: -79.8600 }
   ];
 
   const zone = hotzones[Math.floor(Math.random() * hotzones.length)];
 
   return {
-    category,
-    intensity,
-    radius,
-    lat: zone.lat + (Math.random() - 0.5) * 0.0015,
-    lng: zone.lng + (Math.random() - 0.5) * 0.0015,
-    source: `Verified Intelligence • ${zone.name}`,
-    description: String(item.title || 'Live security threat report'),
+    category: category,
+    lat: zone.lat + (Math.random() - 0.5) * 0.005,
+    lng: zone.lng + (Math.random() - 0.5) * 0.005,
+    source: `${feedType === 'unverified' ? 'Social Chatter' : 'Live Dispatch'} • ${zone.name}`,
+    description: String(item.title || 'Live threat intelligence'),
     url: String(item.link || 'https://www.hamilton.ca/')
   };
 }
 
 async function run() {
-  console.log("Starting strict threat intelligence verification filter...");
+  console.log("Starting strict data ingestion...");
   let count = 0;
 
-  for (const feedUrl of FEEDS) {
+  for (const feed of FEEDS) {
     try {
-      const feed = await parser.parseURL(feedUrl);
-      for (const item of (feed.items || []).slice(0, 20)) {
-        const intel = strictClassifyThreat(item);
-        if (!intel) continue; // Instantly skip irrelevant content
+      const parsedFeed = await parser.parseURL(feed.url);
+      for (const item of (parsedFeed.items || []).slice(0, 30)) {
+        const intel = filterAndCategorize(item, feed.type);
+        if (!intel) continue; // Skip if filtered out
 
         const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + Date.now());
         await db.collection("reports").doc(docId).set({
@@ -103,8 +82,6 @@ async function run() {
           description: intel.description,
           lat: intel.lat,
           lng: intel.lng,
-          intensity: intel.intensity,
-          radius: intel.radius,
           url: intel.url,
           timestamp: admin.firestore.FieldValue.serverTimestamp(),
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -112,14 +89,13 @@ async function run() {
         });
 
         count++;
-        console.log(`[Valid Threat Logged] Category: [${intel.category}] -> ${intel.description}`);
+        console.log(`[Logged] Category: ${intel.category} -> ${intel.description}`);
       }
     } catch (e) {
       console.error(`Feed Error:`, e.message);
     }
   }
-
-  console.log(`Ingestion complete. Deployed ${count} verified high-priority threat markers.`);
+  console.log(`Ingestion complete. Deployed ${count} active pins.`);
 }
 
 run().catch(err => {
