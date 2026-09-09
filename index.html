@@ -148,10 +148,10 @@
                     </div>
                 </div>
 
-                <!-- ON THE STREET REPORTING FEED TAB -->
-                <div class="bg-slate-900 border border-pink-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
+                <!-- ON THE STREET REPORTING FEED TAB (Amber/Gold Theme) -->
+                <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3.5 space-y-3 shadow-inner">
                     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
-                        <span class="text-xs font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
                             On The Street Reporting
                         </span>
@@ -292,7 +292,7 @@
             }
         }
 
-        let currentAppData = { emergency: [], verified: [], news: [], unverified: [] };
+        let currentAppData = { emergency: [], news: [], unverified: [] };
 
         function renderData(appData) {
             markersLayer.clearLayers();
@@ -318,16 +318,16 @@
                 unverified: { icon: redIcon, heat: 1.5, colorClass: 'rose', title: 'Community Chatter & Socials (Unverified)' }
             };
 
-            // Populate On The Street Reporting Tab from Instagram/Social Feeds
+            // Populate On The Street Reporting Tab from Instagram / Field Feeds
             const allItems = [...appData.unverified, ...appData.news, ...appData.emergency];
             const streetReports = allItems.filter(i => i.source.includes('@interventionintersection2026') || i.source.includes('Instagram')).slice(0, 5);
 
             const spotlightContainer = document.getElementById('intervention-feed-container');
             if (streetReports.length > 0) {
                 spotlightContainer.innerHTML = streetReports.map(item => `
-                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-pink-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
+                    <a href="${item.url || 'https://www.instagram.com/interventionintersection2026'}" target="_blank" class="block bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 p-2.5 rounded-xl text-[11px] space-y-1 transition">
                         <div class="flex items-center justify-between">
-                            <span class="font-bold text-pink-400 truncate">${item.source}</span>
+                            <span class="font-bold text-amber-400 truncate">${item.source}</span>
                             <span class="text-[9px] font-mono text-slate-500 shrink-0">${formatTimestamp(item.timestamp)}</span>
                         </div>
                         <p class="text-slate-300 line-clamp-2 leading-snug">${item.description}</p>
@@ -344,7 +344,6 @@
                 const cfg = config[category];
 
                 appData[category].forEach(inc => {
-                    // Only drop map pins if hasPin is true and coordinates are verified
                     if (inc.hasPin && inc.lat && inc.lng) {
                         heatPoints.push([inc.lat, inc.lng, cfg.heat]);
                         const marker = L.marker([inc.lat, inc.lng], { icon: cfg.icon }).addTo(markersLayer);
@@ -365,7 +364,6 @@
                         `);
                     }
 
-                    // Render sidebar feed item regardless of pin status
                     const nodeItem = document.createElement('div');
                     nodeItem.className = `slide-hover bg-slate-900/40 hover:bg-slate-800/80 p-3 rounded-r-xl border border-transparent border-l-2 border-l-${cfg.colorClass}-500 border-b-slate-800/60 cursor-pointer flex flex-col gap-1.5 shadow-sm`;
                     let sourceLinkIcon = inc.url ? `<a href="${inc.url}" target="_blank" class="text-[9px] text-amber-400 hover:underline ml-auto" onclick="event.stopPropagation()">[Source Post]</a>` : '';
