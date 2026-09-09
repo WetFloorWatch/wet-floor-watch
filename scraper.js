@@ -15,93 +15,70 @@ const newsParser = new Parser({
 
 const redditParser = new Parser({
   headers: {
-    'User-Agent': 'WetFloorWatchLive/6.0 (Safety Intelligence Grid)',
+    'User-Agent': 'WetFloorWatchGrid/7.0 (Live Safety Intelligence)',
     'Accept': 'application/rss+xml, application/xml, text/xml, */*'
   }
 });
 
 const FEEDS = [
-  { url: "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews", parser: newsParser, sourceType: "Verified News Dispatch" },
-  { url: "https://www.reddit.com/r/Hamilton/new/.rss", parser: redditParser, type: "Crowdsourced Community Report" }
+  { url: "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews", parser: newsParser, sourceType: "Official Dispatch Feed" },
+  { url: "https://www.reddit.com/r/Hamilton/new/.rss", parser: redditParser, sourceType: "Community Intelligence Report" }
 ];
 
-function processLiveIntelligence(item, sourceType) {
+function processLiveThreats(item, sourceType) {
   const text = (item.title + " " + (item.contentSnippet || item.content || "")).toLowerCase();
 
-  // Strict Exclusion Filter to eliminate sports, weather trivia, and general lifestyle fluff
-  const ignoreList = ['ticats', 'argonauts', 'football', 'hockey', 'tickets', 'lake ontario', 'history', 'sturgeon', 'belugas', 'festival', 'parade', 'osap', 'university'];
+  // Strict Exclusion Filter for sports, history, weather, and general media noise
+  const ignoreList = ['ticats', 'argonauts', 'football', 'hockey', 'tickets', 'lake ontario', 'history', 'sturgeon', 'belugas', 'festival', 'parade', 'osap', 'university', 'home opener'];
   if (ignoreList.some(term => text.includes(term))) return null;
 
   let category = 'emergency';
-  let severity = 'medium';
-  let intensity = 0.6;
-  let radius = 60;
 
-  // Granular Safety Classification matching your advanced UI filters
-  if (text.includes('shooting') || text.includes('gun') || text.includes('weapon') || text.includes('stabbing') || text.includes('knife')) {
-    category = 'shootings'; // Critical / Weapons
-    severity = 'high';
-    intensity = 1.0;
-    radius = 140;
+  // Mapping strictly to your HTML frontend's 4 active UI categories
+  if (text.includes('shooting') || text.includes('gun') || text.includes('weapon') || text.includes('stabbing') || text.includes('knife') || text.includes('armed')) {
+    category = 'shootings'; // Maps to Critical / Weapons (Red)
   } else if (text.includes('assault') || text.includes('fight') || text.includes('attack') || text.includes('threat') || text.includes('harass') || text.includes('robbery') || text.includes('stalke')) {
-    category = 'assaults'; // Assaults & Harassment
-    severity = 'high';
-    intensity = 0.85;
-    radius = 90;
+    category = 'assaults'; // Maps to Assaults & Harassment (Orange)
   } else if (text.includes('drug') || text.includes('needle') || text.includes('encampment') || text.includes('tent') || text.includes('overdose') || text.includes('substance') || text.includes('paraphernalia')) {
-    category = 'drugs'; // Drug Sales, Needles & Encampments / Open Air Drug Activity
-    severity = 'high';
-    intensity = 0.90;
-    radius = 110;
-  } else if (text.includes('pothole') || text.includes('roadwork') || text.includes('construction') || text.includes('hazard') || text.includes('flooding') || text.includes('traffic')) {
-    category = 'infrastructure'; // Potholes, Roadwork & Infrastructure
-    severity = 'medium';
-    intensity = 0.50;
-    radius = 45;
-  } else if (text.includes('police') || text.includes('dispatch') || text.includes('fire') || text.includes('ambulance') || text.includes('crash')) {
-    category = 'emergency';
-    severity = 'medium';
-    intensity = 0.70;
-    radius = 70;
+    category = 'drugs'; // Maps to Drug Sales, Needles & Encampments (Yellow)
+  } else if (text.includes('police') || text.includes('dispatch') || text.includes('fire') || text.includes('ambulance') || text.includes('crash') || text.includes('collision') || text.includes('hazard')) {
+    category = 'emergency'; // Maps to Official Dispatch (Green)
   } else {
-    return null; // Ignore unclassified items
+    return null; // Discard unclassified chatter
   }
 
-  // Active Downtown Core Hotspot Mapping
-  const hotspots = [
+  // Realistic Downtown Hamilton Core Safety Corridors
+  const dangerZones = [
     { name: "York Blvd & Bay St N (Shelter Corridor)", lat: 43.2625, lng: -79.8732 },
     { name: "James St N & Barton St E (Cathedral Zone)", lat: 43.2612, lng: -79.8665 },
     { name: "Jackson Square / King St W", lat: 43.2557, lng: -79.8711 },
-    { name: "Beasley Park Encampment Zone", lat: 43.2575, lng: -79.8580 },
-    { name: "Hess Village Corridor", lat: 43.2530, lng: -79.8795 },
+    { name: "Beasley Park Encampment Sector", lat: 43.2575, lng: -79.8580 },
+    { name: "Hess Village Alleyway Corridor", lat: 43.2530, lng: -79.8795 },
     { name: "Central Memorial Park", lat: 43.2490, lng: -79.8520 },
     { name: "Barton St E & Ottawa St", lat: 43.2435, lng: -79.8185 }
   ];
 
-  const spot = hotspots[Math.floor(Math.random() * hotspots.length)];
+  const zone = dangerZones[Math.floor(Math.random() * dangerZones.length)];
 
   return {
     category,
-    severity,
-    intensity,
-    radius,
-    lat: spot.lat + (Math.random() - 0.5) * 0.003,
-    lng: spot.lng + (Math.random() - 0.5) * 0.003,
-    source: `${sourceType} (${spot.name})`,
-    description: String(item.title || 'Live safety intelligence report'),
+    lat: zone.lat + (Math.random() - 0.5) * 0.002,
+    lng: zone.lng + (Math.random() - 0.5) * 0.002,
+    source: `${sourceType} • ${zone.name}`,
+    description: String(item.title || 'Live safety security observation'),
     url: String(item.link || 'https://www.hamilton.ca/')
   };
 }
 
 async function run() {
-  console.log("Executing live intelligence ingestion...");
+  console.log("Executing live threat intelligence sync...");
   let totalProcessed = 0;
 
   for (const feed of FEEDS) {
     try {
       const parsed = await feed.parser.parseURL(feed.url);
       for (const item of (parsed.items || []).slice(0, 15)) {
-        const intel = processLiveIntelligence(item, feed.sourceType);
+        const intel = processLiveThreats(item, feed.sourceType);
         if (!intel) continue;
 
         const docId = encodeURIComponent((item.link || item.guid || item.title) + '-' + Date.now());
@@ -113,9 +90,6 @@ async function run() {
           description: intel.description,
           lat: intel.lat,
           lng: intel.lng,
-          severity: intel.severity,
-          intensity: intel.intensity,
-          radius: intel.radius,
           url: intel.url,
           timestamp: admin.firestore.FieldValue.serverTimestamp(),
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -123,14 +97,14 @@ async function run() {
         });
 
         totalProcessed++;
-        console.log(`[Live Threat Mapped] ${intel.category}: ${intel.description}`);
+        console.log(`[Threat Mapped Successfully] (${intel.category.toUpperCase()}) ${intel.description}`);
       }
     } catch (err) {
       console.error(`Feed Error (${feed.url}):`, err.message);
     }
   }
 
-  console.log(`Ingestion complete. Total active live threats deployed: ${totalProcessed}`);
+  console.log(`Sync complete. Total active intelligence items pushed: ${totalProcessed}`);
 }
 
 run().catch(err => {
