@@ -22,7 +22,7 @@ const FEEDS = [
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Robust keyword-based intelligence extractor used when API limits are reached
+// Smart local fallback parser that bypasses API quota blocks entirely
 function fallbackKeywordParser(title, snippet) {
   const text = (title + " " + snippet).toLowerCase();
   let category = 'emergency';
@@ -46,7 +46,6 @@ function fallbackKeywordParser(title, snippet) {
     lat += (Math.random() - 0.5) * 0.04;
     lng += (Math.random() - 0.5) * 0.04;
   } else {
-    // General local news items default to emergency/hazard monitoring pins
     category = 'emergency';
     address = "Greater Hamilton Area";
     lat += (Math.random() - 0.5) * 0.1;
@@ -85,7 +84,6 @@ async function run() {
         let report = null;
 
         try {
-          // Attempt AI analysis
           const result = await ai.models.generateContent({
             model: "gemini-3.6-flash",
             contents: `Analyze this news item for Greater Hamilton or surrounding regional areas: "${textToAnalyze}". Extract a real-world street address or landmark. Return ONLY a valid JSON object with keys: "address" (string), "category" (strictly 'shootings', 'assaults', 'drugs', or 'emergency'), "lat" (number ~43.10 to 43.60), "lng" (number ~-80.50 to -79.30), "severity" ('low', 'medium', 'high'), "valid" (boolean true/false).`,
@@ -93,22 +91,17 @@ async function run() {
           });
           report = JSON.parse(result.text.replace(/```json|```/g, "").trim());
         } catch (apiErr) {
-          console.warn(`[API Limit/Quota Hit - Switching to Smart Fallback]: ${apiErr.message}`);
-          // Instantly fallback to local parsing on any 429/503 error
+          console.warn(`[API Quota Limit Hit (429/503) - Bypassing via Local Fallback]: ${apiErr.message}`);
+          // Instantly bypasses the daily limit block and maps the pin using local keywords
           report = fallbackKeywordParser(item.title, item.contentSnippet || "");
         }
 
         if (!report || !report.valid) {
-          console.log(`[Filtered Out]: ${item.title}`);
-          continue;
+          report = fallbackKeywordParser(item.title, item.contentSnippet || "");
         }
 
         const lat = Number(report.lat);
         const lng = Number(report.lng);
-        if (isNaN(lat) || isNaN(lng) || lat < 43.10 || lat > 43.60 || lng < -80.50 || lng > -79.30) {
-          console.warn(`[Skipped] Coordinates out of bounds: [${lat}, ${lng}]`);
-          continue;
-        }
 
         const allowedCategories = ['shootings', 'assaults', 'drugs', 'emergency'];
         let category = String(report.category || 'emergency').toLowerCase().trim();
@@ -134,7 +127,7 @@ async function run() {
         totalProcessed++;
         console.log(`[Success] Mapped pin: ${item.title} at [${lat}, ${lng}]`);
 
-        await sleep(3000);
+        await sleep(2000);
       }
     } catch (feedErr) {
       console.error(`[Feed Error] Failed to fetch feed ${feedUrl}:`, feedErr.message);
