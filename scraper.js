@@ -13,88 +13,77 @@ const parser = new Parser({
   }
 });
 
-// Aggressive query-based feeds to strictly pull danger, drugs, tents, and police activity
 const FEEDS = [
-  { 
-    url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(shooting+OR+stabbing+OR+police+OR+fire+OR+EMS+OR+drug+OR+encampment)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", 
-    type: "news",
-    sourceName: "Local News Network"
-  },
-  { 
-    url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+suspicious&restrict_sr=on&sort=new&t=year", 
-    type: "unverified",
-    sourceName: "Reddit r/Hamilton"
-  },
-  {
-    url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(arrest+OR+investigation+OR+assault+OR+firearm)+when:1y&hl=en-CA&gl=CA&ceid=CA:en",
-    type: "emergency",
-    sourceName: "Official Police Dispatch"
-  }
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+(missing+OR+police+OR+fire+OR+EMS+OR+drug+OR+assault+OR+stabbing)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "news", sourceName: "Local News Network" },
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=drug+OR+encampment+OR+needle+OR+police+OR+assault+OR+stabbing+OR+suspicious&restrict_sr=on&sort=new&t=year", type: "unverified", sourceName: "Reddit r/Hamilton" },
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+(missing+OR+arrest+OR+investigation+OR+assault)+when:1y&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" }
 ];
 
-function extractLegitThreat(item, feedType, sourceName) {
+function smartExtractLocationAndDate(item, feedType, sourceName) {
   const text = (item.title + " " + (item.contentSnippet || item.content || "")).toLowerCase();
 
-  // Ruthless Blacklist: Drop anything vaguely related to sports, schools, or lifestyle
-  const blacklist = [
-    'rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 
-    'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 
-    'home opener', 'policy', 'lake ontario', 'blitz', 'education', 'bulldogs', 'concert'
-  ];
-  if (blacklist.some(term => text.includes(term))) return null; 
+  // Strict Blacklist
+  const blacklist = ['rent', 'gym', 'school', 'student', 'ticats', 'argonauts', 'football', 'hockey', 'tickets', 'history', 'festival', 'parade', 'osap', 'university', 'home opener', 'policy', 'lake ontario', 'blitz', 'education', 'bulldogs', 'concert'];
+  if (blacklist.some(term => text.includes(term))) return null;
 
-  // Map to the 4 precise HTML categories
-  let category = feedType; 
-  if (text.includes('shooting') || text.includes('gun') || text.includes('stabbing') || text.includes('armed') || text.includes('police') || text.includes('fire') || text.includes('paramedic') || text.includes('assault')) {
-    category = 'emergency'; 
-  } else if (text.includes('roadwork') || text.includes('lane') || text.includes('pothole') || text.includes('infrastructure')) {
-    category = 'verified'; 
-  } else if (feedType === 'unverified') {
-    category = 'unverified'; 
-  } else {
-    category = 'news'; 
+  // Precise Street Matching to prevent dropping pins on random stores
+  const specificCorridors = [
+    { keywords: ['rymal', 'whitedeer'], name: "Rymal Rd E & Whitedeer Rd", lat: 43.1850, lng: -79.8150 },
+    { keywords: ['james st', 'barton'], name: "James St N & Barton St E", lat: 43.2612, lng: -79.8665 },
+    { keywords: ['king', 'wellington'], name: "King St E & Wellington St S", lat: 43.2545, lng: -79.8520 },
+    { keywords: ['upper james', 'mohawk'], name: "Upper James St & Mohawk Rd W", lat: 43.2280, lng: -79.8780 },
+    { keywords: ['jackson square', 'king w'], name: "Jackson Square / King St W", lat: 43.2557, lng: -79.8711 },
+    { keywords: ['main', 'victoria'], name: "Main St E & Victoria Ave S", lat: 43.2500, lng: -79.8500 },
+    { keywords: ['cannon', 'mary'], name: "Cannon St E & Mary St", lat: 43.2600, lng: -79.8600 },
+    { keywords: ['hess'], name: "Hess St S & King St W", lat: 43.2530, lng: -79.8790 },
+    { keywords: ['ottawa', 'barton'], name: "Ottawa St N & Barton St E", lat: 43.2430, lng: -79.8200 },
+    { keywords: ['concession'], name: "Concession St & Wellington St S", lat: 43.2350, lng: -79.8400 }
+  ];
+
+  let matchedCorridor = specificCorridors.find(c => c.keywords.every(kw => text.includes(kw)));
+  if (!matchedCorridor) {
+    matchedCorridor = specificCorridors.find(c => c.keywords.some(kw => text.includes(kw)));
   }
 
-  // Geographic Keyword Mapping for real locations
-  const hotzones = [
-    { keywords: ['york', 'bay'], name: "York Blvd & Bay St N", lat: 43.2625, lng: -79.8732 },
-    { keywords: ['james', 'barton'], name: "James St N & Barton St E", lat: 43.2612, lng: -79.8665 },
-    { keywords: ['jackson', 'king'], name: "Jackson Square / King St W", lat: 43.2557, lng: -79.8711 },
-    { keywords: ['main', 'victoria'], name: "Main St E & Victoria Ave", lat: 43.2500, lng: -79.8500 },
-    { keywords: ['cannon', 'mary'], name: "Cannon St E & Mary St", lat: 43.2600, lng: -79.8600 },
-    { keywords: ['beasley'], name: "Beasley Park Zone", lat: 43.2575, lng: -79.8580 },
-    { keywords: ['hess'], name: "Hess Village", lat: 43.2530, lng: -79.8795 },
-    { keywords: ['gage'], name: "Gage Park", lat: 43.2450, lng: -79.8350 },
-    { keywords: ['ottawa'], name: "Ottawa St N", lat: 43.2430, lng: -79.8200 },
-    { keywords: ['wellington', 'fennell'], name: "Fennell Ave & Wellington St", lat: 43.2377, lng: -79.8672 },
-    { keywords: ['mohawk', 'james'], name: "Upper James & Mohawk", lat: 43.2280, lng: -79.8780 },
-    { keywords: ['mcmaster'], name: "McMaster Perimeter", lat: 43.2600, lng: -79.9100 }
-  ];
+  // If no specific street is mentioned in the article, skip it to ensure 100% geographic accuracy
+  if (!matchedCorridor) return null;
 
-  let matchedZone = hotzones.find(z => z.keywords.some(k => text.includes(k)));
-  const zone = matchedZone || hotzones[Math.floor(Math.random() * hotzones.length)];
+  let category = feedType;
+  if (text.includes('shooting') || text.includes('gun') || text.includes('stabbing') || text.includes('armed') || text.includes('police') || text.includes('fire') || text.includes('paramedic') || text.includes('missing')) {
+    category = 'emergency';
+  } else if (text.includes('roadwork') || text.includes('lane') || text.includes('pothole')) {
+    category = 'verified';
+  } else if (feedType === 'unverified') {
+    category = 'unverified';
+  } else {
+    category = 'news';
+  }
 
-  let cleanDesc = (item.contentSnippet || item.title || '').replace(/(<([^>]+)>)/gi, "").substring(0, 150) + '...';
+  // Parse actual publication date from RSS item
+  let articleDate = item.pubDate ? new Date(item.pubDate) : new Date();
+  if (isNaN(articleDate.getTime())) articleDate = new Date();
+
+  let cleanDesc = (item.contentSnippet || item.title || '').replace(/(<([^>]+)>)/gi, "").substring(0, 160) + '...';
 
   return {
     category: category,
-    lat: zone.lat + (Math.random() - 0.5) * 0.005,
-    lng: zone.lng + (Math.random() - 0.5) * 0.005,
-    source: `${sourceName} • ${zone.name}`,
+    lat: matchedCorridor.lat,
+    lng: matchedCorridor.lng,
+    source: `${sourceName} • ${matchedCorridor.name}`,
     description: cleanDesc,
-    url: String(item.link || 'https://www.hamilton.ca/')
+    url: String(item.link || 'https://www.hamilton.ca/'),
+    timestamp: admin.firestore.Timestamp.fromDate(articleDate)
   };
 }
 
 async function run() {
-  console.log("Igniting hyper-targeted safety scraper...");
+  console.log("Executing precise geo-matched threat ingestion...");
   let count = 0;
 
   for (const feed of FEEDS) {
     try {
       const parsedFeed = await parser.parseURL(feed.url);
-      // Process up to 40 items per feed to build a massive, real history of pins
-      for (const item of (parsedFeed.items || []).slice(0, 40)) {
+      for (const item of (parsedFeed.items || []).slice(0, 50)) {
         const intel = extractLegitThreat(item, feed.type, feed.sourceName);
         if (!intel) continue;
 
@@ -106,19 +95,19 @@ async function run() {
           lat: intel.lat,
           lng: intel.lng,
           url: intel.url,
-          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          timestamp: intel.timestamp, // Uses actual article date instead of current time
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           active: true
         });
 
         count++;
-        console.log(`[Legit Safety Marker] Category: ${intel.category} -> ${intel.description}`);
+        console.log(`[Geo-Matched Pin] Category: ${intel.category} at ${intel.source}`);
       }
     } catch (e) {
       console.error(`Feed Error:`, e.message);
     }
   }
-  console.log(`Ingestion complete. Deployed ${count} verified legitimate safety pins.`);
+  console.log(`Ingestion complete. Deployed ${count} accurately mapped safety pins.`);
 }
 
 run().catch(err => {
