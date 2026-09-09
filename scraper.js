@@ -20,11 +20,32 @@ const FEEDS = [
   "https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews"
 ];
 
-// Helper function to pause execution and avoid rate limits (429 errors)
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Helper function to retry API calls if Google servers throw a 503 or temporary overload
+async function generateWithRetry(prompt, retries = 3, delay = 5000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const result = await ai.models.generateContent({
+        model: "gemini-3.6-flash",
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+      return result.text;
+    } catch (err) {
+      if ((err.status === 503 || err.status === 429) && i < retries - 1) {
+        console.warn(`[API Busy/Unavailable] Retrying in ${delay / 1000}s... (${i + 1}/${retries})`);
+        await sleep(delay);
+        delay *= 2; // Exponential backoff
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 async function run() {
-  console.log("Starting paced Greater Hamilton safety intelligence scraper...");
+  console.log("Starting resilient Greater Hamilton safety intelligence scraper...");
   let totalProcessed = 0;
 
   for (const feedUrl of FEEDS) {
@@ -32,8 +53,8 @@ async function run() {
       console.log(`Parsing feed: ${feedUrl}`);
       const feed = await parser.parseURL(feedUrl);
       
-      // Limited to 4 items per run to stay safely within free tier rate limits
-      for (const item of (feed.items || []).slice(0, 4)) {
+      // Increased to 8 items per run now that pacing is stable
+      for (const item of (feed.items || []).slice(0, 8)) {
         const docId = encodeURIComponent(item.link || item.guid || item.title);
         const docRef = db.collection("reports").doc(docId);
         
@@ -44,26 +65,20 @@ async function run() {
 
         const textToAnalyze = `${item.title}. ${item.contentSnippet || item.content || ""}`;
         
-        const prompt = `Analyze this news item for Greater Hamilton, Ontario (including Downtown, Stoney Creek, Ancaster, Dundas, Waterdown, Flamborough, or the Mountain): "${textToAnalyze}". 
-        Extract a precise real-world street address, intersection, or landmark within Greater Hamilton. 
-        Determine if it relates to public safety, crime, road work, transit incidents, or hazards. 
+        const prompt = `Analyze this news item for Greater Hamilton or surrounding regional areas (Niagara, Halton, Toronto, or Hamilton proper): "${textToAnalyze}". 
+        Extract a real-world street address, intersection, highway stretch, school zone, or landmark within or adjacent to Greater Hamilton. 
+        Broadly include public safety, crime, police traffic blitzes, road work, transit disruptions, hazards, or weather/flooding warnings. 
         Return ONLY a valid JSON object with these exact keys:
-        - "address": string (street location description)
+        - "address": string (street location or region description)
         - "category": string (strictly one of: 'shootings', 'assaults', 'drugs', 'emergency')
-        - "lat": number (precise latitude anywhere within Greater Hamilton bounds ~43.12 to 43.50)
-        - "lng": number (precise longitude anywhere within Greater Hamilton bounds ~-80.35 to -79.50)
+        - "lat": number (precise latitude within regional bounds ~43.12 to 43.50)
+        - "lng": number (precise longitude within regional bounds ~-80.35 to -79.50)
         - "severity": string (strictly one of: 'low', 'medium', 'high')
-        - "valid": boolean (true only if it is genuinely located in Greater Hamilton and pertains to safety, hazards, or incidents, false otherwise)`;
+        - "valid": boolean (true if it relates to safety, traffic enforcement, road work, hazards, or public alerts; false only for pure sports, entertainment, or irrelevant fluff)`;
 
         try {
-          const result = await ai.models.generateContent({
-            model: "gemini-3.6-flash",
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
-          });
-
-          const responseText = result.text.replace(/```json|```/g, "").trim();
-          const report = JSON.parse(responseText);
+          const responseText = await generateWithRetry(prompt);
+          const report = JSON.parse(responseText.replace(/```json|```/g, "").trim());
 
           if (!report.valid || typeof report.lat !== 'number' || typeof report.lng !== 'number') {
             console.log(`[AI Filtered Out]: ${item.title}`);
@@ -73,7 +88,7 @@ async function run() {
           const lat = Number(report.lat);
           const lng = Number(report.lng);
           if (isNaN(lat) || isNaN(lng) || lat < 43.12 || lat > 43.50 || lng < -80.35 || lng > -79.50) {
-            console.warn(`[Skipped] Coordinates out of Greater Hamilton bounds: [${lat}, ${lng}]`);
+            console.warn(`[Skipped] Coordinates out of bounds: [${lat}, ${lng}]`);
             continue;
           }
 
@@ -104,7 +119,7 @@ async function run() {
           console.warn(`[AI Parse Skip] Failed to parse item "${item.title}":`, parseErr.message);
         }
 
-        // Wait 12 seconds between each AI call to stay under the free tier 5-requests-per-minute limit
+        // 12-second delay between items
         console.log("Waiting 12 seconds to respect API rate limits...");
         await sleep(12000);
       }
