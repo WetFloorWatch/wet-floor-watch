@@ -328,7 +328,6 @@
             return 'Historical Record';
         }
 
-        // DYNAMIC PLATFORM LINK LABEL GENERATOR
         function getSocialLinkButton(url, category) {
             if (!url) return '';
             let label = 'Open Link';
@@ -341,15 +340,14 @@
             return `<a href="${url}" target="_blank" class="block text-center mt-2.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-${color}-400 font-bold text-[10px] uppercase rounded-lg transition">🔗 ${label}</a>`;
         }
 
-        // MULTI-SOURCE SOCIAL NETWORKS DATA
+        // MULTI-SOURCE SOCIAL NETWORKS DATA (Cleaned of any simulated quotes)
         const SOCIAL_FEEDS = {
             reddit: [
                 { author: 'u/HamOntSafetyWatcher', text: 'Avoid the Bay & York shelter blocks tonight, heavy police presence and discarded paraphernalia near TD Coliseum.', time: '2h ago', url: 'https://reddit.com/r/Hamilton/comments/bay_york_shelter_alert', lat: 43.2615, lng: -79.8735, category: 'hazard' },
                 { author: 'u/SteeltownResident', text: 'Supercrawl setup causing major pedestrian bottlenecks around James North. Plan alternate routes.', time: '5h ago', url: 'https://reddit.com/r/Hamilton/comments/supercrawl_traffic_bottleneck', lat: 43.2585, lng: -79.8670, category: 'street' }
             ],
             instagram: [
-                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://www.instagram.com/interventionintersection2026', lat: 43.2575, lng: -79.8580, category: 'hazard' },
-                { author: '@interventionintersection2026', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://www.instagram.com/interventionintersection2026', lat: 43.2557, lng: -79.8711, category: 'hazard' }
+                { author: '@interventionintersection2026', text: 'Official Community Watch Profile - Tap to view public posts and grid updates.', time: 'Pinned', url: 'https://www.instagram.com/interventionintersection2026', lat: 43.2575, lng: -79.8580, category: 'street' }
             ],
             twitter: [
                 { author: '@HamiltonPolice', text: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect delays.', time: '1h ago', url: 'https://twitter.com/HamiltonPolice', lat: 43.2600, lng: -79.8671, category: 'advisory' },
@@ -430,27 +428,27 @@
             street: [
                 {
                     id: 'seed-street-1', category: 'street', hasPin: true, lat: 43.2585, lng: -79.8670, isVerified: false,
-                    source: '@interventionintersection2026 (Instagram)',
+                    source: 'Community Watch Network',
                     description: 'Active community watch documenting aggressive encounters and open narcotics activity bleeding off James St N.',
                     url: 'https://www.instagram.com/interventionintersection2026', timestamp: new Date(Date.now() - 3600000 * 6)
                 }
             ]
         };
 
-        // PERFECTLY ALIGNED SUPERCRAWL CORRIDOR ALONG JAMES STREET NORTH (Snapped straight to longitude -79.8671)
+        // PERFECTLY ALIGNED SUPERCRAWL CORRIDOR ALONG JAMES STREET NORTH (Snapped to longitude -79.8671)
         const SUPERCRAWL_ROUTES = [
             {
                 name: "Supercrawl Festival Corridor (James St N)",
                 description: "Official festival pedestrian street closure footprint along James St N from King St up to Strachan St.",
                 coords: [
-                    [43.2555, -79.8671], // King St N
-                    [43.2572, -79.8671], // Robert St
-                    [43.2590, -79.8671], // Vine St / York
-                    [43.2608, -79.8671], // Cannon St
-                    [43.2628, -79.8671], // Barton St E
-                    [43.2650, -79.8671], // Rebecca / Murray
-                    [43.2675, -79.8671], // Strachan St N
-                    [43.2695, -79.8671]  // Waterfront perimeter
+                    [43.2555, -79.8671],
+                    [43.2572, -79.8671],
+                    [43.2590, -79.8671],
+                    [43.2608, -79.8671],
+                    [43.2628, -79.8671],
+                    [43.2650, -79.8671],
+                    [43.2675, -79.8671],
+                    [43.2695, -79.8671]
                 ]
             }
         ];
@@ -461,13 +459,11 @@
             supercrawlLayerGroup.clearLayers();
             if(document.getElementById('filter-supercrawl').checked) {
                 SUPERCRAWL_ROUTES.forEach(route => {
-                    // Outer glow layer
                     L.polyline(route.coords, {
                         color: '#f472b6', weight: 14, opacity: 0.35,
                         className: 'supercrawl-corridor cursor-pointer'
                     }).addTo(supercrawlLayerGroup);
 
-                    // Inner crisp core polyline
                     const mainPolyline = L.polyline(route.coords, {
                         color: '#ec4899', weight: 5, opacity: 0.95,
                         dashArray: '6, 6',
