@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
@@ -28,14 +27,14 @@
         }
         .leaflet-popup-content { margin: 12px; line-height: 1.5; }
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
-        .supercrawl-glow {
-            filter: drop-shadow(0 0 14px rgba(236,72,153,0.9));
-            animation: pulse-line 2s infinite;
+        .supercrawl-corridor {
+            filter: drop-shadow(0 0 8px rgba(236,72,153,0.7));
+            animation: pulse-corridor 3s infinite ease-in-out;
         }
-        @keyframes pulse-line {
-            0% { opacity: 0.6; stroke-width: 10; }
-            50% { opacity: 1; stroke-width: 16; }
-            100% { opacity: 0.6; stroke-width: 10; }
+        @keyframes pulse-corridor {
+            0% { opacity: 0.6; stroke-width: 6; }
+            50% { opacity: 0.95; stroke-width: 10; }
+            100% { opacity: 0.6; stroke-width: 6; }
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
@@ -119,7 +118,7 @@
                 </a>
             </div>
 
-            <!-- VERIFIED COMMUNITY PARTNER PROFILE CARD (Direct Instagram Link) -->
+            <!-- COMMUNITY WATCH PROFILE CARD (Direct Instagram Link) -->
             <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0">
                 <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="group flex items-center justify-between p-2.5 bg-slate-900 hover:bg-slate-800/90 border border-fuchsia-500/30 hover:border-fuchsia-400 rounded-xl transition shadow-sm">
                     <div class="flex items-center space-x-3">
@@ -129,7 +128,7 @@
                             </div>
                         </div>
                         <div>
-                            <span class="text-[9px] font-mono text-fuchsia-400 uppercase tracking-wider block font-bold">Verified Street Dispatch</span>
+                            <span class="text-[9px] font-mono text-fuchsia-400 uppercase tracking-wider block font-bold">Community Watch Feed</span>
                             <span class="text-xs font-bold text-slate-100 group-hover:text-fuchsia-300 transition">@interventionintersection2026</span>
                         </div>
                     </div>
@@ -218,7 +217,7 @@
         </main>
     </div>
 
-    <!-- BROADCAST REPORT MODAL (Verified Email Registration & Anti-Spam Moderation) -->
+    <!-- BROADCAST REPORT MODAL -->
     <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -241,7 +240,7 @@
                         <option value="hazard">Drug Hazard (Needles, Pipes, Spoons, Use)</option>
                         <option value="street">Social Intel / Suspicious Activity / Harassment</option>
                         <option value="advisory">Advisory / Traffic Notice</option>
-                        <option value="emergency">Emergency / Violent Incident</option>
+                        <option value="emergency">Emergency / Serious Incident</option>
                     </select>
                 </div>
                 <div class="space-y-1 relative">
@@ -384,7 +383,7 @@
         };
         switchSocialTab('reddit');
 
-        // HAMILTON SEED DATA (With accurate categories)
+        // HAMILTON SEED DATA
         const defaultSeedData = {
             emergency: [
                 {
@@ -438,18 +437,20 @@
             ]
         };
 
-        // PRECISELY ALIGNED SUPERCRAWL CORRIDOR DIRECTLY ALONG JAMES STREET NORTH (-79.8671)
+        // PERFECTLY ALIGNED SUPERCRAWL CORRIDOR ALONG JAMES STREET NORTH (Snapped straight to longitude -79.8671)
         const SUPERCRAWL_ROUTES = [
             {
                 name: "Supercrawl Festival Corridor (James St N)",
-                description: "Official festival street closure footprint along James St N from King St up to Strachan St. Pedestrian zone.",
+                description: "Official festival pedestrian street closure footprint along James St N from King St up to Strachan St.",
                 coords: [
-                    [43.2555, -79.8671], // King St N & James St N
-                    [43.2580, -79.8671], // Rebecca St block
-                    [43.2601, -79.8671], // Cannon St block
-                    [43.2630, -79.8671], // Barton St E intersection
-                    [43.2660, -79.8671], // Murray St block
-                    [43.2690, -79.8671]  // Strachan St N perimeter
+                    [43.2555, -79.8671], // King St N
+                    [43.2572, -79.8671], // Robert St
+                    [43.2590, -79.8671], // Vine St / York
+                    [43.2608, -79.8671], // Cannon St
+                    [43.2628, -79.8671], // Barton St E
+                    [43.2650, -79.8671], // Rebecca / Murray
+                    [43.2675, -79.8671], // Strachan St N
+                    [43.2695, -79.8671]  // Waterfront perimeter
                 ]
             }
         ];
@@ -460,15 +461,23 @@
             supercrawlLayerGroup.clearLayers();
             if(document.getElementById('filter-supercrawl').checked) {
                 SUPERCRAWL_ROUTES.forEach(route => {
-                    const polyline = L.polyline(route.coords, {
-                        color: '#ec4899', weight: 8, opacity: 0.9,
-                        className: 'supercrawl-glow cursor-pointer'
+                    // Outer glow layer
+                    L.polyline(route.coords, {
+                        color: '#f472b6', weight: 14, opacity: 0.35,
+                        className: 'supercrawl-corridor cursor-pointer'
+                    }).addTo(supercrawlLayerGroup);
+
+                    // Inner crisp core polyline
+                    const mainPolyline = L.polyline(route.coords, {
+                        color: '#ec4899', weight: 5, opacity: 0.95,
+                        dashArray: '6, 6',
+                        className: 'cursor-pointer'
                     }).addTo(supercrawlLayerGroup);
                     
-                    polyline.bindPopup(`
-                        <div class="font-sans min-w-[200px]">
-                            <span class="text-[9px] font-bold uppercase text-pink-400 tracking-wider">⚠️ Accurate Supercrawl Corridor (James St N)</span>
-                            <strong class="text-xs text-white block my-1">${route.name}</strong>
+                    mainPolyline.bindPopup(`
+                        <div class="font-sans min-w-[210px] space-y-1">
+                            <span class="text-[9px] font-bold uppercase text-pink-400 tracking-wider">✨ Supercrawl Pedestrian Corridor</span>
+                            <strong class="text-xs text-white block">${route.name}</strong>
                             <p class="text-[11px] text-slate-300">${route.description}</p>
                         </div>
                     `);
@@ -496,7 +505,7 @@
             };
 
             const configs = {
-                emergency: { color: 'red', label: 'Emergency / Violent Incident' },
+                emergency: { color: 'red', label: 'Emergency / Serious Incident' },
                 advisory: { color: 'sky', label: 'Advisory / Traffic Notice' },
                 hazard: { color: 'amber', label: 'Drug / Safety Hazard (Needles/Pipes)' },
                 street: { color: 'fuchsia', label: 'Social / Community Intel' }
@@ -708,5 +717,3 @@
     </script>
 </body>
 </html>
-
-```
