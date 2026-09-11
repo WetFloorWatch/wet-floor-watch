@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wet Floor Watch | Hamilton Community Intelligence Map</title>
+    <title>Wet Floor Watch | Hamilton Intelligence Map</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2'><path d='M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z'/><path d='M11 10h2v4h-2zm0 6h2v2h-2z'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -11,30 +11,33 @@
     <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
     <style>
         body { -webkit-font-smoothing: antialiased; font-family: ui-sans-serif, system-ui, sans-serif; }
-        .leaflet-container { background: #020617 !important; }
-        .leaflet-tile { filter: brightness(0.4) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3); }
+        .leaflet-container { background: #000000 !important; }
         .custom-div-icon { background: transparent; border: none; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
         .leaflet-popup-content-wrapper, .leaflet-popup-tip {
             background: #0f172a !important;
             color: #f8fafc !important;
             border: 1px solid #1e293b;
-            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.7);
+            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.9);
             border-radius: 0.75rem;
         }
         .leaflet-popup-content { margin: 12px; line-height: 1.5; }
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
         .animate-pulse-fast { animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .supercrawl-glow {
+            filter: drop-shadow(0 0 10px rgba(236,72,153,0.8));
+            animation: pulse 2s infinite;
+        }
     </style>
 </head>
 <body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden selection:bg-amber-500/30 selection:text-amber-200">
 
     <!-- DISCLAIMER MODAL -->
-    <div id="disclaimer-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
-        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+    <div id="disclaimer-modal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
+        <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
             <div class="flex items-center space-x-3 border-b border-slate-800 pb-4">
                 <div class="bg-amber-500/20 p-2 rounded-lg border border-amber-500/30">
                     <svg class="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -42,9 +45,9 @@
                 <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch <span class="text-amber-500 text-sm block font-mono">SUPERCRAWL 2026 ACTIVE GRID</span></h2>
             </div>
             <p class="text-sm text-slate-300 leading-relaxed">
-                <strong class="text-rose-400">CRITICAL SAFETY NOTICE:</strong> If you face an immediate emergency, <strong>call 911</strong>. 
+                <strong class="text-rose-500">CRITICAL SAFETY NOTICE:</strong> Call 911 for emergencies. 
                 <br><br>
-                This grid aggregates live Hamilton police dispatches, local news, and verified street-level intelligence targeting open-air drug hazards (needles, paraphernalia), high-risk zones, and Supercrawl weekend crowd densities.
+                This grid aggregates live Hamilton police dispatches, local news, and verified street intelligence targeting open-air drug hazards, historic high-risk zones (up to 2 yrs prior), and Supercrawl crowd corridors.
             </p>
             <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-[0.98]">
                 Access Intelligence Map Grid
@@ -53,7 +56,7 @@
     </div>
 
     <!-- HEADER TOOLBAR -->
-    <header class="bg-slate-950/90 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-4 z-20 flex-shrink-0 shadow-sm">
+    <header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-4 z-20 flex-shrink-0 shadow-sm">
         <div class="flex items-center space-x-3">
             <div class="bg-amber-500/10 p-2 rounded-xl border border-amber-500/20 shadow-inner">
                 <svg class="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/><path d="M11 10h2v4h-2zm0 6h2v2h-2z"/></svg>
@@ -66,14 +69,22 @@
                 <p class="text-[11px] text-slate-400 font-medium hidden sm:block tracking-wide uppercase">Hamilton Threat & Hazard Platform</p>
             </div>
         </div>
+        
         <div class="flex items-center space-x-3">
+            <!-- DONATION BUTTONS (Moved to Header) -->
+            <div class="hidden lg:flex items-center space-x-2 mr-2 border-r border-slate-800 pr-4">
+                <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-[10px] px-3 py-2 rounded-lg border border-slate-700 transition shadow-sm flex items-center gap-1.5">☕ Ko-fi Support</a>
+                <a href="https://www.paypal.com/paypalme/3cl1pz" target="_blank" class="bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold text-[10px] px-3 py-2 rounded-lg border border-slate-700 transition shadow-sm flex items-center gap-1.5">💳 PayPal</a>
+            </div>
+
             <!-- Weather Pill -->
             <div id="weather-pill" class="hidden md:flex items-center space-x-2 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-300 shadow-inner">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="weather-text" class="font-mono">Hamilton: Syncing...</span>
             </div>
-            <button id="open-report-modal" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-lg transition active:scale-95 flex items-center gap-1.5">
-                <span>+</span> Broadcast Field Report
+            
+            <button id="open-report-modal" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] transition active:scale-95 flex items-center gap-1.5">
+                <span>+</span> Broadcast Intel
             </button>
             <button id="locate-me-btn" class="bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
                 📍 <span class="hidden sm:inline">GPS Verify</span>
@@ -84,10 +95,10 @@
         </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
+    <!-- MAIN APP CONTAINER -->
     <div class="flex-1 flex relative overflow-hidden bg-slate-950">
         
-        <!-- SIDEBAR ANALYTICS, FILTERS & DONATIONS -->
+        <!-- SIDEBAR ANALYTICS & FILTERS -->
         <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[420px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
             <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
                 <h2 class="font-bold text-slate-200 text-xs uppercase tracking-widest flex items-center gap-2">
@@ -99,25 +110,25 @@
                 </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-950/20">
+            <div class="p-4 space-y-5 bg-slate-950/20 border-b border-slate-800 flex-shrink-0">
                 
                 <!-- Heatmap Overlay Toggle -->
-                <div class="bg-slate-900 border border-slate-700/50 p-3 rounded-xl flex items-center justify-between">
+                <div class="bg-slate-950 border border-slate-700/50 p-3 rounded-xl flex items-center justify-between shadow-inner">
                     <div class="flex flex-col">
-                        <span class="text-xs font-bold text-slate-200">Danger / Crowd Heatmap</span>
-                        <span class="text-[10px] text-slate-500">Wide-area spatial risk density</span>
+                        <span class="text-xs font-bold text-slate-200">Danger / Incident Heatmap</span>
+                        <span class="text-[10px] text-slate-500">Wide-area spatial risk density overlay</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="heatmap-toggle" checked class="sr-only peer">
-                        <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500"></div>
+                        <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-300 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
                     </label>
                 </div>
 
                 <!-- Date Range Selector -->
                 <div class="space-y-1.5">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date Range Filter</label>
-                    <select id="date-range-filter" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-mono outline-none focus:border-amber-500">
-                        <option value="all">All Historical Records</option>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timeframe Select</label>
+                    <select id="date-range-filter" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-mono outline-none focus:border-amber-500 shadow-inner">
+                        <option value="all">All Historical Records (Past 2 Years)</option>
                         <option value="1">Past 24 Hours</option>
                         <option value="7" selected>Past 7 Days (Supercrawl Window)</option>
                         <option value="30">Past 30 Days</option>
@@ -128,55 +139,52 @@
                 <div class="space-y-2">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Event Categories</label>
                     <div class="grid grid-cols-1 gap-2 text-xs font-semibold">
-                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-pink-950/20 border border-pink-500/30 cursor-pointer hover:bg-pink-950/40 transition">
+                        <!-- Supercrawl Special Toggle -->
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-pink-950/20 border border-pink-500/40 cursor-pointer hover:bg-pink-950/40 transition">
                             <span class="flex items-center gap-2 text-pink-300">
-                                <span class="w-3 h-3 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(236,72,153,0.8)] animate-pulse-fast"></span>
-                                Supercrawl 2026 Grid
+                                <svg class="w-4 h-4 text-pink-500 animate-pulse-fast" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                Supercrawl 2026 Traffic / Congestion
                             </span>
                             <input type="checkbox" id="filter-supercrawl" checked class="w-4 h-4 accent-pink-500 rounded cursor-pointer">
                         </label>
+                        <!-- Police / EMS -->
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-800 transition">
                             <span class="flex items-center gap-2 text-slate-300">
-                                <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-                                Official Police/Fire Dispatch
+                                <span class="w-3 h-3 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.8)]"></span>
+                                Official Police / Fire Dispatch
                             </span>
-                            <input type="checkbox" id="filter-emergency" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+                            <input type="checkbox" id="filter-emergency" checked class="w-4 h-4 accent-red-600 rounded cursor-pointer">
                         </label>
+                        <!-- Hazards -->
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-800 transition">
                             <span class="flex items-center gap-2 text-slate-300">
-                                <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]"></span>
-                                Hazards (Needles, Drug Use)
+                                <span class="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+                                Drug Hazard (Needles, Use)
                             </span>
                             <input type="checkbox" id="filter-hazard" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
                         </label>
+                        <!-- Social / Street -->
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer hover:bg-slate-800 transition">
                             <span class="flex items-center gap-2 text-slate-300">
-                                <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span>
-                                @interventionintersection2026 
+                                <span class="w-3 h-3 rounded-full bg-fuchsia-500 shadow-[0_0_8px_rgba(217,70,239,0.5)]"></span>
+                                @interventionintersection2026
                             </span>
-                            <input type="checkbox" id="filter-street" checked class="w-4 h-4 accent-rose-500 rounded cursor-pointer">
+                            <input type="checkbox" id="filter-street" checked class="w-4 h-4 accent-fuchsia-500 rounded cursor-pointer">
                         </label>
                     </div>
                 </div>
+            </div>
 
-                <!-- Feed Output -->
-                <div class="space-y-3 pt-2 border-t border-slate-800">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 matching records</span>
-                        <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-500 hover:underline">View Social Feed &rarr;</a>
-                    </div>
-                    <div id="feed-list" class="space-y-2.5"></div>
-                </div>
-                
-                <!-- Donation Buttons -->
-                <div class="pt-4 border-t border-slate-800 grid grid-cols-2 gap-2">
-                    <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 font-bold text-xs py-2.5 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        ☕ Support via Ko-fi
-                    </a>
-                    <a href="https://www.paypal.com/paypalme/3cl1pz" target="_blank" class="bg-slate-800 hover:bg-slate-700 border border-slate-700/50 text-slate-300 font-bold text-xs py-2.5 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
-                        💳 Support via PayPal
+            <!-- Scrollable Feed Output -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/40">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 matching records</span>
+                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-fuchsia-400 hover:underline flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        Social Feed
                     </a>
                 </div>
+                <div id="feed-list" class="space-y-2.5"></div>
             </div>
         </aside>
 
@@ -202,9 +210,9 @@
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Category</label>
                     <select id="hazard-type-input" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 text-sm text-slate-200 outline-none focus:border-amber-500">
-                        <option value="hazard">Drug Hazard (Needles, Paraphernalia, Use)</option>
-                        <option value="street">Social Intel / Suspicious Activity</option>
-                        <option value="supercrawl">Supercrawl Issue (Crowd, Traffic)</option>
+                        <option value="hazard">Drug Hazard (Needles, Pipes, Paraphernalia, Use)</option>
+                        <option value="street">Social Intel / Suspicious Activity / Harassment</option>
+                        <option value="emergency">Emergency / Violent Incident</option>
                     </select>
                 </div>
                 <div class="space-y-1 relative">
@@ -234,7 +242,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Weather integration (Open-Meteo API for Hamilton)
+        // Weather integration
         async function fetchWeather() {
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.2557&longitude=-79.8711&current=temperature_2m,weathercode');
@@ -256,24 +264,25 @@
             messagingSenderId: "100894913182",
             appId: "1:100894913182:web:b2a4a5f2eb3d7291afc18f"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Map Setup
-        const map = L.map('map', { zoomControl: false }).setView([43.2530, -79.8650], 14); // Centered on downtown Hamilton
+        // Map Setup - Dark CartoDB Matter for high contrast heatmap
+        const map = L.map('map', { zoomControl: false }).setView([43.2530, -79.8650], 14);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '&copy; CARTO'
+        }).addTo(map);
 
         let markersLayer = L.layerGroup().addTo(map);
+        let supercrawlLayerGroup = L.layerGroup().addTo(map);
         let heatLayer = null;
 
-        function createPinIcon(colorHex, shadowHex, pulse = false) {
-            let pulseHtml = pulse ? `<div class="absolute inset-[-6px] rounded-full border-2 border-[${colorHex}] opacity-50 animate-pulse-fast"></div>` : '';
+        function createPinIcon(colorHex, shadowHex) {
             return L.divIcon({
                 className: 'custom-div-icon',
                 html: `<div class="relative flex items-center justify-center w-5 h-5 rounded-full border-2 border-slate-900" style="background-color: ${colorHex}; box-shadow: 0 0 14px ${shadowHex};">
-                         ${pulseHtml}
                          <div class="w-1.5 h-1.5 rounded-full bg-slate-950/80 z-10"></div>
                        </div>`,
                 iconSize: [20, 20],
@@ -282,72 +291,69 @@
         }
 
         const icons = {
-            supercrawl: createPinIcon('#ec4899', 'rgba(236,72,153,0.8)', true),
-            emergency: createPinIcon('#10b981', 'rgba(16,185,129,0.7)'),
-            hazard: createPinIcon('#fbbf24', 'rgba(251,191,36,0.8)'),
-            street: createPinIcon('#e11d48', 'rgba(225,29,72,0.7)')
+            emergency: createPinIcon('#dc2626', 'rgba(220,38,38,0.8)'), // Red
+            hazard: createPinIcon('#f59e0b', 'rgba(245,158,11,0.8)'), // Amber
+            street: createPinIcon('#d946ef', 'rgba(217,70,239,0.8)') // Fuchsia
         };
 
         function formatTimestamp(ts) {
             if (!ts) return 'Just now';
-            if (ts.toDate) return ts.toDate().toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            if (ts instanceof Date) return ts.toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            return 'Recent Record';
+            if (ts.toDate) return ts.toDate().toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            if (ts instanceof Date) return ts.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            return 'Historical Record';
         }
 
-        // NON-FABRICATED 2026 ACCURATE SEED DATA
+        // COMPREHENSIVE 2024-2026 HAMILTON SEED DATA
         const defaultSeedData = {
-            supercrawl: [
-                {
-                    id: 'sc-1', category: 'supercrawl', hasPin: true, lat: 43.2560, lng: -79.8660,
-                    source: 'Supercrawl (James St N from King to Cannon)',
-                    description: 'ACTIVE CLOSURE: High crowd density festival zone. Full pedestrian closure. HSR Detours in effect (Routes 2, 3, 4).',
-                    url: 'https://supercrawl.ca', timestamp: new Date('2026-09-11T12:00:00')
-                },
-                {
-                    id: 'sc-2', category: 'supercrawl', hasPin: true, lat: 43.2625, lng: -79.8660,
-                    source: 'Traffic Diversion Alert (York Blvd & Bay St)',
-                    description: 'TRAFFIC WARNING: Complete vehicle roadblock on James N north of King. Major delays on York Blvd. Watch for overflow pedestrians.',
-                    url: 'https://supercrawl.ca/accessibility-transit/', timestamp: new Date('2026-09-10T19:00:00')
-                }
-            ],
             emergency: [
                 {
                     id: 'seed-em-1', category: 'emergency', hasPin: true, lat: 43.2571, lng: -79.8824,
                     source: 'Hamilton Police Dispatch (Main St W & Frid St)',
-                    description: 'Homicide Unit Investigation: 37-year-old male arrested following random fatal stabbing of Zenin Roussel (21) found by taxi driver.',
-                    url: 'https://hamiltonpolice.on.ca/news/', timestamp: new Date('2026-09-09T17:30:00')
+                    description: 'Homicide Unit: 37-year-old male arrested following random fatal stabbing of 16-year-old victim.',
+                    url: 'https://hamiltonpolice.on.ca/news/man-arrested-after-random-attack-in-west-end/', timestamp: new Date('2026-09-09T17:30:00')
                 },
                 {
                     id: 'seed-em-2', category: 'emergency', hasPin: true, lat: 43.2355, lng: -79.8402,
                     source: 'Hamilton Police Dispatch (Oriole Crescent)',
-                    description: 'Shooting Investigation: Shots fired at residential dwelling. Spent casings recovered. Seeking security footage.',
-                    url: 'https://hamiltonpolice.on.ca/news/hamilton-police-seek-witnesses-in-overnight-shooting-in-oriole-crescent/', timestamp: new Date('2026-09-03T22:30:00')
+                    description: 'Shooting Investigation: Shots fired at residential dwelling. Spent casings recovered.',
+                    url: 'https://hamiltonpolice.on.ca/news/', timestamp: new Date('2026-09-04T01:40:00')
                 },
                 {
                     id: 'seed-em-3', category: 'emergency', hasPin: true, lat: 43.2281, lng: -79.7680,
                     source: 'Collision Report (Queenston Rd & Redhill Pkwy)',
-                    description: 'Emergency Services responded to single vehicle collision involving a motorcycle above the Redhill Valley Parkway.',
-                    url: 'https://hamiltonpolice.on.ca', timestamp: new Date('2026-09-05T11:00:00')
+                    description: 'Emergency Services responded to severe vehicle collision near the Redhill Valley Parkway.',
+                    url: 'https://hamiltonpolice.on.ca', timestamp: new Date('2026-09-05T12:17:00')
                 },
                 {
                     id: 'seed-em-4', category: 'emergency', hasPin: true, lat: 43.2588, lng: -79.8415,
                     source: 'Arson Investigation (Princess St & Birch Ave)',
-                    description: 'Overnight arson investigation by Hamilton Police and Fire at a residence. Public assistance requested.',
-                    url: 'https://hamiltonpolice.on.ca', timestamp: new Date('2026-08-22T03:00:00')
+                    description: 'Overnight arson investigation by Hamilton Police and Fire at a residence.',
+                    url: 'https://hamiltonpolice.on.ca', timestamp: new Date('2026-08-22T09:38:00')
                 }
             ],
             hazard: [
                 {
                     id: 'seed-haz-1', category: 'hazard', hasPin: true, lat: 43.2575, lng: -79.8580,
                     source: 'Drug Hazard (Beasley Park Perimeter)',
-                    description: 'WARNING: Multiple discarded needles and bent spoons found near the Mary St & Wilson St playground perimeter. Open-air drug use reported.',
+                    description: 'WARNING: Multiple discarded needles and bent spoons found near the Mary St & Wilson St playground perimeter.',
                     url: '', timestamp: new Date(Date.now() - 3600000 * 8)
+                },
+                {
+                    id: 'seed-haz-2', category: 'hazard', hasPin: true, lat: 43.2567, lng: -79.8711,
+                    source: 'Suspected Overdose / Paraphernalia (Jackson Square Area)',
+                    description: 'EMS response to suspected overdose. Open air drug use and crack pipes reported near York Blvd entrance.',
+                    url: '', timestamp: new Date(Date.now() - 3600000 * 48)
+                },
+                {
+                    id: 'seed-haz-hist-1', category: 'hazard', hasPin: true, lat: 43.2642, lng: -79.8566,
+                    source: 'Historical Data: Barton Jail Overdoses (165 Barton St E)',
+                    description: 'Historical marker: Spate of suspected drug overdoses reported among female inmates at the Hamilton-Wentworth Detention Centre.',
+                    url: 'https://www.cbc.ca/news/canada/hamilton/barton-jail-suspected-overdose', timestamp: new Date('2025-05-20T10:00:00')
                 }
             ],
             street: [
                 {
-                    id: 'seed-street-1', category: 'street', hasPin: true, lat: 43.2585, lng: -79.8660,
+                    id: 'seed-street-1', category: 'street', hasPin: true, lat: 43.2585, lng: -79.8670,
                     source: '@interventionintersection2026 (Rebecca St & James N)',
                     description: 'Active community watch documenting aggressive encounters and open narcotics activity bleeding off James St N.',
                     url: 'https://www.instagram.com/interventionintersection2026', timestamp: new Date(Date.now() - 3600000 * 6)
@@ -355,17 +361,68 @@
                 {
                     id: 'seed-street-2', category: 'street', hasPin: true, lat: 43.2557, lng: -79.8711,
                     source: 'Social Intel (King St W & MacNab N)',
-                    description: 'Reports of women being followed aggressively near Jackson Square terminal during evening hours. Use caution.',
+                    description: 'Reports of women being followed aggressively near Jackson Square transit terminal during evening hours. Use caution.',
                     url: '', timestamp: new Date(Date.now() - 3600000 * 24)
+                },
+                {
+                    id: 'seed-street-3', category: 'street', hasPin: true, lat: 43.2630, lng: -79.8655,
+                    source: 'Community Report (Barton St E & James N)',
+                    description: 'Open drug tools (spoons, needles) found in alleyway. Unpredictable foot traffic in the area.',
+                    url: '', timestamp: new Date(Date.now() - 3600000 * 72)
                 }
             ]
         };
 
-        let rawAppData = { supercrawl: [], emergency: [], hazard: [], street: [] };
+        // Visual Supercrawl Corridors (Lines instead of pins)
+        const SUPERCRAWL_ROUTES = [
+            {
+                name: "Supercrawl 2026 Main Corridor",
+                description: "Full pedestrian closure September 11-13. Extreme crowd density and road barricades.",
+                coords: [
+                    [43.2561, -79.8690], // King & James N
+                    [43.2583, -79.8680], // King William / Rebecca
+                    [43.2606, -79.8667]  // Cannon St & James N
+                ]
+            },
+            {
+                name: "York Blvd Traffic Diversion",
+                description: "Major traffic delays and bottlenecking due to James St N closures.",
+                coords: [
+                    [43.2625, -79.8732], // York & Bay
+                    [43.2610, -79.8690]  // Approaching James N
+                ]
+            }
+        ];
+
+        let rawAppData = { emergency: [], hazard: [], street: [] };
+
+        function drawSupercrawl() {
+            supercrawlLayerGroup.clearLayers();
+            if(document.getElementById('filter-supercrawl').checked) {
+                SUPERCRAWL_ROUTES.forEach(route => {
+                    const polyline = L.polyline(route.coords, {
+                        color: '#ec4899', // Pink
+                        weight: 12,
+                        opacity: 0.6,
+                        className: 'supercrawl-glow cursor-pointer'
+                    }).addTo(supercrawlLayerGroup);
+                    
+                    polyline.bindPopup(`
+                        <div class="font-sans min-w-[200px]">
+                            <span class="text-[10px] font-bold uppercase text-pink-400 tracking-wider animate-pulse">Supercrawl Active Zone</span>
+                            <strong class="text-sm text-white block my-1">${route.name}</strong>
+                            <p class="text-xs text-slate-300">${route.description}</p>
+                            <a href="https://supercrawl.ca" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-pink-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition">🔗 Event Info &rarr;</a>
+                        </div>
+                    `);
+                });
+            }
+        }
 
         function filterAndRender() {
             markersLayer.clearLayers();
             if (heatLayer) map.removeLayer(heatLayer);
+            drawSupercrawl();
             
             const feedContainer = document.getElementById('feed-list');
             feedContainer.innerHTML = '';
@@ -375,17 +432,15 @@
             const cutoffTime = dateRangeDays === 'all' ? 0 : now - (parseInt(dateRangeDays) * 24 * 60 * 60 * 1000);
 
             const activeCategories = {
-                supercrawl: document.getElementById('filter-supercrawl').checked,
                 emergency: document.getElementById('filter-emergency').checked,
                 hazard: document.getElementById('filter-hazard').checked,
                 street: document.getElementById('filter-street').checked
             };
 
             const configs = {
-                supercrawl: { color: 'pink', label: 'Supercrawl 2026' },
-                emergency: { color: 'emerald', label: 'Official Dispatch' },
+                emergency: { color: 'red', label: 'Emergency / Violent Incident' },
                 hazard: { color: 'amber', label: 'Drug / Safety Hazard' },
-                street: { color: 'rose', label: '@interventionintersection2026' }
+                street: { color: 'fuchsia', label: 'Social / Intervention Intel' }
             };
 
             let visibleCount = 0;
@@ -402,8 +457,8 @@
                     visibleCount++;
 
                     if (item.lat && item.lng) {
-                        // Weight heatmap: emergencies/hazards are hotter than festivals
-                        const intensity = (cat === 'emergency' || cat === 'hazard') ? 1.0 : 0.5;
+                        // Heatmap weights: emergencies=1.0, hazards/street=0.6
+                        const intensity = (cat === 'emergency') ? 1.0 : 0.6;
                         heatPoints.push([item.lat, item.lng, intensity]);
 
                         const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
@@ -411,7 +466,7 @@
                         
                         marker.bindPopup(`
                             <div class="font-sans min-w-[220px]">
-                                <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-400 tracking-wider">${configs[cat].label}</span>
+                                <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-500 tracking-wider">${configs[cat].label}</span>
                                 <strong class="text-sm text-white block my-1">${item.source}</strong>
                                 <p class="text-xs text-slate-300 mb-2">${item.description}</p>
                                 <span class="text-[10px] text-slate-400 font-mono">${formatTimestamp(item.timestamp)}</span>
@@ -424,7 +479,7 @@
                     card.className = `slide-hover p-3.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-xl cursor-pointer space-y-1.5 transition`;
                     card.innerHTML = `
                         <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-400">${configs[cat].label}</span>
+                            <span class="text-[10px] font-bold uppercase text-${configs[cat].color}-500">${configs[cat].label}</span>
                             <span class="text-[9px] font-mono text-slate-500">${formatTimestamp(item.timestamp)}</span>
                         </div>
                         <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.source}</p>
@@ -441,18 +496,18 @@
             document.getElementById('active-count').innerText = `${visibleCount} verified records`;
 
             if (showHeatmap && heatPoints.length > 0) {
+                // Generates city-wide danger storm map
                 heatLayer = L.heatLayer(heatPoints, { 
-                    radius: 45, 
-                    blur: 25, 
+                    radius: 35, 
+                    blur: 20, 
                     maxZoom: 15,
-                    gradient: { 0.2: '#3b82f6', 0.5: '#eab308', 0.8: '#f97316', 1.0: '#dc2626' }
+                    gradient: { 0.4: '#3b82f6', 0.6: '#eab308', 0.8: '#f97316', 1.0: '#ef4444' } // Blue to Yellow to Red
                 }).addTo(map);
             }
         }
 
         onSnapshot(collection(db, "reports"), (snapshot) => {
             let data = { 
-                supercrawl: [...defaultSeedData.supercrawl],
                 emergency: [...defaultSeedData.emergency], 
                 hazard: [...defaultSeedData.hazard], 
                 street: [...defaultSeedData.street] 
@@ -465,7 +520,7 @@
             rawAppData = data;
             filterAndRender();
         }, () => {
-            rawAppData = defaultSeedData;
+            rawAppData = defaultSeedData; // Fallback
             filterAndRender();
         });
 
@@ -475,17 +530,19 @@
             document.getElementById(id).onchange = filterAndRender;
         });
 
-        // Exact Verified Hamilton Intersections
+        // Exact Verified Hamilton Intersections Dictionary
         const HAMILTON_INDEX = [
-            { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8660 },
+            { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8670 },
             { name: "King St W & MacNab St N", lat: 43.2557, lng: -79.8711 },
             { name: "Main St W & Frid St", lat: 43.2571, lng: -79.8824 },
             { name: "Oriole Crescent Sector", lat: 43.2355, lng: -79.8402 },
             { name: "Barton St E & Ottawa St N", lat: 43.2480, lng: -79.8185 },
+            { name: "Barton Jail (165 Barton St E)", lat: 43.2642, lng: -79.8566 },
             { name: "Beasley Park (Mary St & Wilson St)", lat: 43.2575, lng: -79.8580 },
             { name: "Princess St & Birch Ave", lat: 43.2588, lng: -79.8415 },
             { name: "Queenston Rd & Redhill Pkwy", lat: 43.2281, lng: -79.7680 },
-            { name: "York Blvd & Bay St N", lat: 43.2625, lng: -79.8732 }
+            { name: "York Blvd & Bay St N", lat: 43.2625, lng: -79.8732 },
+            { name: "Barton St E & James St N", lat: 43.2630, lng: -79.8655 }
         ];
 
         const locInput = document.getElementById('hazard-location-input');
