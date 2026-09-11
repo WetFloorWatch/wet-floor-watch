@@ -27,7 +27,6 @@
         }
         .leaflet-popup-content { margin: 12px; line-height: 1.5; }
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
-        .animate-pulse-fast { animation: pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .supercrawl-glow {
             filter: drop-shadow(0 0 14px rgba(236,72,153,0.9));
             animation: pulse-line 2s infinite;
@@ -57,7 +56,7 @@
             <div class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
                 <p><strong class="text-rose-400">LIABILITY WAIVER & APPROXIMATE DATA NOTICE:</strong> All map pins, hazard zones, heatmaps, and social feed aggregates displayed on this application are <strong class="text-white">APPROXIMATE AND ESTIMATED</strong> coordinates gathered from crowdsourced reports, public police dispatches, and multi-source social networks. They do not constitute certified exact legal surveys or official municipal guarantees.</p>
                 
-                <p><strong class="text-amber-400">ACCOUNT & MODERATION POLICY:</strong> To prevent spam, false reporting, hate speech, racism, and profanity, a verified email address is strictly required to broadcast field reports. All submissions are automatically filtered against a strict profanity and hate speech blacklist.</p>
+                <p><strong class="text-amber-400">VERIFIED REGISTRATION & MODERATION POLICY:</strong> To prevent spam, false reporting, hate speech, racism, and profanity, a verified email registration address is strictly required to broadcast field reports. Submissions pass through strict automated filters.</p>
                 
                 <p><strong class="text-cyan-400">EMERGENCY NOTICE:</strong> This tool is strictly for community hazard awareness (needles, paraphernalia, drug use, crime tracking, and Supercrawl congestion). If you are witnessing an immediate violent crime or medical overdose, <strong class="text-rose-400">CALL 911 IMMEDIATELY</strong>.</p>
             </div>
@@ -119,23 +118,24 @@
                 </a>
             </div>
 
-            <!-- DEDICATED @interventionintersection2026 LIVE FEED WIDGET -->
-            <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0 space-y-2">
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px]">
-                            <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
-                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            <!-- VERIFIED COMMUNITY PARTNER PROFILE CARD (Direct Instagram Link & Creative Title) -->
+            <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0">
+                <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="group flex items-center justify-between p-2.5 bg-slate-900 hover:bg-slate-800/90 border border-fuchsia-500/30 hover:border-fuchsia-400 rounded-xl transition shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px] flex-shrink-0">
+                            <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                             </div>
                         </div>
-                        <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-xs font-bold text-slate-200 hover:text-fuchsia-400 transition">@interventionintersection2026</a>
+                        <div>
+                            <span class="text-[9px] font-mono text-fuchsia-400 uppercase tracking-wider block font-bold">Verified Street Dispatch</span>
+                            <span class="text-xs font-bold text-slate-100 group-hover:text-fuchsia-300 transition">@interventionintersection2026</span>
+                        </div>
                     </div>
-                    <span class="text-[8px] uppercase tracking-widest bg-fuchsia-500/20 text-fuchsia-300 px-1.5 py-0.5 rounded border border-fuchsia-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Live Feed</span>
-                </div>
-                <!-- DAN'S ACTUAL POSTS FEED CONTAINER -->
-                <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" id="dan-posts-container">
-                    <!-- Populated instantly via script -->
-                </div>
+                    <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/30 flex items-center gap-1">
+                        Profile ↗
+                    </span>
+                </a>
             </div>
 
             <!-- MULTI-SOURCE SOCIAL NETWORKS TABS -->
@@ -216,7 +216,7 @@
         </main>
     </div>
 
-    <!-- BROADCAST REPORT MODAL -->
+    <!-- BROADCAST REPORT MODAL (Verified Email Registration & Anti-Spam Moderation) -->
     <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -224,13 +224,13 @@
                 <button id="close-report-modal" class="text-slate-400 hover:text-white text-lg font-bold cursor-pointer">✕</button>
             </div>
             
-            <div class="bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-xl text-[11px] text-amber-300 leading-tight">
-                🔒 <strong>Account Required:</strong> A valid email is mandatory to pin events and prevent spam, hate speech, or false reports. Locations are estimated.
+            <div class="bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-xl text-[11px] text-amber-300 leading-tight space-y-1">
+                🔒 <strong>Verified Registration Policy:</strong> To prevent spam, false reporting, hate speech, and profanity, a registered email address is strictly required to broadcast map pins. Submissions are screened automatically.
             </div>
 
             <form id="hazard-form" class="space-y-3 relative">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Your Verified Email *</label>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Registered Email Address *</label>
                     <input type="email" id="user-email-input" placeholder="e.g. user@domain.com" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 font-mono outline-none focus:border-amber-500" required>
                 </div>
                 <div class="space-y-1">
@@ -325,27 +325,6 @@
             return 'Historical Record';
         }
 
-        // DAN'S LIVE POSTS FEED (Guaranteed direct post permalinks, immune to external fetch dropouts)
-        const DAN_POSTS = [
-            { title: "⚠️ James N Harassment Log", date: "Sep 11", url: "https://www.instagram.com/p/DG_DanPost1/" },
-            { title: "💉 Beasley Park Needles Sweep", date: "Sep 10", url: "https://www.instagram.com/p/DG_DanPost2/" },
-            { title: "🚨 Jackson Sq Open Drug Use", date: "Sep 08", url: "https://www.instagram.com/p/DG_DanPost3/" }
-        ];
-
-        function renderDanPosts() {
-            const container = document.getElementById('dan-posts-container');
-            container.innerHTML = DAN_POSTS.map(post => `
-                <a href="${post.url}" target="_blank" class="min-w-[115px] h-[65px] bg-slate-900 rounded-lg p-1.5 flex flex-col justify-between border border-fuchsia-500/30 hover:border-fuchsia-400 transition flex-shrink-0 group">
-                    <span class="text-[8px] font-mono text-fuchsia-300 flex justify-between items-center">
-                        <span>${post.date}</span>
-                        <span class="text-amber-400 opacity-0 group-hover:opacity-100 transition">🔗 Post</span>
-                    </span>
-                    <span class="text-[9px] font-bold text-slate-200 leading-tight">${post.title}</span>
-                </a>
-            `).join('');
-        }
-        renderDanPosts();
-
         // MULTI-SOURCE SOCIAL NETWORKS DATA
         const SOCIAL_FEEDS = {
             reddit: [
@@ -353,8 +332,8 @@
                 { author: 'u/SteeltownResident', text: 'Supercrawl setup causing major pedestrian bottlenecks around James North. Plan alternate routes.', time: '5h ago', url: 'https://reddit.com/r/Hamilton/comments/supercrawl_traffic_bottleneck', lat: 43.2585, lng: -79.8670, category: 'street' }
             ],
             instagram: [
-                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://www.instagram.com/p/DG_DanPost2/', lat: 43.2575, lng: -79.8580, category: 'hazard' },
-                { author: '@interventionintersection2026', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://www.instagram.com/p/DG_DanPost3/', lat: 43.2557, lng: -79.8711, category: 'hazard' }
+                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://www.instagram.com/interventionintersection2026', lat: 43.2575, lng: -79.8580, category: 'hazard' },
+                { author: '@interventionintersection2026', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://www.instagram.com/interventionintersection2026', lat: 43.2557, lng: -79.8711, category: 'hazard' }
             ],
             twitter: [
                 { author: '@HamiltonPolice', text: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect delays.', time: '1h ago', url: 'https://twitter.com/HamiltonPolice', lat: 43.2600, lng: -79.8675, category: 'emergency' },
@@ -380,7 +359,7 @@
                 <a href="${post.url}" target="_blank" class="block p-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition space-y-1">
                     <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
                         <strong class="text-slate-300">${post.author}</strong>
-                        <span class="text-amber-400">🔗 Direct Post Link</span>
+                        <span class="text-amber-400">🔗 Direct Profile Link</span>
                     </div>
                     <p class="text-xs text-slate-200 leading-tight">${post.text}</p>
                 </a>
@@ -540,7 +519,7 @@
                         heatPoints.push([item.lat, item.lng, intensity]);
 
                         const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
-                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-2.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-${configs[cat].color}-400 font-bold text-[10px] uppercase rounded-lg transition">🔗 Open Direct Post Link</a>` : '';
+                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-2.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-${configs[cat].color}-400 font-bold text-[10px] uppercase rounded-lg transition">🔗 Open Instagram Profile</a>` : '';
                         
                         marker.bindPopup(`
                             <div class="font-sans min-w-[220px] space-y-1">
@@ -567,7 +546,7 @@
                         <p class="text-[11px] text-slate-400 line-clamp-2">${item.description}</p>
                         <div class="flex justify-between items-center pt-1">
                             <span class="text-[8px] text-amber-400/80 font-mono">⚠️ Approximate Coordinates</span>
-                            ${item.url ? `<a href="${item.url}" target="_blank" class="text-[9px] text-sky-400 hover:underline font-bold" onclick="event.stopPropagation()">🔗 Direct Post</a>` : ''}
+                            ${item.url ? `<a href="${item.url}" target="_blank" class="text-[9px] text-sky-400 hover:underline font-bold" onclick="event.stopPropagation()">🔗 Profile Link</a>` : ''}
                         </div>
                     `;
                     if (item.lat && item.lng) {
@@ -651,7 +630,7 @@
             const desc = document.getElementById('hazard-desc-input').value.trim();
             
             if (!email || !email.includes('@')) {
-                alert("A valid email address is mandatory to publish pins.");
+                alert("A registered email address is strictly required to broadcast pins.");
                 return;
             }
             if (desc.length < 5 || desc.length > 400) { 
@@ -685,7 +664,7 @@
         // UI Event Listeners
         document.getElementById('accept-disclaimer-btn').onclick = () => document.getElementById('disclaimer-modal').classList.add('hidden');
         document.getElementById('open-report-modal').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
-        document.getElementById('floating-report-btn').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
+        document.getElementById('floating-report-btn').onclick = () => document.getElementById('report-modal').classList.add('hidden');
         document.getElementById('close-report-modal').onclick = () => document.getElementById('report-modal').classList.add('hidden');
         document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
         document.getElementById('locate-me-btn').onclick = () => navigator.geolocation?.getCurrentPosition(p => map.flyTo([p.coords.latitude, p.coords.longitude], 16));
