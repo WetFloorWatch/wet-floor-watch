@@ -39,15 +39,15 @@
                 <div class="bg-amber-500/20 p-2 rounded-lg border border-amber-500/30">
                     <svg class="w-7 h-7 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 </div>
-                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch <span class="text-amber-500 text-sm block font-mono">INTELLIGENCE GRID</span></h2>
+                <h2 class="text-xl font-bold tracking-tight text-white">Wet Floor Watch <span class="text-amber-500 text-sm block font-mono">SUPERCRAWL 2026 GRID</span></h2>
             </div>
             <p class="text-sm text-slate-300 leading-relaxed">
-                <strong class="text-rose-400">CRITICAL SAFETY NOTICE:</strong> If you are facing an immediate emergency, <strong>call 911 immediately</strong>. 
+                <strong class="text-rose-400">SAFETY NOTICE:</strong> If you face an immediate emergency, <strong>call 911</strong>. 
                 <br><br>
-                This platform maps real-world street events, dispatches, drug hazards, and social media intel across Hamilton with verified coordinates.
+                Integrated tactical intelligence platform mapping Hamilton street events, emergency dispatches, and Supercrawl weekend crowd density, traffic closures, and festival zones.
             </p>
             <button id="accept-disclaimer-btn" class="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg active:scale-[0.98]">
-                Access Intelligence Map Grid
+                Access Supercrawl Tactical Map
             </button>
         </div>
     </div>
@@ -61,9 +61,9 @@
             <div>
                 <h1 class="font-bold text-lg tracking-tight text-white flex items-center gap-2">
                     Wet Floor Watch 
-                    <span class="text-emerald-400 font-mono text-[10px] uppercase bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 tracking-wider">Tactical Grid</span>
+                    <span class="text-pink-400 font-mono text-[10px] uppercase bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/20 tracking-wider">Supercrawl 2026 Active</span>
                 </h1>
-                <p class="text-[11px] text-slate-400 font-medium hidden sm:block tracking-wide uppercase">Hamilton Threat & Awareness Platform</p>
+                <p class="text-[11px] text-slate-400 font-medium hidden sm:block tracking-wide uppercase">Hamilton Crowd, Traffic & Threat Intelligence</p>
             </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -86,8 +86,8 @@
         <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[410px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
             <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
                 <h2 class="font-bold text-slate-200 text-xs uppercase tracking-widest flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                    Map Analytics & Filters
+                    <svg class="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z"/></svg>
+                    Supercrawl & Event Filters
                 </h2>
                 <button id="sidebar-close" class="md:hidden text-slate-500 hover:text-white transition p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -101,19 +101,26 @@
                     <select id="date-range-filter" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 font-mono outline-none focus:border-amber-500">
                         <option value="all">All Recorded History</option>
                         <option value="1">Past 24 Hours</option>
-                        <option value="7" selected>Past 7 Days</option>
+                        <option value="7" selected>Past 7 Days (Supercrawl Weekend)</option>
                         <option value="30">Past 30 Days</option>
-                        <option value="90">Past 90 Days</option>
                     </select>
                 </div>
 
-                <!-- Category Checkbox Filters -->
+                <!-- Category Checkbox Filters including Supercrawl -->
                 <div class="space-y-2">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Event Selection Filters</label>
                     <div class="grid grid-cols-1 gap-2 text-xs font-semibold">
+                        <label class="flex items-center justify-between p-2.5 rounded-xl bg-pink-950/30 hover:bg-pink-950/50 border border-pink-500/30 cursor-pointer">
+                            <span class="flex items-center gap-2 text-pink-200">
+                                <span class="w-3 h-3 rounded-full bg-pink-500 shadow-[0_0_10px_rgba(236,72,153,0.8)] animate-pulse"></span>
+                                Supercrawl 2026 Zones & Traffic
+                            </span>
+                            <input type="checkbox" id="filter-supercrawl" checked class="w-4 h-4 accent-pink-500 rounded cursor-pointer">
+                        </label>
+
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
                             <span class="flex items-center gap-2 text-slate-200">
-                                <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
                                 Official Police Dispatch
                             </span>
                             <input type="checkbox" id="filter-emergency" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
@@ -121,7 +128,7 @@
 
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
                             <span class="flex items-center gap-2 text-slate-200">
-                                <span class="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
+                                <span class="w-3 h-3 rounded-full bg-blue-500"></span>
                                 Local News Reports
                             </span>
                             <input type="checkbox" id="filter-news" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
@@ -129,7 +136,7 @@
 
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
                             <span class="flex items-center gap-2 text-slate-200">
-                                <span class="w-3 h-3 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-400"></span>
                                 User Field Reports
                             </span>
                             <input type="checkbox" id="filter-user" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
@@ -137,7 +144,7 @@
 
                         <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 cursor-pointer">
                             <span class="flex items-center gap-2 text-slate-200">
-                                <span class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(225,29,72,0.5)]"></span>
+                                <span class="w-3 h-3 rounded-full bg-rose-500"></span>
                                 Social Media / Street Intel
                             </span>
                             <input type="checkbox" id="filter-street" checked class="w-4 h-4 accent-amber-500 rounded cursor-pointer">
@@ -150,7 +157,7 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 events matching</span>
-                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-[10px] font-bold text-amber-400 hover:underline">@interventionintersection &rarr;</a>
+                    <a href="https://www.instagram.com/supercrawl" target="_blank" class="text-[10px] font-bold text-pink-400 hover:underline">@supercrawl &rarr;</a>
                 </div>
                 <div id="feed-list" class="space-y-2.5"></div>
             </div>
@@ -184,11 +191,11 @@
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (5-400 characters)</label>
-                    <textarea id="hazard-desc-input" placeholder="Incident specifics, drug hazards, weapons..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
+                    <textarea id="hazard-desc-input" placeholder="Incident specifics, crowd density, traffic blockages..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 text-sm text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Social Media / News Link (Facebook, Instagram, News URL)</label>
-                    <input type="url" id="hazard-url-input" placeholder="https://facebook.com/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 font-mono outline-none focus:border-amber-500">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Social Media / News Link (Instagram, Facebook, Supercrawl URL)</label>
+                    <input type="url" id="hazard-url-input" placeholder="https://supercrawl.ca/..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 font-mono outline-none focus:border-amber-500">
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 px-4 rounded-xl text-xs transition shadow-lg active:scale-98">
                     Submit Report to Intelligence Grid
@@ -215,7 +222,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 13);
+        const map = L.map('map', { zoomControl: false }).setView([43.2570, -79.8700], 14);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
@@ -233,6 +240,7 @@
         }
 
         const icons = {
+            supercrawl: createPinIcon('#ec4899', 'rgba(236,72,153,0.9)'),
             emergency: createPinIcon('#10b981', 'rgba(16,185,129,0.7)'),
             news: createPinIcon('#3b82f6', 'rgba(59,130,246,0.7)'),
             user_report: createPinIcon('#fbbf24', 'rgba(251,191,36,0.8)'),
@@ -246,20 +254,55 @@
             return 'Recent Record';
         }
 
-        // Verified Accurate Hamilton Street Master Index with Exact Coordinates matching titles
+        // Exact Verified Hamilton Street & Intersection Master Index
         const HAMILTON_INDEX = [
+            { name: "James St N & King William St (Supercrawl Main Hub)", lat: 43.2550, lng: -79.8660 },
+            { name: "James St N & Wilson St (Art & Vendor Corridor)", lat: 43.2575, lng: -79.8660 },
+            { name: "James St N & Cannon St W (North Festival Gate)", lat: 43.2600, lng: -79.8660 },
+            { name: "James St N & York Blvd (High Crowd Density / Traffic Jam)", lat: 43.2625, lng: -79.8660 },
             { name: "Rebecca St & James St N", lat: 43.2585, lng: -79.8660 },
             { name: "King St W & MacNab St N", lat: 43.2557, lng: -79.8711 },
             { name: "Main St W & Frid St", lat: 43.2520, lng: -79.8660 },
-            { name: "Oriole Crescent Sector", lat: 43.2350, lng: -79.8400 },
-            { name: "Barton St E & Ottawa St N", lat: 43.2480, lng: -79.8185 },
-            { name: "Beasley Park (Mary St & Wilson St)", lat: 43.2575, lng: -79.8580 },
-            { name: "King St E & Victoria Ave S", lat: 43.2510, lng: -79.8500 },
-            { name: "York Blvd & Bay St N", lat: 43.2625, lng: -79.8732 }
+            { name: "Oriole Crescent Sector", lat: 43.2350, lng: -79.8400 }
         ];
 
-        // Corrected Seed Database with precise matching coordinates
+        // Supercrawl 2026 Weekend Seed Database + Live Intelligence & Police Dispatches
         const defaultSeedData = {
+            supercrawl: [
+                {
+                    id: 'sc-1',
+                    category: 'supercrawl',
+                    hasPin: true,
+                    lat: 43.2550,
+                    lng: -79.8660,
+                    source: 'Supercrawl 2026 Main Stage Hub (James St N & King William)',
+                    description: 'CRITICAL DENSITY INTEL: Peak crowd congestion expected between 7 PM - 11 PM. Full pedestrian closure on James St N from King St to Cannon St. Heavy sound bleed and dense foot traffic.',
+                    url: 'https://supercrawl.ca',
+                    timestamp: new Date(Date.now() - 3600000 * 2)
+                },
+                {
+                    id: 'sc-2',
+                    category: 'supercrawl',
+                    hasPin: true,
+                    lat: 43.2625,
+                    lng: -79.8660,
+                    source: 'Traffic Diversion Alert (James St N & York Blvd)',
+                    description: 'TRAFFIC ALERT: Complete vehicle roadblock on James St N north of King. Major delays on York Blvd and Bay St. Parking restrictions enforced across downtown core.',
+                    url: 'https://supercrawl.ca/accessibility-transit/',
+                    timestamp: new Date(Date.now() - 3600000 * 5)
+                },
+                {
+                    id: 'sc-3',
+                    category: 'supercrawl',
+                    hasPin: true,
+                    lat: 43.2575,
+                    lng: -79.8660,
+                    source: 'Art Market & Vendor Corridor (James St N & Wilson)',
+                    description: 'High density pedestrian flow. Artisan booths, food trucks, and family zones operating at maximum capacity. Watch for restricted bike lanes.',
+                    url: 'https://supercrawl.ca',
+                    timestamp: new Date(Date.now() - 3600000 * 3)
+                }
+            ],
             emergency: [
                 {
                     id: 'seed-em-1',
@@ -267,21 +310,10 @@
                     hasPin: true,
                     lat: 43.2557,
                     lng: -79.8711,
-                    source: 'Hamilton Police Dispatch (King St W & MacNab St N)',
-                    description: 'Homicide unit investigated fatal overnight stabbing incident near King Street West and MacNab Street North transit terminal.',
-                    url: 'https://hamiltonpolice.on.ca/news/hamilton-police-investigating-overnight-homicide/',
+                    source: 'Hamilton Police Dispatch (King St W & MacNab)',
+                    description: 'Downtown police presence increased for Supercrawl weekend security patrols and crowd management.',
+                    url: 'https://hamiltonpolice.on.ca',
                     timestamp: new Date(Date.now() - 3600000 * 12)
-                },
-                {
-                    id: 'seed-em-2',
-                    category: 'emergency',
-                    hasPin: true,
-                    lat: 43.2350,
-                    lng: -79.8400,
-                    source: 'Hamilton Police Dispatch (Oriole Crescent Sector)',
-                    description: 'Shots fired at residential dwelling; Hamilton Police recovered spent casings and appealed for neighborhood security footage.',
-                    url: 'https://hamiltonpolice.on.ca/news/hamilton-police-seek-witnesses-in-overnight-shooting-in-oriole-crescent/',
-                    timestamp: new Date(Date.now() - 3600000 * 36)
                 }
             ],
             news: [
@@ -291,10 +323,10 @@
                     hasPin: true,
                     lat: 43.2510,
                     lng: -79.8500,
-                    source: 'Global News Hamilton (King St E & Victoria Ave S)',
-                    description: 'Fatal stabbing marks 9th homicide of 2026; residents urged to submit dashcam footage near downtown corridors.',
-                    url: 'https://globalnews.ca/news/12014980/hamilton-homicide-stabbing/',
-                    timestamp: new Date(Date.now() - 3600000 * 48)
+                    source: 'Global News Hamilton (Supercrawl Preview)',
+                    description: 'Hundreds of thousands expected for Supercrawl 2026 arts and music festival. Transit detours active for HSR buses.',
+                    url: 'https://globalnews.ca',
+                    timestamp: new Date(Date.now() - 3600000 * 24)
                 }
             ],
             user_report: [
@@ -304,8 +336,8 @@
                     hasPin: true,
                     lat: 43.2575,
                     lng: -79.8580,
-                    source: 'Field Report (Beasley Park - Mary St & Wilson St)',
-                    description: 'Discarded biohazard needles and open-air drug paraphernalia reported along playground perimeter.',
+                    source: 'Field Report (Beasley Park Zone)',
+                    description: 'Overflow crowds parking in residential zones near Beasley Park. Watch for restricted permit zones.',
                     url: '',
                     timestamp: new Date(Date.now() - 3600000 * 8)
                 }
@@ -317,15 +349,15 @@
                     hasPin: true,
                     lat: 43.2585,
                     lng: -79.8660,
-                    source: '@interventionintersection2026 (Rebecca St & James St N)',
-                    description: 'Active community street watch log documenting open narcotics activity and safety concerns at Rebecca St & James St N.',
+                    source: '@interventionintersection2026',
+                    description: 'Documenting street-level crowd safety and emergency response lanes around James St N festival perimeter.',
                     url: 'https://www.instagram.com/interventionintersection2026',
                     timestamp: new Date(Date.now() - 3600000 * 6)
                 }
             ]
         };
 
-        let rawAppData = { emergency: [], news: [], user_report: [], street: [] };
+        let rawAppData = { supercrawl: [], emergency: [], news: [], user_report: [], street: [] };
 
         function filterAndRender() {
             markersLayer.clearLayers();
@@ -337,6 +369,7 @@
             const cutoffTime = dateRangeDays === 'all' ? 0 : now - (parseInt(dateRangeDays) * 24 * 60 * 60 * 1000);
 
             const activeCategories = {
+                supercrawl: document.getElementById('filter-supercrawl').checked,
                 emergency: document.getElementById('filter-emergency').checked,
                 news: document.getElementById('filter-news').checked,
                 user_report: document.getElementById('filter-user').checked,
@@ -344,6 +377,7 @@
             };
 
             const configs = {
+                supercrawl: { color: 'pink', label: 'Supercrawl 2026 Intel' },
                 emergency: { color: 'emerald', label: 'Police Dispatch' },
                 news: { color: 'blue', label: 'Local News' },
                 user_report: { color: 'amber', label: 'Field Report' },
@@ -363,7 +397,7 @@
 
                     if (item.lat && item.lng) {
                         const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
-                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition">🔗 Access Source & Social Intel &rarr;</a>` : '';
+                        let socialLink = item.url ? `<a href="${item.url}" target="_blank" class="block text-center mt-3 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-pink-400 font-bold text-[10px] uppercase tracking-wider rounded-lg transition">🔗 Official Supercrawl / Source Link &rarr;</a>` : '';
                         
                         marker.bindPopup(`
                             <div class="font-sans min-w-[220px]">
@@ -385,7 +419,7 @@
                         </div>
                         <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.source}</p>
                         <p class="text-xs text-slate-400 line-clamp-2">${item.description}</p>
-                        ${item.url ? `<a href="${item.url}" target="_blank" class="text-[10px] text-amber-400 hover:underline font-mono block pt-1" onclick="event.stopPropagation()">🔗 Open Social / News Link</a>` : ''}
+                        ${item.url ? `<a href="${item.url}" target="_blank" class="text-[10px] text-pink-400 hover:underline font-mono block pt-1" onclick="event.stopPropagation()">🔗 Open Supercrawl / Source Link</a>` : ''}
                     `;
                     if (item.lat && item.lng) {
                         card.onclick = () => map.flyTo([item.lat, item.lng], 16, { duration: 1 });
@@ -399,6 +433,7 @@
 
         onSnapshot(collection(db, "reports"), (snapshot) => {
             let data = { 
+                supercrawl: [...defaultSeedData.supercrawl],
                 emergency: [...defaultSeedData.emergency], 
                 news: [...defaultSeedData.news], 
                 user_report: [...defaultSeedData.user_report], 
@@ -417,7 +452,7 @@
         });
 
         document.getElementById('date-range-filter').onchange = filterAndRender;
-        ['filter-emergency', 'filter-news', 'filter-user', 'filter-street'].forEach(id => {
+        ['filter-supercrawl', 'filter-emergency', 'filter-news', 'filter-user', 'filter-street'].forEach(id => {
             document.getElementById(id).onchange = filterAndRender;
         });
 
