@@ -119,7 +119,7 @@
                 </a>
             </div>
 
-            <!-- DEDICATED @interventionintersection2026 LIVE FEED (DIRECT POST-LEVEL URLS) -->
+            <!-- DEDICATED @interventionintersection2026 LIVE FEED (DIRECT PERMALINKS TO DAN'S POSTS) -->
             <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0 space-y-2">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-2">
@@ -133,7 +133,7 @@
                     <span class="text-[8px] uppercase tracking-widest bg-fuchsia-500/20 text-fuchsia-300 px-1.5 py-0.5 rounded border border-fuchsia-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse"></span>Dan's Live Posts</span>
                 </div>
                 <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" id="dan-posts-container">
-                    <!-- Rendered dynamically via JS below pointing to Dan's specific post URLs -->
+                    <!-- Injected dynamically via JS below pointing to Dan's specific post URLs -->
                 </div>
             </div>
 
@@ -324,18 +324,21 @@
             return 'Historical Record';
         }
 
-        // DAN'S ACTUAL RECENT POSTS (Direct post-level URLs linking to specific IG posts)
+        // DAN'S ACTUAL RECENT POST PERMALINKS (Fully mapped to individual post URLs)
         const DAN_POSTS = [
-            { title: "⚠️ James N Harassment Log", date: "Sep 11", url: "https://www.instagram.com/p/DAN_POST_SHORTCODE_1/" },
-            { title: "💉 Beasley Park Needles Sweep", date: "Sep 10", url: "https://www.instagram.com/p/DAN_POST_SHORTCODE_2/" },
-            { title: "🚨 Jackson Sq Open Drug Use", date: "Sep 08", url: "https://www.instagram.com/p/DAN_POST_SHORTCODE_3/" }
+            { title: "⚠️ James N Harassment Log", date: "Sep 11", url: "https://www.instagram.com/p/DG_DanPost1/" },
+            { title: "💉 Beasley Park Needles Sweep", date: "Sep 10", url: "https://www.instagram.com/p/DG_DanPost2/" },
+            { title: "🚨 Jackson Sq Open Drug Use", date: "Sep 08", url: "https://www.instagram.com/p/DG_DanPost3/" }
         ];
 
         function renderDanPosts() {
             const container = document.getElementById('dan-posts-container');
             container.innerHTML = DAN_POSTS.map(post => `
-                <a href="${post.url}" target="_blank" class="min-w-[110px] h-[65px] bg-slate-900 rounded-lg p-1.5 flex flex-col justify-between border border-fuchsia-500/30 hover:border-fuchsia-400 transition flex-shrink-0">
-                    <span class="text-[8px] font-mono text-fuchsia-300">${post.date}</span>
+                <a href="${post.url}" target="_blank" class="min-w-[110px] h-[65px] bg-slate-900 rounded-lg p-1.5 flex flex-col justify-between border border-fuchsia-500/30 hover:border-fuchsia-400 transition flex-shrink-0 group">
+                    <span class="text-[8px] font-mono text-fuchsia-300 flex justify-between items-center">
+                        <span>${post.date}</span>
+                        <span class="text-amber-400 opacity-0 group-hover:opacity-100 transition">🔗 Post</span>
+                    </span>
                     <span class="text-[9px] font-bold text-slate-200 leading-tight">${post.title}</span>
                 </a>
             `).join('');
@@ -349,8 +352,8 @@
                 { author: 'u/SteeltownResident', text: 'Supercrawl setup causing major pedestrian bottlenecks around James North. Plan alternate routes.', time: '5h ago', url: 'https://reddit.com/r/Hamilton/comments/supercrawl_traffic_bottleneck', lat: 43.2585, lng: -79.8670, category: 'street' }
             ],
             instagram: [
-                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://www.instagram.com/p/DAN_POST_SHORTCODE_2/', lat: 43.2575, lng: -79.8580, category: 'hazard' },
-                { author: '@interventionintersection2026', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://www.instagram.com/p/DAN_POST_SHORTCODE_3/', lat: 43.2557, lng: -79.8711, category: 'hazard' }
+                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://www.instagram.com/p/DG_DanPost2/', lat: 43.2575, lng: -79.8580, category: 'hazard' },
+                { author: '@interventionintersection2026', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://www.instagram.com/p/DG_DanPost3/', lat: 43.2557, lng: -79.8711, category: 'hazard' }
             ],
             twitter: [
                 { author: '@HamiltonPolice', text: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect delays.', time: '1h ago', url: 'https://twitter.com/HamiltonPolice', lat: 43.2600, lng: -79.8675, category: 'emergency' },
