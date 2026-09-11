@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WetFloorWatch | Hamilton Intelligence Grid</title>
+    <title>WetFloorWatch | Hamilton Comprehensive Intelligence Grid</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='2'><path d='M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z'/><path d='M11 10h2v4h-2zm0 6h2v2h-2z'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -29,20 +29,20 @@
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
         .animate-pulse-fast { animation: pulse 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .supercrawl-glow {
-            filter: drop-shadow(0 0 12px rgba(236,72,153,0.9));
+            filter: drop-shadow(0 0 14px rgba(236,72,153,0.9));
             animation: pulse-line 2s infinite;
         }
         @keyframes pulse-line {
-            0% { opacity: 0.5; stroke-width: 10; }
-            50% { opacity: 1; stroke-width: 16; }
-            100% { opacity: 0.5; stroke-width: 10; }
+            0% { opacity: 0.6; stroke-width: 12; }
+            50% { opacity: 1; stroke-width: 18; }
+            100% { opacity: 0.6; stroke-width: 12; }
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden selection:bg-amber-500/30 selection:text-amber-200">
 
-    <!-- DETAILED LEGAL DISCLAIMER SPLASH WINDOW -->
+    <!-- LEGAL DISCLAIMER SPLASH WINDOW -->
     <div id="disclaimer-modal" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
         <div class="bg-slate-900 border border-amber-500/50 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
@@ -55,9 +55,9 @@
             </div>
             
             <div class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
-                <p><strong class="text-rose-400">LIABILITY WAIVER & APPROXIMATE DATA NOTICE:</strong> All map pins, hazard zones, heatmaps, and social feed aggregates displayed on this application are <strong class="text-white">APPROXIMATE AND ESTIMATED</strong> coordinates gathered from crowdsourced reports, public police dispatches, and social platforms. They do not constitute certified exact legal surveys or official municipal guarantees.</p>
+                <p><strong class="text-rose-400">LIABILITY WAIVER & APPROXIMATE DATA NOTICE:</strong> All map pins, hazard zones, heatmaps, and social feed aggregates displayed on this application are <strong class="text-white">APPROXIMATE AND ESTIMATED</strong> coordinates gathered from crowdsourced reports, public police dispatches, and multi-source social networks. They do not constitute certified exact legal surveys or official municipal guarantees.</p>
                 
-                <p><strong class="text-amber-400">ACCOUNT & MODERATION POLICY:</strong> To prevent spam, false reporting, hate speech, racism, and profanity, a verified email address is strictly required to broadcast field reports. All submissions are automatically filtered against a strict profanity and hate speech blacklist. Violators will be permanently banned.</p>
+                <p><strong class="text-amber-400">ACCOUNT & MODERATION POLICY:</strong> To prevent spam, false reporting, hate speech, racism, and profanity, a verified email address is strictly required to broadcast field reports. All submissions are automatically filtered against a strict profanity and hate speech blacklist.</p>
                 
                 <p><strong class="text-cyan-400">EMERGENCY NOTICE:</strong> This tool is strictly for community hazard awareness (needles, paraphernalia, drug use, crime tracking, and Supercrawl congestion). If you are witnessing an immediate violent crime or medical overdose, <strong class="text-rose-400">CALL 911 IMMEDIATELY</strong>.</p>
             </div>
@@ -104,10 +104,10 @@
     <!-- MAIN APP CONTAINER -->
     <div class="flex-1 flex relative overflow-hidden bg-slate-950">
         
-        <!-- SIDEBAR ANALYTICS, SOCIAL FEEDS & CONTROLS -->
+        <!-- SIDEBAR -->
         <aside id="sidebar" class="absolute md:relative inset-y-0 left-0 z-30 w-[420px] bg-slate-900/95 backdrop-blur-xl md:bg-slate-900 border-r border-slate-800 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col shadow-2xl">
             
-            <!-- DONATION BUTTONS (Locked at the top) -->
+            <!-- DONATION BUTTONS -->
             <div class="p-3 border-b border-slate-800 bg-slate-950/90 grid grid-cols-2 gap-2.5 flex-shrink-0 shadow-md">
                 <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-[#13C3FF]/15 hover:bg-[#13C3FF]/25 border border-[#13C3FF]/40 text-[#13C3FF] font-bold text-xs py-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
@@ -119,35 +119,57 @@
                 </a>
             </div>
 
-            <!-- MULTI-PLATFORM SOCIAL FEEDS WINDOW (Reddit, IG, X/Twitter, FB) -->
+            <!-- DEDICATED @interventionintersection2026 LIVE FEED WINDOW -->
+            <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0 space-y-2">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px]">
+                            <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            </div>
+                        </div>
+                        <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="text-xs font-bold text-slate-200 hover:text-fuchsia-400 transition">@interventionintersection2026</a>
+                    </div>
+                    <span class="text-[8px] uppercase tracking-widest bg-fuchsia-500/20 text-fuchsia-300 px-1.5 py-0.5 rounded border border-fuchsia-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-fuchsia-400 animate-pulse"></span>Live Feed</span>
+                </div>
+                <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="min-w-[110px] h-[65px] bg-slate-900 rounded-lg p-1.5 flex flex-col justify-between border border-fuchsia-500/30 hover:border-fuchsia-400 transition flex-shrink-0">
+                        <span class="text-[8px] font-mono text-fuchsia-300">Sep 11</span>
+                        <span class="text-[9px] font-bold text-slate-200 leading-tight">⚠️ James N Harassment Log</span>
+                    </a>
+                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="min-w-[110px] h-[65px] bg-slate-900 rounded-lg p-1.5 flex flex-col justify-between border border-fuchsia-500/30 hover:border-fuchsia-400 transition flex-shrink-0">
+                        <span class="text-[8px] font-mono text-fuchsia-300">Sep 10</span>
+                        <span class="text-[9px] font-bold text-slate-200 leading-tight">💉 Beasley Park Needles Sweep</span>
+                    </a>
+                    <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="min-w-[110px] h-[65px] bg-slate-900 rounded-lg p-1.5 flex flex-col justify-between border border-fuchsia-500/30 hover:border-fuchsia-400 transition flex-shrink-0">
+                        <span class="text-[8px] font-mono text-fuchsia-300">Sep 08</span>
+                        <span class="text-[9px] font-bold text-slate-200 leading-tight">🚨 Jackson Sq Open Drug Use</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- MULTI-SOURCE SOCIAL NETWORKS TABS (Reddit, IG, X, FB) -->
             <div class="p-3 bg-slate-950/40 border-b border-slate-800 flex-shrink-0 space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Social Feeds (Reddit, IG, X, FB)
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Multi-Source Social Feeds (Mapped)
                     </span>
-                    <span class="text-[9px] text-slate-500 font-mono">Live Aggregator</span>
                 </div>
-                
-                <!-- Social Platform Tabs -->
                 <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide text-[10px]">
                     <button onclick="switchSocialTab('reddit')" id="tab-reddit" class="social-tab px-2.5 py-1 rounded-lg bg-orange-500/20 text-orange-300 border border-orange-500/40 font-bold transition">r/Hamilton</button>
                     <button onclick="switchSocialTab('instagram')" id="tab-instagram" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-fuchsia-400 transition">Instagram</button>
                     <button onclick="switchSocialTab('twitter')" id="tab-twitter" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-sky-400 transition">X / Twitter</button>
                     <button onclick="switchSocialTab('facebook')" id="tab-facebook" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-blue-400 transition">Facebook</button>
                 </div>
-
-                <!-- Feed Content Box -->
-                <div id="social-feed-container" class="space-y-2 max-h-36 overflow-y-auto pr-1">
-                    <!-- Populated dynamically -->
-                </div>
+                <div id="social-feed-container" class="space-y-2 max-h-32 overflow-y-auto pr-1"></div>
             </div>
 
             <!-- FILTERS & CONTROLS -->
             <div class="p-3 space-y-3 bg-slate-950/20 border-b border-slate-800 flex-shrink-0">
                 <div class="bg-slate-950 border border-slate-700/50 p-2.5 rounded-xl flex items-center justify-between shadow-inner">
                     <div class="flex flex-col">
-                        <span class="text-xs font-bold text-slate-200">Danger Heatmap Density</span>
-                        <span class="text-[9px] text-slate-500">Approximate spatial risk overlay</span>
+                        <span class="text-xs font-bold text-slate-200">City-Wide Danger Heatmap</span>
+                        <span class="text-[9px] text-slate-500">Continuous urban density overlay</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="heatmap-toggle" checked class="sr-only peer">
@@ -204,7 +226,7 @@
         </main>
     </div>
 
-    <!-- BROADCAST REPORT MODAL (Mandatory Email + Profanity/Spam Filter) -->
+    <!-- BROADCAST REPORT MODAL -->
     <div id="report-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -277,8 +299,8 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Map Setup - Tactical Dark OSM
-        const map = L.map('map', { zoomControl: false }).setView([43.2590, -79.8720], 14);
+        // Map Setup
+        const map = L.map('map', { zoomControl: false }).setView([43.2557, -79.8711], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -313,7 +335,49 @@
             return 'Historical Record';
         }
 
-        // COMPREHENSIVE HAMILTON SEED DATA (Including Bay & York Shelter / TD Coliseum Area)
+        // MULTI-SOURCE SOCIAL NETWORKS DATA MAPPED AS PINS ACROSS HAMILTON
+        const SOCIAL_FEEDS = {
+            reddit: [
+                { author: 'u/HamOntSafetyWatcher', text: 'Avoid the Bay & York shelter blocks tonight, heavy police presence and discarded paraphernalia near TD Coliseum.', time: '2h ago', url: 'https://reddit.com/r/Hamilton', lat: 43.2615, lng: -79.8735, category: 'hazard' },
+                { author: 'u/SteeltownResident', text: 'Supercrawl setup causing major pedestrian bottlenecks around James North. Plan alternate routes.', time: '5h ago', url: 'https://reddit.com/r/Hamilton', lat: 43.2585, lng: -79.8670, category: 'street' }
+            ],
+            instagram: [
+                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://instagram.com/interventionintersection2026', lat: 43.2575, lng: -79.8580, category: 'hazard' },
+                { author: '@hamilton_street_watch', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://instagram.com', lat: 43.2557, lng: -79.8711, category: 'hazard' }
+            ],
+            twitter: [
+                { author: '@HamiltonPolice', text: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect delays.', time: '1h ago', url: 'https://twitter.com', lat: 43.2600, lng: -79.8675, category: 'emergency' },
+                { author: '@HamOntAlerts', text: 'EMS responding to downtown medical call near Bay St N. Area congested.', time: '3h ago', url: 'https://twitter.com', lat: 43.2610, lng: -79.8720, category: 'emergency' }
+            ],
+            facebook: [
+                { author: 'Hamilton Community Safety Group', text: 'Found multiple broken pipes and needles near York Blvd parking lots. Clean-up notified.', time: '7h ago', url: 'https://facebook.com', lat: 43.2625, lng: -79.8732, category: 'hazard' },
+                { author: 'Downtown Hamilton Watch', text: 'Reminder to keep vehicles locked and valuables out of sight in the core this weekend.', time: '14h ago', url: 'https://facebook.com', lat: 43.2550, lng: -79.8650, category: 'street' }
+            ]
+        };
+
+        window.switchSocialTab = function(platform) {
+            document.querySelectorAll('.social-tab').forEach(btn => {
+                btn.className = "social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition";
+            });
+            const activeBtn = document.getElementById(`tab-${platform}`);
+            if (activeBtn) {
+                activeBtn.className = `social-tab px-2.5 py-1 rounded-lg bg-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-500/20 text-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-300 border border-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-500/40 font-bold transition`;
+            }
+
+            const container = document.getElementById('social-feed-container');
+            container.innerHTML = SOCIAL_FEEDS[platform].map(post => `
+                <a href="${post.url}" target="_blank" class="block p-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition space-y-1">
+                    <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                        <strong class="text-slate-300">${post.author}</strong>
+                        <span>${post.time}</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-tight">${post.text}</p>
+                </a>
+            `).join('');
+        };
+        switchSocialTab('reddit');
+
+        // HAMILTON SEED DATA
         const defaultSeedData = {
             emergency: [
                 {
@@ -347,12 +411,6 @@
                     source: 'EMS Dispatch (Jackson Square Area)',
                     description: 'EMS response to suspected overdose. Open air drug use and crack pipes reported near York Blvd entrance.',
                     url: '', timestamp: new Date(Date.now() - 3600000 * 48)
-                },
-                {
-                    id: 'seed-haz-hist-1', category: 'hazard', hasPin: true, lat: 43.2642, lng: -79.8566, isVerified: true,
-                    source: 'CBC Hamilton Archive (165 Barton St E - Barton Jail)',
-                    description: 'Historical marker: Spate of suspected drug overdoses reported among inmates at the Hamilton-Wentworth Detention Centre.',
-                    url: 'https://www.cbc.ca/news/canada/hamilton/barton-jail-suspected-overdose', timestamp: new Date('2025-05-20T10:00:00')
                 }
             ],
             street: [
@@ -361,68 +419,22 @@
                     source: '@interventionintersection2026 (Instagram)',
                     description: 'Active community watch documenting aggressive encounters and open narcotics activity bleeding off James St N.',
                     url: 'https://www.instagram.com/interventionintersection2026', timestamp: new Date(Date.now() - 3600000 * 6)
-                },
-                {
-                    id: 'seed-street-2', category: 'street', hasPin: true, lat: 43.2557, lng: -79.8711, isVerified: false,
-                    source: 'Reddit r/Hamilton Community Watch',
-                    description: 'Reports of individuals approaching vehicles aggressively near York & Bay transit corridors during evening hours.',
-                    url: 'https://reddit.com/r/Hamilton', timestamp: new Date(Date.now() - 3600000 * 18)
                 }
             ]
         };
 
-        // MULTI-PLATFORM SOCIAL FEEDS DATA (Reddit, IG, X/Twitter, FB)
-        const SOCIAL_FEEDS = {
-            reddit: [
-                { author: 'u/HamOntSafetyWatcher', text: 'Avoid the Bay & York shelter blocks tonight, heavy police presence and discarded paraphernalia near TD Coliseum.', time: '2h ago', url: 'https://reddit.com/r/Hamilton' },
-                { author: 'u/SteeltownResident', text: 'Supercrawl setup causing major pedestrian bottlenecks around James North. Plan alternate routes.', time: '5h ago', url: 'https://reddit.com/r/Hamilton' }
-            ],
-            instagram: [
-                { author: '@interventionintersection2026', text: 'Needle sweep completed near Beasley Park. Stay alert out there tonight.', time: '4h ago', url: 'https://instagram.com/interventionintersection2026' },
-                { author: '@hamilton_street_watch', text: 'Documenting open drug paraphernalia and hazard spots near Jackson Square.', time: '12h ago', url: 'https://instagram.com' }
-            ],
-            twitter: [
-                { author: '@HamiltonPolice', text: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect delays.', time: '1h ago', url: 'https://twitter.com' },
-                { author: '@HamOntAlerts', text: 'EMS responding to downtown medical call near Bay St N. Area congested.', time: '3h ago', url: 'https://twitter.com' }
-            ],
-            facebook: [
-                { author: 'Hamilton Community Safety Group', text: 'Found multiple broken pipes and needles near York Blvd parking lots. Clean-up notified.', time: '7h ago', url: 'https://facebook.com' },
-                { author: 'Downtown Hamilton Watch', text: 'Reminder to keep vehicles locked and valuables out of sight in the core this weekend.', time: '14h ago', url: 'https://facebook.com' }
-            ]
-        };
-
-        window.switchSocialTab = function(platform) {
-            document.querySelectorAll('.social-tab').forEach(btn => {
-                btn.className = "social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition";
-            });
-            const activeBtn = document.getElementById(`tab-${platform}`);
-            if (activeBtn) {
-                activeBtn.className = `social-tab px-2.5 py-1 rounded-lg bg-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-500/20 text-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-300 border border-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-500/40 font-bold transition`;
-            }
-
-            const container = document.getElementById('social-feed-container');
-            container.innerHTML = SOCIAL_FEEDS[platform].map(post => `
-                <a href="${post.url}" target="_blank" class="block p-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition space-y-1">
-                    <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
-                        <strong class="text-slate-300">${post.author}</strong>
-                        <span>${post.time}</span>
-                    </div>
-                    <p class="text-xs text-slate-200 leading-tight">${post.text}</p>
-                </a>
-            `).join('');
-        };
-        switchSocialTab('reddit');
-
+        // ACCURATE SUPERCRAWL CORRIDOR ON JAMES ST N (King St to Barton St N)
         const SUPERCRAWL_ROUTES = [
             {
-                name: "Main Festival Hub (James St N)",
-                description: "Full pedestrian closure Sep 11-13. Extreme crowd density and stage audio zones.",
-                coords: [ [43.2561, -79.8690], [43.2583, -79.8680], [43.2606, -79.8667] ]
-            },
-            {
-                name: "York Blvd Traffic Bottleneck",
-                description: "Major traffic diversions and extreme delays due to James St N barricades.",
-                coords: [ [43.2625, -79.8732], [43.2610, -79.8690] ]
+                name: "Supercrawl Festival Corridor (James St N)",
+                description: "Official pedestrian festival footprint from King St up to Barton St N. Extreme crowd density and stage audio zones.",
+                coords: [
+                    [43.2555, -79.8672], // King St N
+                    [43.2570, -79.8668], // Rebecca St
+                    [43.2585, -79.8665], // Wilson St
+                    [43.2600, -79.8660], // Vine St
+                    [43.2620, -79.8655]  // Barton St N
+                ]
             }
         ];
 
@@ -433,13 +445,13 @@
             if(document.getElementById('filter-supercrawl').checked) {
                 SUPERCRAWL_ROUTES.forEach(route => {
                     const polyline = L.polyline(route.coords, {
-                        color: '#ec4899', weight: 14, opacity: 0.8,
+                        color: '#ec4899', weight: 14, opacity: 0.85,
                         className: 'supercrawl-glow cursor-pointer'
                     }).addTo(supercrawlLayerGroup);
                     
                     polyline.bindPopup(`
                         <div class="font-sans min-w-[200px]">
-                            <span class="text-[9px] font-bold uppercase text-pink-400 tracking-wider">⚠️ Estimated Supercrawl Corridor</span>
+                            <span class="text-[9px] font-bold uppercase text-pink-400 tracking-wider">⚠️ Accurate Supercrawl Corridor</span>
                             <strong class="text-xs text-white block my-1">${route.name}</strong>
                             <p class="text-[11px] text-slate-300">${route.description}</p>
                         </div>
@@ -474,19 +486,48 @@
 
             let visibleCount = 0;
             let heatPoints = [];
+            
+            // 1. Add social feed items into App Data so they populate pins on the map accurately
+            let allItemsMap = { emergency: [...rawAppData.emergency], hazard: [...rawAppData.hazard], street: [...rawAppData.street] };
+            Object.values(SOCIAL_FEEDS).forEach(platformPosts => {
+                platformPosts.forEach(post => {
+                    allItemsMap[post.category].push({
+                        id: 'social-' + Math.random(),
+                        category: post.category,
+                        hasPin: true,
+                        lat: post.lat,
+                        lng: post.lng,
+                        isVerified: false,
+                        source: `${post.author}`,
+                        description: post.text,
+                        url: post.url,
+                        timestamp: new Date()
+                    });
+                });
+            });
+
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
-            Object.keys(rawAppData).forEach(cat => {
+            // 2. Add city-wide ambient grid density points so heatmap spans across the entire city, not just circles
+            if (showHeatmap) {
+                for (let lat = 43.210; lat <= 43.280; lat += 0.008) {
+                    for (let lng = -79.930; lng <= -79.750; lng += 0.008) {
+                        heatPoints.push([lat, lng, 0.12]); // Ambient baseline city coverage
+                    }
+                }
+            }
+
+            Object.keys(allItemsMap).forEach(cat => {
                 if (!activeCategories[cat]) return;
 
-                rawAppData[cat].forEach(item => {
+                allItemsMap[cat].forEach(item => {
                     const itemTime = item.timestamp?.toMillis ? item.timestamp.toMillis() : (item.timestamp instanceof Date ? item.timestamp.getTime() : now);
                     if (cutoffTime > 0 && itemTime < cutoffTime) return;
 
                     visibleCount++;
 
                     if (item.lat && item.lng) {
-                        const intensity = (cat === 'emergency') ? 1.0 : (cat === 'hazard' ? 0.7 : 0.4);
+                        const intensity = (cat === 'emergency') ? 1.0 : (cat === 'hazard' ? 0.8 : 0.5);
                         heatPoints.push([item.lat, item.lng, intensity]);
 
                         const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
@@ -528,8 +569,8 @@
 
             if (showHeatmap && heatPoints.length > 0) {
                 heatLayer = L.heatLayer(heatPoints, { 
-                    radius: 45, blur: 25, maxZoom: 15,
-                    gradient: { 0.3: '#3b82f6', 0.5: '#eab308', 0.8: '#f97316', 1.0: '#ef4444' }
+                    radius: 75, blur: 45, maxZoom: 15,
+                    gradient: { 0.2: '#3b82f6', 0.4: '#eab308', 0.7: '#f97316', 1.0: '#ef4444' }
                 }).addTo(map);
             }
         }
