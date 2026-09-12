@@ -118,24 +118,20 @@
                 </a>
             </div>
 
-            <!-- COMMUNITY WATCH PROFILE CARD -->
-            <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0">
-                <a href="https://www.instagram.com/interventionintersection2026" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-2.5 bg-slate-900 hover:bg-slate-800/90 border border-fuchsia-500/30 hover:border-fuchsia-400 rounded-xl transition shadow-sm">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px] flex-shrink-0">
-                            <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="text-[9px] font-mono text-fuchsia-400 uppercase tracking-wider block font-bold">Community Watch Feed</span>
-                            <span class="text-xs font-bold text-slate-100 group-hover:text-fuchsia-300 transition">@interventionintersection2026</span>
-                        </div>
-                    </div>
-                    <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/30 flex items-center gap-1">
-                        Profile ↗
+            <!-- MULTI-SOURCE SOCIAL NETWORKS BOX -->
+            <div class="p-3 bg-slate-950/60 border-b border-slate-800 flex-shrink-0 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Multi-Source Social Feeds (Live)
                     </span>
-                </a>
+                </div>
+                <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide text-[10px]">
+                    <button id="tab-reddit" class="social-tab px-2.5 py-1 rounded-lg bg-orange-500/20 text-orange-300 border border-orange-500/40 font-bold transition cursor-pointer">r/Hamilton</button>
+                    <button id="tab-instagram" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-fuchsia-400 transition cursor-pointer">Instagram</button>
+                    <button id="tab-twitter" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-sky-400 transition cursor-pointer">X / Twitter</button>
+                    <button id="tab-facebook" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-blue-400 transition cursor-pointer">Facebook</button>
+                </div>
+                <div id="social-feed-container" class="space-y-2 max-h-36 overflow-y-auto pr-1"></div>
             </div>
 
             <!-- FILTERS & CONTROLS -->
@@ -153,12 +149,12 @@
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Timeframe</label>
-                        <select id="date-range-filter" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-200 font-mono outline-none focus:border-amber-500 shadow-inner">
-                            <option value="all" selected>All Records</option>
-                            <option value="30">Past 30 Days</option>
-                            <option value="7">Past 7 Days</option>
-                            <option value="1">Past 24 Hours</option>
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">News & Intel Source</label>
+                        <select id="source-filter" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-200 font-mono outline-none focus:border-amber-500 shadow-inner">
+                            <option value="all" selected>All Sources</option>
+                            <option value="police">Police Dispatches Only</option>
+                            <option value="news">Local News Outlets</option>
+                            <option value="social">Social & Community</option>
                         </select>
                     </div>
                     <div>
@@ -283,6 +279,7 @@
         let supercrawlLayerGroup = L.layerGroup().addTo(map);
         let heatLayer = null;
         let rawReports = [];
+        let currentSocialTab = 'reddit';
 
         function createPinIcon(colorHex, shadowHex) {
             return L.divIcon({
@@ -352,18 +349,59 @@
             }
         }
 
+        window.switchSocialTab = function(platform) {
+            currentSocialTab = platform;
+            document.querySelectorAll('.social-tab').forEach(btn => {
+                btn.className = "social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition cursor-pointer";
+            });
+
+            const activeBtn = document.getElementById(`tab-${platform}`);
+            if (activeBtn) {
+                const colorMap = { reddit: 'orange', instagram: 'fuchsia', twitter: 'sky', facebook: 'blue' };
+                const c = colorMap[platform] || 'amber';
+                activeBtn.className = `social-tab px-2.5 py-1 rounded-lg bg-${c}-500/20 text-${c}-300 border border-${c}-500/40 font-bold transition cursor-pointer`;
+            }
+
+            const container = document.getElementById('social-feed-container');
+            container.innerHTML = '';
+
+            const matched = rawReports.filter(r => {
+                if (!r.url) return false;
+                const u = r.url.toLowerCase();
+                const p = (r.platform || '').toLowerCase();
+                if (platform === 'reddit') return p === 'reddit' || u.includes('reddit.com');
+                if (platform === 'instagram') return p === 'instagram' || u.includes('instagram.com') || r.source.includes('interventionintersection');
+                if (platform === 'twitter') return p === 'twitter' || u.includes('twitter.com') || u.includes('x.com');
+                if (platform === 'facebook') return p === 'facebook' || u.includes('facebook.com');
+                return false;
+            }).slice(0, 5);
+
+            if (matched.length === 0) {
+                container.innerHTML = `<div class="text-[10px] text-slate-500 font-mono p-2">No live synchronized posts found for ${platform}.</div>`;
+                return;
+            }
+
+            container.innerHTML = matched.map(post => `
+                <a href="${post.url}" target="_blank" rel="noopener noreferrer" class="block p-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition space-y-1">
+                    <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
+                        <strong class="text-slate-300 truncate max-w-[200px]">${post.source}</strong>
+                        <span class="text-amber-400 font-bold">🔗 Open Direct Link</span>
+                    </div>
+                    <p class="text-xs text-slate-200 leading-tight line-clamp-2">${post.description}</p>
+                </a>
+            `).join('');
+        };
+
         function filterAndRender() {
             markersLayer.clearLayers();
             if (heatLayer) map.removeLayer(heatLayer);
             drawSupercrawl();
+            switchSocialTab(currentSocialTab);
             
             const feedContainer = document.getElementById('feed-list');
             feedContainer.innerHTML = '';
 
-            const dateRangeDays = document.getElementById('date-range-filter').value;
-            const now = Date.now();
-            const cutoffTime = dateRangeDays === 'all' ? 0 : now - (parseInt(dateRangeDays) * 24 * 60 * 60 * 1000);
-
+            const sourceFilter = document.getElementById('source-filter').value;
             const activeCategories = {
                 emergency: document.getElementById('filter-emergency').checked,
                 advisory: document.getElementById('filter-advisory').checked,
@@ -392,10 +430,13 @@
 
             rawReports.forEach(item => {
                 const cat = item.category || 'hazard';
+                const p = (item.platform || '').toLowerCase();
+
                 if (!activeCategories[cat]) return;
 
-                const itemTime = item.timestamp?.toMillis ? item.timestamp.toMillis() : (item.timestamp instanceof Date ? item.timestamp.getTime() : now);
-                if (cutoffTime > 0 && itemTime < cutoffTime) return;
+                if (sourceFilter === 'police' && p !== 'police') return;
+                if (sourceFilter === 'news' && p !== 'news') return;
+                if (sourceFilter === 'social' && p !== 'reddit' && p !== 'instagram' && p !== 'twitter' && p !== 'facebook') return;
 
                 visibleCount++;
 
@@ -449,7 +490,6 @@
             }
         }
 
-        // Firestore Realtime Listener
         const reportsRef = collection(db, "reports");
         const q = query(reportsRef, orderBy("timestamp", "desc"), limit(100));
 
@@ -460,7 +500,12 @@
             console.error("Firestore Sync Error:", error);
         });
 
-        document.getElementById('date-range-filter').onchange = filterAndRender;
+        document.getElementById('tab-reddit').onclick = () => switchSocialTab('reddit');
+        document.getElementById('tab-instagram').onclick = () => switchSocialTab('instagram');
+        document.getElementById('tab-twitter').onclick = () => switchSocialTab('twitter');
+        document.getElementById('tab-facebook').onclick = () => switchSocialTab('facebook');
+
+        document.getElementById('source-filter').onchange = filterAndRender;
         document.getElementById('heatmap-toggle').onchange = filterAndRender;
         ['filter-supercrawl', 'filter-emergency', 'filter-advisory', 'filter-hazard', 'filter-street'].forEach(id => {
             document.getElementById(id).onchange = filterAndRender;
@@ -521,6 +566,7 @@
             try {
                 await addDoc(collection(db, "reports"), {
                     category: document.getElementById('hazard-type-input').value,
+                    platform: 'social',
                     hasPin: true,
                     lat: parseFloat(document.getElementById('selected-lat').value),
                     lng: parseFloat(document.getElementById('selected-lng').value),
