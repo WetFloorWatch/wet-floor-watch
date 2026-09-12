@@ -88,10 +88,10 @@
                 <span id="weather-text" class="font-mono">Hamilton: Syncing...</span>
             </div>
             
-            <button id="open-report-modal" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] transition active:scale-95 flex items-center gap-1.5">
+            <button id="open-report-modal" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
                 <span>+</span> Broadcast
             </button>
-            <button id="locate-me-btn" class="bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+            <button id="locate-me-btn" class="bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
                 📍 <span class="hidden sm:inline">GPS Sync</span>
             </button>
             <button id="sidebar-toggle" class="md:hidden bg-slate-900 text-slate-300 p-2 rounded-xl border border-slate-700">
@@ -108,19 +108,19 @@
             
             <!-- DONATION BUTTONS -->
             <div class="p-3 border-b border-slate-800 bg-slate-950/90 grid grid-cols-2 gap-2.5 flex-shrink-0 shadow-md">
-                <a href="https://ko-fi.com/eclipz" target="_blank" class="bg-[#13C3FF]/15 hover:bg-[#13C3FF]/25 border border-[#13C3FF]/40 text-[#13C3FF] font-bold text-xs py-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                <a href="https://ko-fi.com/eclipz" target="_blank" rel="noopener noreferrer" class="bg-[#13C3FF]/15 hover:bg-[#13C3FF]/25 border border-[#13C3FF]/40 text-[#13C3FF] font-bold text-xs py-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/></svg>
                     Ko-fi Support
                 </a>
-                <a href="https://www.paypal.com/paypalme/3cl1pz" target="_blank" class="bg-[#00457C]/30 hover:bg-[#00457C]/50 border border-[#0079C1]/50 text-[#0079C1] font-bold text-xs py-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
+                <a href="https://www.paypal.com/paypalme/3cl1pz" target="_blank" rel="noopener noreferrer" class="bg-[#00457C]/30 hover:bg-[#00457C]/50 border border-[#0079C1]/50 text-[#0079C1] font-bold text-xs py-2 rounded-xl text-center transition flex items-center justify-center gap-1.5 shadow-sm">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.348 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.175-.041.254-.982 5.05-4.348 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106a.641.641 0 0 1-.633.54H7.55c.382 0 .717-.27.788-.646l1.24-7.854c.081-.518.525-.9 1.05-.9h2.19c3.483 0 6.27-1.127 7.218-4.498.147-.532.227-1.033.227-1.464 0-.495-.087-1.056-.25-1.583z"/></svg>
                     PayPal Support
                 </a>
             </div>
 
-            <!-- COMMUNITY WATCH PROFILE CARD (Direct Instagram Link) -->
+            <!-- COMMUNITY WATCH PROFILE CARD -->
             <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0">
-                <a href="https://www.instagram.com/interventionintersection2026" target="_blank" class="group flex items-center justify-between p-2.5 bg-slate-900 hover:bg-slate-800/90 border border-fuchsia-500/30 hover:border-fuchsia-400 rounded-xl transition shadow-sm">
+                <a href="https://www.instagram.com/interventionintersection2026" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-2.5 bg-slate-900 hover:bg-slate-800/90 border border-fuchsia-500/30 hover:border-fuchsia-400 rounded-xl transition shadow-sm">
                     <div class="flex items-center space-x-3">
                         <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px] flex-shrink-0">
                             <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
@@ -136,22 +136,6 @@
                         Profile ↗
                     </span>
                 </a>
-            </div>
-
-            <!-- MULTI-SOURCE SOCIAL NETWORKS TABS -->
-            <div class="p-3 bg-slate-950/40 border-b border-slate-800 flex-shrink-0 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> Multi-Source Social Feeds (Mapped)
-                    </span>
-                </div>
-                <div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide text-[10px]">
-                    <button onclick="switchSocialTab('reddit')" id="tab-reddit" class="social-tab px-2.5 py-1 rounded-lg bg-orange-500/20 text-orange-300 border border-orange-500/40 font-bold transition">r/Hamilton</button>
-                    <button onclick="switchSocialTab('instagram')" id="tab-instagram" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-fuchsia-400 transition">Instagram</button>
-                    <button onclick="switchSocialTab('twitter')" id="tab-twitter" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-sky-400 transition">X / Twitter</button>
-                    <button onclick="switchSocialTab('facebook')" id="tab-facebook" class="social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-blue-400 transition">Facebook</button>
-                </div>
-                <div id="social-feed-container" class="space-y-2 max-h-32 overflow-y-auto pr-1"></div>
             </div>
 
             <!-- FILTERS & CONTROLS -->
@@ -171,9 +155,9 @@
                     <div>
                         <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Timeframe</label>
                         <select id="date-range-filter" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-200 font-mono outline-none focus:border-amber-500 shadow-inner">
-                            <option value="all" selected>Past 2 Years (All)</option>
+                            <option value="all" selected>All Records</option>
                             <option value="30">Past 30 Days</option>
-                            <option value="7">Past 7 Days (Supercrawl)</option>
+                            <option value="7">Past 7 Days</option>
                             <option value="1">Past 24 Hours</option>
                         </select>
                     </div>
@@ -190,19 +174,18 @@
                 </div>
             </div>
 
-            <!-- MAIN EVENT FEED & QUIP -->
+            <!-- MAIN EVENT FEED & FOOTER -->
             <div class="flex-1 overflow-y-auto p-3 space-y-2.5 bg-slate-950/40 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 matching records</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 synchronized records</span>
                         <span class="text-[9px] text-amber-500 font-mono">⚠️ Pin locations estimated</span>
                     </div>
                     <div id="feed-list" class="space-y-2"></div>
                 </div>
 
-                <!-- Crownsourced Quip Footer -->
                 <div class="pt-3 border-t border-slate-800 text-center flex-shrink-0">
-                    <p class="text-[10px] font-mono text-amber-400/90 tracking-wide">✨ Crownsourced & Created by Eclipz</p>
+                    <p class="text-[10px] font-mono text-amber-400/90 tracking-wide">✨ Created by Eclipz • Real-time Scraper Grid</p>
                 </div>
             </div>
         </aside>
@@ -226,7 +209,7 @@
             </div>
             
             <div class="bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-xl text-[11px] text-amber-300 leading-tight space-y-1">
-                🔒 <strong>Verified Registration Policy:</strong> To prevent spam, false reporting, hate speech, and profanity, a registered email address is strictly required to broadcast map pins. Submissions are screened automatically.
+                🔒 <strong>Verified Registration Policy:</strong> To prevent spam, false reporting, hate speech, and profanity, a registered email address is strictly required to broadcast map pins.
             </div>
 
             <form id="hazard-form" class="space-y-3 relative">
@@ -251,8 +234,8 @@
                     <input type="hidden" id="selected-lng" value="-79.8700">
                 </div>
                 <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description (Strict anti-profanity & anti-hate filter) *</label>
-                    <textarea id="hazard-desc-input" placeholder="Detailed specifics (e.g. discarded needles near shelter entrance)..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Description *</label>
+                    <textarea id="hazard-desc-input" placeholder="Detailed specifics..." rows="3" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 outline-none resize-none focus:border-amber-500" required></textarea>
                 </div>
                 <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3 px-4 rounded-xl text-xs transition shadow-lg active:scale-98 cursor-pointer uppercase tracking-wider">
                     Submit Verified Pin
@@ -261,12 +244,11 @@
         </div>
     </div>
 
-    <!-- SCRIPTS -->
+    <!-- SCRIPTS MODULE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Weather integration
         async function fetchWeather() {
             try {
                 const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=43.2557&longitude=-79.8711&current=temperature_2m,weathercode');
@@ -279,7 +261,6 @@
         }
         fetchWeather();
 
-        // Firebase Initialization
         const firebaseConfig = {
             apiKey: "AIzaSyDsUcJX5_sTFZ4gYbetTtQjN95sDD1vuks",
             authDomain: "wetfloorwatch.firebaseapp.com",
@@ -291,7 +272,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Map Setup
         const map = L.map('map', { zoomControl: false }).setView([43.2557, -79.8711], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -302,6 +282,7 @@
         let markersLayer = L.layerGroup().addTo(map);
         let supercrawlLayerGroup = L.layerGroup().addTo(map);
         let heatLayer = null;
+        let rawReports = [];
 
         function createPinIcon(colorHex, shadowHex) {
             return L.divIcon({
@@ -328,114 +309,6 @@
             return 'Historical Record';
         }
 
-        function getSocialLinkButton(url, category) {
-            if (!url) return '';
-            let label = 'Open Link';
-            let color = 'sky';
-            if (url.includes('instagram.com')) { label = 'Open Instagram Profile'; color = 'fuchsia'; }
-            else if (url.includes('twitter.com') || url.includes('x.com')) { label = 'Open X / Twitter Post'; color = 'sky'; }
-            else if (url.includes('reddit.com')) { label = 'Open Reddit Thread'; color = 'orange'; }
-            else if (url.includes('facebook.com')) { label = 'Open Facebook Post'; color = 'blue'; }
-            
-            return `<a href="${url}" target="_blank" class="block text-center mt-2.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-${color}-400 font-bold text-[10px] uppercase rounded-lg transition">🔗 ${label}</a>`;
-        }
-
-        // MULTI-SOURCE SOCIAL NETWORKS DATA (Cleaned of any simulated quotes)
-        const SOCIAL_FEEDS = {
-            reddit: [
-                { author: 'u/HamOntSafetyWatcher', text: 'Avoid the Bay & York shelter blocks tonight, heavy police presence and discarded paraphernalia near TD Coliseum.', time: '2h ago', url: 'https://reddit.com/r/Hamilton/comments/bay_york_shelter_alert', lat: 43.2615, lng: -79.8735, category: 'hazard' },
-                { author: 'u/SteeltownResident', text: 'Supercrawl setup causing major pedestrian bottlenecks around James North. Plan alternate routes.', time: '5h ago', url: 'https://reddit.com/r/Hamilton/comments/supercrawl_traffic_bottleneck', lat: 43.2585, lng: -79.8670, category: 'street' }
-            ],
-            instagram: [
-                { author: '@interventionintersection2026', text: 'Official Community Watch Profile - Tap to view public posts and grid updates.', time: 'Pinned', url: 'https://www.instagram.com/interventionintersection2026', lat: 43.2575, lng: -79.8580, category: 'street' }
-            ],
-            twitter: [
-                { author: '@HamiltonPolice', text: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect delays.', time: '1h ago', url: 'https://twitter.com/HamiltonPolice', lat: 43.2600, lng: -79.8671, category: 'advisory' },
-                { author: '@HamOntAlerts', text: 'EMS responding to downtown medical call near Bay St N. Area congested.', time: '3h ago', url: 'https://twitter.com', lat: 43.2610, lng: -79.8720, category: 'advisory' }
-            ],
-            facebook: [
-                { author: 'Hamilton Community Safety Group', text: 'Found multiple broken pipes and needles near York Blvd parking lots. Clean-up notified.', time: '7h ago', url: 'https://facebook.com/groups/hamiltonwatch', lat: 43.2625, lng: -79.8732, category: 'hazard' },
-                { author: 'Downtown Hamilton Watch', text: 'Reminder to keep vehicles locked and valuables out of sight in the core this weekend.', time: '14h ago', url: 'https://facebook.com/groups/downtownwatch', lat: 43.2550, lng: -79.8650, category: 'street' }
-            ]
-        };
-
-        window.switchSocialTab = function(platform) {
-            document.querySelectorAll('.social-tab').forEach(btn => {
-                btn.className = "social-tab px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition";
-            });
-            const activeBtn = document.getElementById(`tab-${platform}`);
-            if (activeBtn) {
-                activeBtn.className = `social-tab px-2.5 py-1 rounded-lg bg-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-500/20 text-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-300 border border-${platform === 'reddit' ? 'orange' : platform === 'instagram' ? 'fuchsia' : platform === 'twitter' ? 'sky' : 'blue'}-500/40 font-bold transition`;
-            }
-
-            const container = document.getElementById('social-feed-container');
-            container.innerHTML = SOCIAL_FEEDS[platform].map(post => `
-                <a href="${post.url}" target="_blank" class="block p-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition space-y-1">
-                    <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
-                        <strong class="text-slate-300">${post.author}</strong>
-                        <span class="text-amber-400">🔗 Link</span>
-                    </div>
-                    <p class="text-xs text-slate-200 leading-tight">${post.text}</p>
-                </a>
-            `).join('');
-        };
-        switchSocialTab('reddit');
-
-        // HAMILTON SEED DATA
-        const defaultSeedData = {
-            emergency: [
-                {
-                    id: 'seed-em-1', category: 'emergency', hasPin: true, lat: 43.2571, lng: -79.8824, isVerified: true,
-                    source: 'CHCH News / Hamilton Police Dispatch (Main W & Frid)',
-                    description: 'Homicide Unit: 37-year-old male arrested following random fatal stabbing of 16-year-old victim.',
-                    url: 'https://hamiltonpolice.on.ca', timestamp: new Date('2026-09-09T17:30:00')
-                },
-                {
-                    id: 'seed-em-2', category: 'emergency', hasPin: true, lat: 43.2355, lng: -79.8402, isVerified: true,
-                    source: 'Hamilton Police Dispatch (Oriole Crescent)',
-                    description: 'Shooting Investigation: Shots fired at residential dwelling overnight. Spent casings recovered.',
-                    url: 'https://hamiltonpolice.on.ca', timestamp: new Date('2026-09-04T01:40:00')
-                }
-            ],
-            advisory: [
-                {
-                    id: 'seed-adv-1', category: 'advisory', hasPin: true, lat: 43.2600, lng: -79.8671, isVerified: true,
-                    source: '@HamiltonPolice (X / Twitter)',
-                    description: 'TRAFFIC ALERT: Road closures in effect along James St N for Supercrawl 2026 weekend. Expect significant traffic delays.',
-                    url: 'https://twitter.com/HamiltonPolice', timestamp: new Date(Date.now() - 3600000 * 2)
-                }
-            ],
-            hazard: [
-                {
-                    id: 'seed-haz-bay-york', category: 'hazard', hasPin: true, lat: 43.2615, lng: -79.8735, isVerified: true,
-                    source: 'Community Field Report (Bay & York Shelter / TD Coliseum Area)',
-                    description: 'High-risk hazard zone: Shelter perimeter and TD Coliseum vicinity heavily riddled with discarded needles, broken glass, and open drug use. Proceed with extreme caution.',
-                    url: '', timestamp: new Date(Date.now() - 3600000 * 3)
-                },
-                {
-                    id: 'seed-haz-1', category: 'hazard', hasPin: true, lat: 43.2575, lng: -79.8580, isVerified: true,
-                    source: 'Public Health / Parks (Beasley Park Perimeter)',
-                    description: 'WARNING: Multiple discarded needles and bent spoons found near the Mary St & Wilson St playground perimeter.',
-                    url: '', timestamp: new Date(Date.now() - 3600000 * 8)
-                },
-                {
-                    id: 'seed-haz-2', category: 'hazard', hasPin: true, lat: 43.2567, lng: -79.8711, isVerified: true,
-                    source: 'EMS Dispatch (Jackson Square Area)',
-                    description: 'EMS response to suspected overdose. Open air drug use and crack pipes reported near York Blvd entrance.',
-                    url: '', timestamp: new Date(Date.now() - 3600000 * 48)
-                }
-            ],
-            street: [
-                {
-                    id: 'seed-street-1', category: 'street', hasPin: true, lat: 43.2585, lng: -79.8670, isVerified: false,
-                    source: 'Community Watch Network',
-                    description: 'Active community watch documenting aggressive encounters and open narcotics activity bleeding off James St N.',
-                    url: 'https://www.instagram.com/interventionintersection2026', timestamp: new Date(Date.now() - 3600000 * 6)
-                }
-            ]
-        };
-
-        // PERFECTLY ALIGNED SUPERCRAWL CORRIDOR ALONG JAMES STREET NORTH (Snapped to longitude -79.8671)
         const SUPERCRAWL_ROUTES = [
             {
                 name: "Supercrawl Festival Corridor (James St N)",
@@ -452,8 +325,6 @@
                 ]
             }
         ];
-
-        let rawAppData = { emergency: [], advisory: [], hazard: [], street: [] };
 
         function drawSupercrawl() {
             supercrawlLayerGroup.clearLayers();
@@ -501,41 +372,14 @@
             };
 
             const configs = {
-                emergency: { color: 'red', label: 'Emergency / Serious Incident' },
-                advisory: { color: 'sky', label: 'Advisory / Traffic Notice' },
-                hazard: { color: 'amber', label: 'Drug / Safety Hazard (Needles/Pipes)' },
+                emergency: { color: 'red', label: 'Emergency Incident' },
+                advisory: { color: 'sky', label: 'Advisory / Traffic' },
+                hazard: { color: 'amber', label: 'Drug / Safety Hazard' },
                 street: { color: 'fuchsia', label: 'Social / Community Intel' }
             };
 
             let visibleCount = 0;
             let heatPoints = [];
-            
-            let allItemsMap = { 
-                emergency: [...rawAppData.emergency], 
-                advisory: [...rawAppData.advisory],
-                hazard: [...rawAppData.hazard], 
-                street: [...rawAppData.street] 
-            };
-
-            Object.values(SOCIAL_FEEDS).forEach(platformPosts => {
-                platformPosts.forEach(post => {
-                    if (allItemsMap[post.category]) {
-                        allItemsMap[post.category].push({
-                            id: 'social-' + Math.random(),
-                            category: post.category,
-                            hasPin: true,
-                            lat: post.lat,
-                            lng: post.lng,
-                            isVerified: false,
-                            source: `${post.author}`,
-                            description: post.text,
-                            url: post.url,
-                            timestamp: new Date()
-                        });
-                    }
-                });
-            });
-
             const showHeatmap = document.getElementById('heatmap-toggle').checked;
 
             if (showHeatmap) {
@@ -546,58 +390,56 @@
                 }
             }
 
-            Object.keys(allItemsMap).forEach(cat => {
+            rawReports.forEach(item => {
+                const cat = item.category || 'hazard';
                 if (!activeCategories[cat]) return;
 
-                allItemsMap[cat].forEach(item => {
-                    const itemTime = item.timestamp?.toMillis ? item.timestamp.toMillis() : (item.timestamp instanceof Date ? item.timestamp.getTime() : now);
-                    if (cutoffTime > 0 && itemTime < cutoffTime) return;
+                const itemTime = item.timestamp?.toMillis ? item.timestamp.toMillis() : (item.timestamp instanceof Date ? item.timestamp.getTime() : now);
+                if (cutoffTime > 0 && itemTime < cutoffTime) return;
 
-                    visibleCount++;
+                visibleCount++;
 
-                    if (item.lat && item.lng) {
-                        const intensity = (cat === 'emergency') ? 1.0 : (cat === 'advisory' ? 0.7 : (cat === 'hazard' ? 0.85 : 0.6));
-                        heatPoints.push([item.lat, item.lng, intensity]);
+                if (item.lat && item.lng) {
+                    const intensity = (cat === 'emergency') ? 1.0 : (cat === 'advisory' ? 0.7 : (cat === 'hazard' ? 0.85 : 0.6));
+                    heatPoints.push([item.lat, item.lng, intensity]);
 
-                        const marker = L.marker([item.lat, item.lng], { icon: icons[cat] }).addTo(markersLayer);
-                        let socialLink = getSocialLinkButton(item.url, cat);
-                        
-                        marker.bindPopup(`
-                            <div class="font-sans min-w-[220px] space-y-1">
-                                <span class="text-[9px] font-bold uppercase text-${configs[cat].color}-400 tracking-wider">${configs[cat].label}</span>
-                                <strong class="text-xs text-white block">${item.source}</strong>
-                                <p class="text-[11px] text-slate-300">${item.description}</p>
-                                <div class="pt-1 border-t border-slate-800 flex justify-between text-[9px] text-slate-400 font-mono">
-                                    <span>⚠️ Location Estimated</span>
-                                    <span>${formatTimestamp(item.timestamp)}</span>
-                                </div>
-                                ${socialLink}
+                    const marker = L.marker([item.lat, item.lng], { icon: icons[cat] || icons.hazard }).addTo(markersLayer);
+                    
+                    marker.bindPopup(`
+                        <div class="font-sans min-w-[220px] space-y-1">
+                            <span class="text-[9px] font-bold uppercase text-${configs[cat]?.color || 'amber'}-400 tracking-wider">${configs[cat]?.label || 'Report'}</span>
+                            <strong class="text-xs text-white block">${item.source}</strong>
+                            <p class="text-[11px] text-slate-300">${item.description}</p>
+                            <div class="pt-1 border-t border-slate-800 flex justify-between text-[9px] text-slate-400 font-mono">
+                                <span>⚠️ Estimated Location</span>
+                                <span>${formatTimestamp(item.timestamp)}</span>
                             </div>
-                        `);
-                    }
+                            ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="block text-center mt-2 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-[10px] rounded transition">🔗 Open Direct Source</a>` : ''}
+                        </div>
+                    `);
+                }
 
-                    const card = document.createElement('div');
-                    card.className = `p-3 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-xl cursor-pointer space-y-1 transition`;
-                    card.innerHTML = `
-                        <div class="flex items-center justify-between">
-                            <span class="text-[9px] font-bold uppercase text-${configs[cat].color}-400">${configs[cat].label}</span>
-                            <span class="text-[8px] font-mono text-slate-500">${formatTimestamp(item.timestamp)}</span>
-                        </div>
-                        <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.source}</p>
-                        <p class="text-[11px] text-slate-400 line-clamp-2">${item.description}</p>
-                        <div class="flex justify-between items-center pt-1">
-                            <span class="text-[8px] text-amber-400/80 font-mono">⚠️ Approximate Coordinates</span>
-                            ${item.url ? `<a href="${item.url}" target="_blank" class="text-[9px] text-sky-400 hover:underline font-bold" onclick="event.stopPropagation()">🔗 Link</a>` : ''}
-                        </div>
-                    `;
-                    if (item.lat && item.lng) {
-                        card.onclick = () => map.flyTo([item.lat, item.lng], 16, { duration: 1 });
-                    }
-                    feedContainer.appendChild(card);
-                });
+                const card = document.createElement('div');
+                card.className = `p-3 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-xl cursor-pointer space-y-1 transition`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-[9px] font-bold uppercase text-${configs[cat]?.color || 'amber'}-400">${configs[cat]?.label || 'Intel'}</span>
+                        <span class="text-[8px] font-mono text-slate-500">${formatTimestamp(item.timestamp)}</span>
+                    </div>
+                    <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.source}</p>
+                    <p class="text-[11px] text-slate-400 line-clamp-2">${item.description}</p>
+                    <div class="flex justify-between items-center pt-1">
+                        <span class="text-[8px] text-amber-400/80 font-mono">⚠️ Approximate Coordinates</span>
+                        ${item.url ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-[9px] text-sky-400 hover:underline font-bold" onclick="event.stopPropagation()">🔗 Direct Link</a>` : ''}
+                    </div>
+                `;
+                if (item.lat && item.lng) {
+                    card.onclick = () => map.flyTo([item.lat, item.lng], 16, { duration: 1 });
+                }
+                feedContainer.appendChild(card);
             });
 
-            document.getElementById('active-count').innerText = `${visibleCount} records matched`;
+            document.getElementById('active-count').innerText = `${visibleCount} live records loaded`;
 
             if (showHeatmap && heatPoints.length > 0) {
                 heatLayer = L.heatLayer(heatPoints, { 
@@ -607,23 +449,15 @@
             }
         }
 
-        onSnapshot(collection(db, "reports"), (snapshot) => {
-            let data = { 
-                emergency: [...defaultSeedData.emergency], 
-                advisory: [...defaultSeedData.advisory],
-                hazard: [...defaultSeedData.hazard], 
-                street: [...defaultSeedData.street] 
-            };
-            snapshot.forEach(doc => {
-                const item = doc.data();
-                const cat = item.category || 'hazard';
-                if (data[cat]) data[cat].push({ id: doc.id, ...item });
-            });
-            rawAppData = data;
+        // Firestore Realtime Listener
+        const reportsRef = collection(db, "reports");
+        const q = query(reportsRef, orderBy("timestamp", "desc"), limit(100));
+
+        onSnapshot(q, (snapshot) => {
+            rawReports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             filterAndRender();
-        }, () => {
-            rawAppData = defaultSeedData; 
-            filterAndRender();
+        }, (error) => {
+            console.error("Firestore Sync Error:", error);
         });
 
         document.getElementById('date-range-filter').onchange = filterAndRender;
@@ -672,7 +506,7 @@
             const desc = document.getElementById('hazard-desc-input').value.trim();
             
             if (!email || !email.includes('@')) {
-                alert("A registered email address is strictly required to broadcast pins.");
+                alert("A registered email address is required to broadcast pins.");
                 return;
             }
             if (desc.length < 5 || desc.length > 400) { 
@@ -680,7 +514,7 @@
                 return; 
             }
             if (containsProfanity(desc)) { 
-                alert("Submission rejected: Profanity, hate speech, or prohibited terms detected."); 
+                alert("Submission rejected: Prohibited terms detected."); 
                 return; 
             }
 
@@ -697,16 +531,15 @@
                 });
                 document.getElementById('report-modal').classList.add('hidden');
                 e.target.reset();
-                alert("Report successfully published to the approximate grid.");
+                alert("Report published to live grid.");
             } catch (err) {
                 alert("Write failed: Check Firestore public rules.");
             }
         };
 
-        // UI Event Listeners
         document.getElementById('accept-disclaimer-btn').onclick = () => document.getElementById('disclaimer-modal').classList.add('hidden');
         document.getElementById('open-report-modal').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
-        document.getElementById('floating-report-btn').onclick = () => document.getElementById('report-modal').classList.add('hidden');
+        document.getElementById('floating-report-btn').onclick = () => document.getElementById('report-modal').classList.remove('hidden');
         document.getElementById('close-report-modal').onclick = () => document.getElementById('report-modal').classList.add('hidden');
         document.getElementById('sidebar-toggle').onclick = () => document.getElementById('sidebar').classList.toggle('-translate-x-full');
         document.getElementById('locate-me-btn').onclick = () => navigator.geolocation?.getCurrentPosition(p => map.flyTo([p.coords.latitude, p.coords.longitude], 16));
