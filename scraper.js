@@ -26,6 +26,7 @@ const VERIFIED_INCIDENT_SEEDS = [
   {
     id: "seed-2026-stoney-creek",
     category: "emergency",
+    platform: "police",
     hasPin: true,
     lat: 43.2144,
     lng: -79.7135,
@@ -37,6 +38,7 @@ const VERIFIED_INCIDENT_SEEDS = [
   {
     id: "seed-2026-main-st-homicide",
     category: "emergency",
+    platform: "police",
     hasPin: true,
     lat: 43.2500,
     lng: -79.8500,
@@ -48,6 +50,7 @@ const VERIFIED_INCIDENT_SEEDS = [
   {
     id: "seed-2026-oriole-shooting",
     category: "emergency",
+    platform: "police",
     hasPin: true,
     lat: 43.2350,
     lng: -79.8400,
@@ -59,6 +62,7 @@ const VERIFIED_INCIDENT_SEEDS = [
   {
     id: "seed-2026-macnab-stabbing",
     category: "emergency",
+    platform: "police",
     hasPin: true,
     lat: 43.2557,
     lng: -79.8711,
@@ -70,6 +74,7 @@ const VERIFIED_INCIDENT_SEEDS = [
   {
     id: "seed-2026-east14-bearspray",
     category: "emergency",
+    platform: "police",
     hasPin: true,
     lat: 43.2300,
     lng: -79.8600,
@@ -81,6 +86,7 @@ const VERIFIED_INCIDENT_SEEDS = [
   {
     id: "seed-2026-news-needles",
     category: "hazard",
+    platform: "news",
     hasPin: true,
     lat: 43.2618,
     lng: -79.8660,
@@ -92,11 +98,11 @@ const VERIFIED_INCIDENT_SEEDS = [
 ];
 
 const FEEDS = [
-  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", sourceName: "Official Police Dispatch" },
-  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+news+(shooting+OR+stabbing+OR+assault+OR+drug+OR+fire+OR+crime+OR+encampment)+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "advisory", sourceName: "Local News Network" },
-  { url: "https://news.google.com/rss/search?q=site:thespec.com+Hamilton+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "advisory", sourceName: "The Hamilton Spectator" },
-  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=needle+OR+drug+OR+tent+OR+encampment+OR+paraphernalia+OR+overdose+OR+police+OR+incident&restrict_sr=on&sort=new&t=year", type: "street", sourceName: "Community Chatter (r/Hamilton)" },
-  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "street", sourceName: "@interventionintersection2026" }
+  { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+when:6m&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", platform: "police", sourceName: "Official Police Dispatch" },
+  { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+news+(shooting+OR+stabbing+OR+assault+OR+drug+OR+fire+OR+crime+OR+encampment)+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "advisory", platform: "news", sourceName: "Local News Network" },
+  { url: "https://news.google.com/rss/search?q=site:thespec.com+Hamilton+when:3m&hl=en-CA&gl=CA&ceid=CA:en", type: "advisory", platform: "news", sourceName: "The Hamilton Spectator" },
+  { url: "https://www.reddit.com/r/Hamilton/search.rss?q=needle+OR+drug+OR+tent+OR+encampment+OR+paraphernalia+OR+overdose+OR+police+OR+incident&restrict_sr=on&sort=new&t=year", type: "street", platform: "reddit", sourceName: "Community Chatter (r/Hamilton)" },
+  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "street", platform: "instagram", sourceName: "@interventionintersection2026" }
 ];
 
 const EXACT_STREET_WHITELIST = [
@@ -120,10 +126,10 @@ const EXACT_STREET_WHITELIST = [
   { names: ['east 14th', 'east mountain'], name: "East Mountain Sector", lat: 43.2300, lng: -79.8600 }
 ];
 
-function sanitizeUrl(rawUrl) {
+function sanitizeUrl(rawUrl, platform) {
   if (!rawUrl) return 'https://hamiltonpolice.on.ca/news/';
   let url = rawUrl.trim();
-  if (url.includes('reddit.com')) {
+  if (platform === 'reddit' || url.includes('reddit.com')) {
     url = url.replace('http://', 'https://');
     if (!url.startsWith('https://www.reddit.com')) {
       url = url.replace(/https:\/\/[^\/]*reddit\.com/, 'https://www.reddit.com');
@@ -132,7 +138,7 @@ function sanitizeUrl(rawUrl) {
   return url;
 }
 
-async function verifyAndExtract(item, feedType, sourceName) {
+async function verifyAndExtract(item, feedType, platform, sourceName) {
   const title = (item.title || "").toLowerCase();
   const rawSnippet = (item.contentSnippet || item.content || "").toLowerCase();
   const leadText = title + " " + rawSnippet;
@@ -161,10 +167,11 @@ async function verifyAndExtract(item, feedType, sourceName) {
     .trim()
     .substring(0, 220) + '...';
 
-  const cleanUrl = sanitizeUrl(item.link || item.guid);
+  const cleanUrl = sanitizeUrl(item.link || item.guid, platform);
 
   return {
     category: feedType,
+    platform: platform,
     hasPin: hasPin,
     lat: pinData.lat,
     lng: pinData.lng,
@@ -180,6 +187,7 @@ async function run() {
   for (const seed of VERIFIED_INCIDENT_SEEDS) {
     await db.collection("reports").doc(seed.id).set({
       category: seed.category,
+      platform: seed.platform,
       hasPin: seed.hasPin,
       lat: seed.lat,
       lng: seed.lng,
@@ -200,7 +208,7 @@ async function run() {
       console.log(`Fetching feed: ${feed.sourceName}`);
       const parsedFeed = await parser.parseURL(feed.url);
       for (const item of (parsedFeed.items || []).slice(0, 50)) {
-        const intel = await verifyAndExtract(item, feed.type, feed.sourceName);
+        const intel = await verifyAndExtract(item, feed.type, feed.platform, feed.sourceName);
         if (!intel) continue;
 
         const uniqueString = intel.url + '-' + intel.source;
@@ -208,6 +216,7 @@ async function run() {
 
         await db.collection("reports").doc(docId).set({
           category: intel.category,
+          platform: intel.platform,
           hasPin: intel.hasPin,
           lat: intel.lat,
           lng: intel.lng,
