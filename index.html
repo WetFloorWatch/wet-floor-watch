@@ -27,14 +27,15 @@
         }
         .leaflet-popup-content { margin: 12px; line-height: 1.5; }
         .leaflet-container a.leaflet-popup-close-button { color: #94a3b8; padding: 4px; }
-        .supercrawl-corridor {
-            filter: drop-shadow(0 0 8px rgba(236,72,153,0.7));
-            animation: pulse-corridor 3s infinite ease-in-out;
+        
+        .supercrawl-fog {
+            animation: pulse-fog 4s infinite alternate ease-in-out;
+            /* SVG filters inside leaflet work best for blur, but CSS can assist */
+            filter: blur(4px); 
         }
-        @keyframes pulse-corridor {
-            0% { opacity: 0.6; stroke-width: 6; }
-            50% { opacity: 0.95; stroke-width: 10; }
-            100% { opacity: 0.6; stroke-width: 6; }
+        @keyframes pulse-fog {
+            0% { fill-opacity: 0.15; }
+            100% { fill-opacity: 0.45; }
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
@@ -118,6 +119,26 @@
                 </a>
             </div>
 
+            <!-- COMMUNITY WATCH PROFILE CARD -->
+            <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex-shrink-0">
+                <a href="https://www.instagram.com/interventionintersection2026" target="_blank" rel="noopener noreferrer" class="group flex items-center justify-between p-2.5 bg-slate-900 hover:bg-slate-800/90 border border-fuchsia-500/30 hover:border-fuchsia-400 rounded-xl transition shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px] flex-shrink-0">
+                            <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-mono text-fuchsia-400 uppercase tracking-wider block font-bold">Community Watch Feed</span>
+                            <span class="text-xs font-bold text-slate-100 group-hover:text-fuchsia-300 transition">@interventionintersection2026</span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/30 flex items-center gap-1">
+                        Profile ↗
+                    </span>
+                </a>
+            </div>
+
             <!-- MULTI-SOURCE SOCIAL NETWORKS BOX -->
             <div class="p-3 bg-slate-950/60 border-b border-slate-800 flex-shrink-0 space-y-2">
                 <div class="flex items-center justify-between">
@@ -149,12 +170,12 @@
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">News & Intel Source</label>
-                        <select id="source-filter" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-200 font-mono outline-none focus:border-amber-500 shadow-inner">
-                            <option value="all" selected>All Sources</option>
-                            <option value="police">Police Dispatches Only</option>
-                            <option value="news">Local News Outlets</option>
-                            <option value="social">Social & Community</option>
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Timeframe</label>
+                        <select id="date-range-filter" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-200 font-mono outline-none focus:border-amber-500 shadow-inner">
+                            <option value="all" selected>All Records</option>
+                            <option value="30">Past 30 Days</option>
+                            <option value="7">Past 7 Days</option>
+                            <option value="1">Past 24 Hours</option>
                         </select>
                     </div>
                     <div>
@@ -170,8 +191,18 @@
                 </div>
             </div>
 
-            <!-- MAIN EVENT FEED & FOOTER -->
-            <div class="flex-1 overflow-y-auto p-3 space-y-2.5 bg-slate-950/40 flex flex-col justify-between">
+            <!-- MAIN EVENT TABS (Isolating Sources) -->
+            <div class="px-3 pt-3 flex-shrink-0 bg-slate-950/40">
+                <div class="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide text-[10px]">
+                    <button id="main-tab-all" class="main-tab px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold transition cursor-pointer whitespace-nowrap">All Sources</button>
+                    <button id="main-tab-police" class="main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-red-400 transition cursor-pointer whitespace-nowrap">Police Dispatches</button>
+                    <button id="main-tab-news" class="main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-sky-400 transition cursor-pointer whitespace-nowrap">Local News</button>
+                    <button id="main-tab-social" class="main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-fuchsia-400 transition cursor-pointer whitespace-nowrap">Social / Intel</button>
+                </div>
+            </div>
+
+            <!-- MAIN EVENT FEED LIST -->
+            <div class="flex-1 overflow-y-auto px-3 pb-3 space-y-2.5 bg-slate-950/40 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="active-count">0 synchronized records</span>
@@ -280,6 +311,7 @@
         let heatLayer = null;
         let rawReports = [];
         let currentSocialTab = 'reddit';
+        let currentMainTab = 'all';
 
         function createPinIcon(colorHex, shadowHex) {
             return L.divIcon({
@@ -306,46 +338,30 @@
             return 'Historical Record';
         }
 
-        const SUPERCRAWL_ROUTES = [
-            {
-                name: "Supercrawl Festival Corridor (James St N)",
-                description: "Official festival pedestrian street closure footprint along James St N from King St up to Strachan St.",
-                coords: [
-                    [43.2555, -79.8671],
-                    [43.2572, -79.8671],
-                    [43.2590, -79.8671],
-                    [43.2608, -79.8671],
-                    [43.2628, -79.8671],
-                    [43.2650, -79.8671],
-                    [43.2675, -79.8671],
-                    [43.2695, -79.8671]
-                ]
-            }
+        const SUPERCRAWL_FOG_BOUNDS = [
+            [43.2545, -79.8690], // Bottom Left
+            [43.2545, -79.8650], // Bottom Right
+            [43.2690, -79.8650], // Top Right
+            [43.2690, -79.8690]  // Top Left
         ];
 
         function drawSupercrawl() {
             supercrawlLayerGroup.clearLayers();
             if(document.getElementById('filter-supercrawl').checked) {
-                SUPERCRAWL_ROUTES.forEach(route => {
-                    L.polyline(route.coords, {
-                        color: '#f472b6', weight: 14, opacity: 0.35,
-                        className: 'supercrawl-corridor cursor-pointer'
-                    }).addTo(supercrawlLayerGroup);
-
-                    const mainPolyline = L.polyline(route.coords, {
-                        color: '#ec4899', weight: 5, opacity: 0.95,
-                        dashArray: '6, 6',
-                        className: 'cursor-pointer'
-                    }).addTo(supercrawlLayerGroup);
-                    
-                    mainPolyline.bindPopup(`
-                        <div class="font-sans min-w-[210px] space-y-1">
-                            <span class="text-[9px] font-bold uppercase text-pink-400 tracking-wider">✨ Supercrawl Pedestrian Corridor</span>
-                            <strong class="text-xs text-white block">${route.name}</strong>
-                            <p class="text-[11px] text-slate-300">${route.description}</p>
-                        </div>
-                    `);
-                });
+                const fog = L.polygon(SUPERCRAWL_FOG_BOUNDS, {
+                    color: 'transparent',
+                    fillColor: '#94a3b8',
+                    fillOpacity: 0.35,
+                    className: 'supercrawl-fog cursor-pointer'
+                }).addTo(supercrawlLayerGroup);
+                
+                fog.bindPopup(`
+                    <div class="font-sans min-w-[210px] space-y-1">
+                        <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">☁️ Congestion Fog</span>
+                        <strong class="text-xs text-white block">Supercrawl Festival Zone</strong>
+                        <p class="text-[11px] text-slate-300">High pedestrian traffic and street closures active within this corridor.</p>
+                    </div>
+                `);
             }
         }
 
@@ -385,11 +401,25 @@
                 <a href="${post.url}" target="_blank" rel="noopener noreferrer" class="block p-2 bg-slate-900 hover:bg-slate-800/80 border border-slate-800 rounded-lg transition space-y-1">
                     <div class="flex justify-between items-center text-[9px] text-slate-400 font-mono">
                         <strong class="text-slate-300 truncate max-w-[200px]">${post.source}</strong>
-                        <span class="text-amber-400 font-bold">🔗 Open Direct Link</span>
+                        <span class="text-amber-400 font-bold whitespace-nowrap">🔗 Link</span>
                     </div>
                     <p class="text-xs text-slate-200 leading-tight line-clamp-2">${post.description}</p>
                 </a>
             `).join('');
+        };
+
+        window.switchMainTab = function(tab) {
+            currentMainTab = tab;
+            document.querySelectorAll('.main-tab').forEach(btn => {
+                btn.className = "main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 hover:text-white transition cursor-pointer whitespace-nowrap";
+            });
+            const activeBtn = document.getElementById(`main-tab-${tab}`);
+            if (activeBtn) {
+                const colorMap = { all: 'amber', police: 'red', news: 'sky', social: 'fuchsia' };
+                const c = colorMap[tab];
+                activeBtn.className = `main-tab px-2.5 py-1.5 rounded-lg bg-${c}-500/20 text-${c}-300 border border-${c}-500/40 font-bold transition cursor-pointer whitespace-nowrap`;
+            }
+            filterAndRender();
         };
 
         function filterAndRender() {
@@ -401,7 +431,10 @@
             const feedContainer = document.getElementById('feed-list');
             feedContainer.innerHTML = '';
 
-            const sourceFilter = document.getElementById('source-filter').value;
+            const dateRangeDays = document.getElementById('date-range-filter').value;
+            const now = Date.now();
+            const cutoffTime = dateRangeDays === 'all' ? 0 : now - (parseInt(dateRangeDays) * 24 * 60 * 60 * 1000);
+
             const activeCategories = {
                 emergency: document.getElementById('filter-emergency').checked,
                 advisory: document.getElementById('filter-advisory').checked,
@@ -434,9 +467,13 @@
 
                 if (!activeCategories[cat]) return;
 
-                if (sourceFilter === 'police' && p !== 'police') return;
-                if (sourceFilter === 'news' && p !== 'news') return;
-                if (sourceFilter === 'social' && p !== 'reddit' && p !== 'instagram' && p !== 'twitter' && p !== 'facebook') return;
+                const itemTime = item.timestamp?.toMillis ? item.timestamp.toMillis() : (item.timestamp instanceof Date ? item.timestamp.getTime() : now);
+                if (cutoffTime > 0 && itemTime < cutoffTime) return;
+
+                // Tab Filter Logic
+                if (currentMainTab === 'police' && p !== 'police') return;
+                if (currentMainTab === 'news' && p !== 'news') return;
+                if (currentMainTab === 'social' && p !== 'reddit' && p !== 'instagram' && p !== 'twitter' && p !== 'facebook' && p !== 'social') return;
 
                 visibleCount++;
 
@@ -505,7 +542,12 @@
         document.getElementById('tab-twitter').onclick = () => switchSocialTab('twitter');
         document.getElementById('tab-facebook').onclick = () => switchSocialTab('facebook');
 
-        document.getElementById('source-filter').onchange = filterAndRender;
+        document.getElementById('main-tab-all').onclick = () => switchMainTab('all');
+        document.getElementById('main-tab-police').onclick = () => switchMainTab('police');
+        document.getElementById('main-tab-news').onclick = () => switchMainTab('news');
+        document.getElementById('main-tab-social').onclick = () => switchMainTab('social');
+
+        document.getElementById('date-range-filter').onchange = filterAndRender;
         document.getElementById('heatmap-toggle').onchange = filterAndRender;
         ['filter-supercrawl', 'filter-emergency', 'filter-advisory', 'filter-hazard', 'filter-street'].forEach(id => {
             document.getElementById(id).onchange = filterAndRender;
