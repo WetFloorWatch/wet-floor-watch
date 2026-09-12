@@ -1,27 +1,17 @@
-name: WetFloorWatch Live Grid Ingestion
-
+name: WetFloorWatch Scraper Engine
 on:
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
-
 jobs:
   ingest:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js Environment
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '24'
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Execute Live Scraper Engine
+      - run: npm install firebase-admin rss-parser
+      - run: node scraper.js
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-        run: node scraper.js
