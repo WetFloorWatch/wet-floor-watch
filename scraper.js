@@ -13,7 +13,7 @@ initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
 const parser = new Parser({
-  headers: { 'User-Agent': 'WetFloorWatch-LiveEngine/2.0' },
+  headers: { 'User-Agent': 'WetFloorWatch-LiveEngine/2.1' },
   timeout: 10000
 });
 
@@ -79,10 +79,8 @@ async function verifyAndExtract(item, feedType, platform, sourceName) {
     }
   }
 
-  if (!matchedCorridor) {
-    // Default fallback to downtown core if general Hamilton news matches without specific street
-    matchedCorridor = { name: "Hamilton General Core", lat: 43.2557, lng: -79.8711 };
-  }
+  const hasPin = matchedCorridor !== null;
+  const pinData = matchedCorridor || { name: "Hamilton General Sector", lat: null, lng: null };
 
   const cleanDescription = scrubPII(
     (item.contentSnippet || item.title || '').replace(/(<([^>]+)>)/gi, "").replace(/\s+/g, " ").trim()
@@ -93,10 +91,10 @@ async function verifyAndExtract(item, feedType, platform, sourceName) {
   return {
     category: feedType,
     platform: platform,
-    hasPin: true,
-    lat: matchedCorridor.lat,
-    lng: matchedCorridor.lng,
-    source: `${sourceName} • ${matchedCorridor.name}`,
+    hasPin: hasPin,
+    lat: pinData.lat,
+    lng: pinData.lng,
+    source: `${sourceName} • ${pinData.name}`,
     description: cleanDescription,
     url: item.link || item.guid || '',
     timestamp: Timestamp.fromDate(articleDate)
