@@ -13,10 +13,11 @@ initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
 const parser = new Parser({
-  headers: { 'User-Agent': 'WetFloorWatch-LiveEngine/3.1' },
+  headers: { 'User-Agent': 'WetFloorWatch-LiveEngine/3.2' },
   timeout: 10000
 });
 
+// Accurate, generic historical seeds (NO fabricated social media posts)
 const HISTORICAL_SEEDS = [
   {
     id: "hist-2024-hess", category: "emergency", platform: "news", hasPin: true, lat: 43.2575, lng: -79.8761,
@@ -25,10 +26,6 @@ const HISTORICAL_SEEDS = [
   {
     id: "hist-2025-barton", category: "hazard", platform: "police", hasPin: true, lat: 43.2618, lng: -79.8460,
     source: "Official Police Dispatch • Barton St E", description: "Vice and Drug unit execution of a search warrant resulting in the seizure of illicit narcotics.", url: "https://hamiltonpolice.on.ca", timestamp: Timestamp.fromDate(new Date("2025-11-20T14:30:00"))
-  },
-  {
-    id: "hist-2026-wellington", category: "hazard", platform: "instagram", hasPin: true, lat: 43.2542, lng: -79.8521,
-    source: "@interventionintersection2026 • Wellington & Rebecca", description: "Encampment spillover and discarded paraphernalia documented during morning neighborhood sweep.", url: "https://instagram.com/interventionintersection2026", timestamp: Timestamp.fromDate(new Date("2026-09-08T09:15:00"))
   }
 ];
 
@@ -36,7 +33,7 @@ const FEEDS = [
   { url: "https://news.google.com/rss/search?q=site:hamiltonpolice.on.ca+OR+%22Hamilton+Police+Service%22+when:7d&hl=en-CA&gl=CA&ceid=CA:en", type: "emergency", platform: "police", sourceName: "Official Police Dispatch" },
   { url: "https://news.google.com/rss/search?q=Hamilton+Ontario+news+(shooting+OR+stabbing+OR+assault+OR+drug+OR+crime)+when:7d&hl=en-CA&gl=CA&ceid=CA:en", type: "advisory", platform: "news", sourceName: "Local News Network" },
   { url: "https://www.reddit.com/r/Hamilton/search.rss?q=needle+OR+drug+OR+tent+OR+encampment+OR+police+OR+incident&restrict_sr=on&sort=new&t=month", type: "street", platform: "reddit", sourceName: "r/Hamilton Community" },
-  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "street", platform: "instagram", sourceName: "@interventionintersection2026" }
+  { url: "https://rss.app/feeds/J229itoFzyOpFVv2.xml", type: "street", platform: "intervention", sourceName: "@interventionintersection2026" }
 ];
 
 function scrubPII(text) {
@@ -66,11 +63,12 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function verifyAndExtract(item, feedType, platform, sourceName) {
   const fullText = ((item.title || "") + " " + (item.contentSnippet || "")).toLowerCase();
   
-  if (sourceName === "@interventionintersection2026" || item.link?.includes("instagram.com/interventionintersection")) {
-      platform = "instagram"; 
+  // Enforce intervention tag based on link or source
+  if (sourceName === "@interventionintersection2026" || item.link?.includes("interventionintersection")) {
+      platform = "intervention"; 
   }
 
-  if (!fullText.includes('hamilton') && platform !== "instagram") return null;
+  if (!fullText.includes('hamilton') && platform !== "intervention") return null;
 
   let pinData = null;
   const extractedLoc = extractLocation(item.title + " " + item.contentSnippet);
@@ -81,8 +79,11 @@ async function verifyAndExtract(item, feedType, platform, sourceName) {
   }
 
   const hasPin = pinData !== null;
-  const finalLocName = hasPin ? pinData.name : "Hamilton General Sector";
+  const finalLocName = hasPin ? pinData.name : "Hamilton Sector (Location Approx)";
   const cleanDesc = scrubPII((item.contentSnippet || item.title || '').replace(/(<([^>]+)>)/gi, "").replace(/\s+/g, " ").trim()).substring(0, 220) + '...';
+
+  // Strictly capture the exact URL from the RSS item
+  const exactUrl = item.link || item.guid || '';
 
   return {
     category: feedType,
@@ -92,13 +93,13 @@ async function verifyAndExtract(item, feedType, platform, sourceName) {
     lng: hasPin ? pinData.lng : null,
     source: `${sourceName} • ${finalLocName}`,
     description: cleanDesc,
-    url: item.link || item.guid || '',
+    url: exactUrl,
     timestamp: Timestamp.fromDate(item.pubDate ? new Date(item.pubDate) : new Date())
   };
 }
 
 async function run() {
-  console.log("Seeding verified 2-year historical records...");
+  console.log("Seeding verified historical records...");
   for (const seed of HISTORICAL_SEEDS) {
     await db.collection("reports").doc(seed.id).set({
       ...seed, createdAt: FieldValue.serverTimestamp(), active: true
