@@ -343,7 +343,8 @@
             const s = String(sourceName || '').toLowerCase();
 
             if (t === 'police' || t === 'ems' || s.includes('police')) return 'police';
-            if (t === 'instagram' || t === 'social' || t === 'community' || t === 'reddit') return 'social';
+            if (t === 'instagram' || s.includes('interventionintersection2026')) return 'intervention';
+            if (t === 'social' || t === 'community' || t === 'reddit') return 'social';
             if (t === 'news' || t === 'rss-news') return 'news';
 
             return 'news';
@@ -401,7 +402,7 @@
                 
                 if (currentMainTab === 'police' && p !== 'police') return;
                 if (currentMainTab === 'news' && p !== 'news') return;
-                if (currentMainTab === 'social' && p !== 'reddit' && p !== 'word_of_mouth' && p !== 'intervention') return;
+                if (currentMainTab === 'social' && p !== 'reddit' && p !== 'word_of_mouth' && p !== 'intervention' && p !== 'social') return;
 
                 visibleCount++;
 
