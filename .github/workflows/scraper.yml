@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: npm
+          package-manager-cache: false
 
       - name: Install scraper dependencies
         run: npm install firebase-admin rss-parser cheerio groq-sdk
