@@ -13,7 +13,7 @@ initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
 const parser = new Parser({
-  headers: { 'User-Agent': 'WetFloorWatch-LiveEngine/3.0' },
+  headers: { 'User-Agent': 'WetFloorWatch-LiveEngine/3.1' },
   timeout: 10000
 });
 
@@ -67,10 +67,10 @@ async function verifyAndExtract(item, feedType, platform, sourceName) {
   const fullText = ((item.title || "") + " " + (item.contentSnippet || "")).toLowerCase();
   
   if (sourceName === "@interventionintersection2026" || item.link?.includes("instagram.com/interventionintersection")) {
-      platform = "intervention"; 
+      platform = "instagram"; 
   }
 
-  if (!fullText.includes('hamilton') && platform !== "intervention") return null;
+  if (!fullText.includes('hamilton') && platform !== "instagram") return null;
 
   let pinData = null;
   const extractedLoc = extractLocation(item.title + " " + item.contentSnippet);
