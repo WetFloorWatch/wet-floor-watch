@@ -1,4 +1,3 @@
-```yaml
 name: WetFloorWatch Scraper Engine
 
 on:
@@ -28,4 +27,3 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NOMINATIM_USER_AGENT: ${{ secrets.NOMINATIM_USER_AGENT }}
-```
