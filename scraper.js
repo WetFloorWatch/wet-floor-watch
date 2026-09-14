@@ -1,48 +1,5 @@
 'use strict';
 
-/*
- * WetFloorWatch - production-oriented ingestion worker
- *
- * Design principles:
- *   1. Never fabricate an incident.
- *   2. Never fabricate coordinates.
- *   3. Never retain residential house numbers when a location can be
- *      represented by an intersection / road / neighbourhood.
- *   4. Never substitute a homepage for a missing source URL.
- *   5. Historical ingestion is performed from real source archives/feeds.
- *   6. Geocoding is cached and throttled.
- *
- * Required:
- *   npm i firebase-admin rss-parser cheerio groq-sdk
- *
- * Environment:
- *   FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
- *   GROQ_API_KEY=...
- *
- * Required for production:
- *   NOMINATIM_USER_AGENT=WetFloorWatch/1.0 your-real-contact@example.com
- *
- * Optional:
- *   FIRESTORE_COLLECTION=incidents
- *   NOMINATIM_URL=https://nominatim.openstreetmap.org/search
- *   HAMILTON_POLICE_ARCHIVE=https://hamiltonpolice.on.ca/news/?h=1
- *   HISTORY_DAYS=730
- *   GROQ_MODEL=llama-3.3-70b-versatile
- *
- * Feed URLs:
- *   RSS_FEEDS='[
- *     {"name":"Hamilton Police","url":"https://hamiltonpolice.on.ca/news/feed/en-ca","type":"police"},
- *     {"name":"Hamilton Reddit","url":"...","type":"community"}
- *   ]'
- *
- * Instagram:
- *   INSTAGRAM_FEED_URL=<genuine feed/API adapter URL>
- *
- * NOTE:
- * The Hamilton Police RSS endpoint is XML. The worker also has an
- * HTML archive fallback.
- */
-
 const Parser = require('rss-parser');
 const cheerio = require('cheerio');
 const crypto = require('crypto');
@@ -52,22 +9,20 @@ let Groq = null;
 
 try {
   Groq = require('groq-sdk');
-} catch (_) {
-  // Groq is optional. The ingestion pipeline remains deterministic without it.
-}
+} catch (_) {}
 
 const parser = new Parser({
-  timeout: 20_000,
+  timeout: 20000,
   headers: {
     'User-Agent': 'WetFloorWatch/1.0'
   }
 });
 
-const HISTORY_DAYS =
-  Number(process.env.HISTORY_DAYS || 730);
-
 const COLLECTION =
   process.env.FIRESTORE_COLLECTION || 'incidents';
+
+const HISTORY_DAYS =
+  Number(process.env.HISTORY_DAYS || 730);
 
 const NOMINATIM_URL =
   process.env.NOMINATIM_URL ||
@@ -76,19 +31,54 @@ const NOMINATIM_URL =
 const NOMINATIM_USER_AGENT =
   process.env.NOMINATIM_USER_AGENT || '';
 
-if (!NOMINATIM_USER_AGENT) {
-  throw new Error(
-    'Missing NOMINATIM_USER_AGENT. Set it to identify WetFloorWatch and provide a contact address.'
-  );
-}
-
-const HAMILTON_POLICE_ARCHIVE =
-  process.env.HAMILTON_POLICE_ARCHIVE ||
-  'https://hamiltonpolice.on.ca/news/?h=1';
-
 const GROQ_MODEL =
   process.env.GROQ_MODEL ||
   'llama-3.3-70b-versatile';
+
+const HPS_ARCHIVE =
+  process.env.HAMILTON_POLICE_ARCHIVE ||
+  'https://hamiltonpolice.on.ca/news/?h=1';
+
+const HFD_FEATURE_URL =
+  process.env.HFD_FEATURE_URL ||
+  'https://services.arcgis.com/rYz782eMbySr2srL/arcgis/rest/services/HFD_Fire_Incidents/FeatureServer/0';
+
+const INSTAGRAM_FEED_URL =
+  process.env.INSTAGRAM_FEED_URL || '';
+
+const EMS_FEED_URL =
+  process.env.HAMILTON_EMS_FEED_URL || '';
+
+if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+  throw new Error(
+    'Missing FIREBASE_SERVICE_ACCOUNT_JSON'
+  );
+}
+
+if (!NOMINATIM_USER_AGENT) {
+  throw new Error(
+    'Missing NOMINATIM_USER_AGENT'
+  );
+}
+
+const serviceAccount = JSON.parse(
+  process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+);
+
+admin.initializeApp({
+  credential:
+    admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+const groq =
+  Groq && process.env.GROQ_API_KEY
+    ? new Groq({
+        apiKey:
+          process.env.GROQ_API_KEY
+      })
+    : null;
 
 const HAMILTON_BOUNDS = {
   minLat: 43.05,
@@ -97,68 +87,252 @@ const HAMILTON_BOUNDS = {
   maxLon: -79.55
 };
 
-function initFirebase() {
-  if (admin.apps.length) {
-    return admin.firestore();
-  }
-
-  if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    throw new Error(
-      'Missing FIREBASE_SERVICE_ACCOUNT_JSON environment variable.'
-    );
-  }
-
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+const cutoffDate = () =>
+  new Date(
+    Date.now() -
+      HISTORY_DAYS *
+        86400000
   );
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-  });
+const sleep = ms =>
+  new Promise(resolve =>
+    setTimeout(resolve, ms)
+  );
 
-  return admin.firestore();
-}
+/*
+ * Built-in authoritative/local news feeds.
+ *
+ * These don't depend on RSS_FEEDS being configured.
+ */
+const DEFAULT_FEEDS = [
 
-const db = initFirebase();
+  {
+    name: 'Global News Hamilton',
+    url: 'https://globalnews.ca/hamilton/feed/',
+    type: 'news'
+  },
 
-const groq =
-  Groq && process.env.GROQ_API_KEY
-    ? new Groq({
-        apiKey: process.env.GROQ_API_KEY
-      })
-    : null;
+  {
+    name: 'CBC Hamilton',
+    url: 'https://www.cbc.ca/webfeed/rss/rss-canada-hamiltonnews',
+    type: 'news'
+  },
+
+  {
+    name: 'CHCH News Hamilton',
+    url:
+      'https://news.google.com/rss/search?q=site%3Achch.com%2Fchch-news%2F%20Hamilton&hl=en-CA&gl=CA&ceid=CA%3Aen',
+    type: 'news'
+  },
+
+  {
+    name: 'Hamilton Spectator',
+    url:
+      'https://news.google.com/rss/search?q=site%3Athespec.com%2Fnews%2Fhamilton%2F%20Hamilton&hl=en-CA&gl=CA&ceid=CA%3Aen',
+    type: 'news'
+  }
+
+];
+
+/*
+ * The entire purpose of the product is safety awareness.
+ * Generic sports, politics, entertainment and navigation
+ * records are therefore rejected.
+ */
+const SAFETY_TERMS =
+  /\b(
+    shooting|
+    shot fired|
+    gunfire|
+    gunshot|
+    stabbing|
+    stabbed|
+    assault|
+    attack|
+    harassment|
+    violent|
+    violence|
+    homicide|
+    murder|
+    death|
+    suspicious death|
+    sexual assault|
+    robbery|
+    theft|
+    stolen|
+    break.?in|
+    arson|
+    fire|
+    explosion|
+    collision|
+    crash|
+    pedestrian struck|
+    cyclist struck|
+    impaired driving|
+    drug|
+    fentanyl|
+    opioid|
+    overdose|
+    open drug|
+    needle|
+    syringe|
+    pipe|
+    paraphernalia|
+    weapon|
+    firearm|
+    gun|
+    bomb|
+    hazard|
+    gas leak|
+    carbon monoxide|
+    missing person|
+    encampment|
+    tent|
+    road closure|
+    emergency|
+    paramedic|
+    ambulance|
+    fire department
+  )\b/ix;
+
+/*
+ * This is specifically what prevents the garbage cards
+ * like "Skip to main content".
+ */
+const BOILERPLATE =
+  /^(skip to|main content|footer content|home$|search$|filter$|archive$|rss feed|read more$|load more|privacy|cookie|terms|accessibility|careers|contact us|site map)/i;
+
+/*
+ * The categories that appear in the platform.
+ */
+const CATEGORY_RULES = [
+
+  [
+    'shooting',
+    /shooting|gunfire|shot fired|gunshot|shots fired/i
+  ],
+
+  [
+    'assault',
+    /stabbing|stabbed|assault|attack|violent attack|sexual assault|harassment/i
+  ],
+
+  [
+    'fire',
+    /arson|structure fire|house fire|building fire|fire department|explosion/i
+  ],
+
+  [
+    'collision',
+    /collision|crash|pedestrian struck|cyclist struck|vehicle struck|impaired driving/i
+  ],
+
+  [
+    'drug',
+    /open drug|drug use|fentanyl|opioid|overdose|needle|syringe|pipe|paraphernalia|drug trafficking/i
+  ],
+
+  [
+    'weapons',
+    /firearm|weapon|gun|knife|bomb/i
+  ],
+
+  [
+    'theft',
+    /theft|stolen|robbery|break.?in|smash.?and.?grab/i
+  ],
+
+  [
+    'missing-person',
+    /missing person|missing child|missing youth/i
+  ],
+
+  [
+    'suspicious',
+    /suspicious|homicide|death under investigation|unknown death/i
+  ],
+
+  [
+    'hazard',
+    /hazard|danger|unsafe|gas leak|carbon monoxide|road closure|spill|encampment|tent/i
+  ]
+
+];
 
 /* ------------------------------------------------------------------ */
-/* Utilities                                                          */
+/* Utility                                                            */
 /* ------------------------------------------------------------------ */
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function normalizeWhitespace(value = '') {
+function normalizeWhitespace(
+  value = ''
+) {
   return String(value)
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-function absoluteUrl(value, base) {
+function scrubPII(
+  value = ''
+) {
+
+  return normalizeWhitespace(
+    String(value)
+
+      .replace(
+        /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
+        '[redacted]'
+      )
+
+      .replace(
+        /\b(?:\+?1[\s.-]?)?(?:\(?\d{3}\)?[\s.-])\d{3}[\s.-]\d{4}\b/g,
+        '[redacted]'
+      )
+
+      .replace(
+        /\b[A-Z]\d[A-Z][ -]?\d[A-Z]\d\b/gi,
+        '[postal code redacted]'
+      )
+  );
+}
+
+function absUrl(
+  value,
+  base
+) {
+
   try {
-    if (!value) return null;
 
-    const u = new URL(value, base);
+    const u =
+      new URL(
+        value,
+        base
+      );
 
-    if (!['http:', 'https:'].includes(u.protocol)) {
+    if (
+      ![
+        'http:',
+        'https:'
+      ].includes(
+        u.protocol
+      )
+    ) {
       return null;
     }
 
     return u.href;
+
   } catch {
+
     return null;
+
   }
 }
 
-function isHamiltonCoordinate(lat, lon) {
+function isHamiltonCoord(
+  lat,
+  lon
+) {
+
   return (
     Number.isFinite(lat) &&
     Number.isFinite(lon) &&
@@ -169,13 +343,67 @@ function isHamiltonCoordinate(lat, lon) {
   );
 }
 
+function classify(
+  title,
+  summary,
+  hint = ''
+) {
+
+  const text =
+    `${title} ${summary} ${hint}`;
+
+  for (
+    const [
+      category,
+      expression
+    ] of CATEGORY_RULES
+  ) {
+
+    if (
+      expression.test(
+        text
+      )
+    ) {
+      return category;
+    }
+
+  }
+
+  return 'community-safety';
+}
+
+function isRelevant(
+  title,
+  summary,
+  sourceType
+) {
+
+  /*
+   * Fire / EMS sources are already
+   * emergency-service datasets.
+   */
+  if (
+    sourceType === 'fire' ||
+    sourceType === 'ems'
+  ) {
+    return true;
+  }
+
+  return SAFETY_TERMS.test(
+    `${title} ${summary}`
+  );
+}
+
 function incidentId(
   sourceUrl,
   publishedAt,
   title
 ) {
+
   return crypto
-    .createHash('sha256')
+    .createHash(
+      'sha256'
+    )
     .update(
       [
         sourceUrl || '',
@@ -186,300 +414,124 @@ function incidentId(
     .digest('hex');
 }
 
-function cutoffDate() {
-  return new Date(
-    Date.now() -
-      HISTORY_DAYS *
-        24 *
-        60 *
-        60 *
-        1000
+/*
+ * Never map a private home address.
+ */
+function safePublicLocation(
+  value = ''
+) {
+
+  const s =
+    normalizeWhitespace(
+      value
+    );
+
+  if (
+    /^\d{1,6}\s+[A-Za-z].*(Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Lane|Ln|Crescent|Cres|Court|Ct|Place|Pl|Way|Terrace|Ter)\b/i.test(
+      s
+    )
+  ) {
+    return null;
+  }
+
+  if (
+    /\b(?:unit|suite|apt|apartment|#)\s*[-A-Za-z0-9]+/i.test(
+      s
+    )
+  ) {
+    return null;
+  }
+
+  return (
+    scrubPII(
+      s.replace(
+        /^\d{1,6}[ -]+(?=[A-Za-z])/,
+        ''
+      )
+    ).slice(0, 300) ||
+    null
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Privacy                                                            */
-/* ------------------------------------------------------------------ */
 
 /*
- * We deliberately avoid storing:
- *   - personal names where they aren't necessary
- *   - house numbers
- *   - phone numbers
- *   - emails
- *   - exact residential addresses
- *
- * Public intersections and public facilities can remain.
+ * Deterministic public-intersection extraction.
  */
-
-function scrubPII(text = '') {
-  let result = String(text);
-
-  // Emails
-  result = result.replace(
-    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
-    '[redacted]'
-  );
-
-  // Phone numbers
-  result = result.replace(
-    /\b(?:\+?1[\s.-]?)?(?:\(?\d{3}\)?[\s.-])\d{3}[\s.-]\d{4}\b/g,
-    '[redacted]'
-  );
-
-  // Canadian postal codes
-  result = result.replace(
-    /\b[A-Z]\d[A-Z][ -]?\d[A-Z]\d\b/gi,
-    '[postal code redacted]'
-  );
-
-  return normalizeWhitespace(result);
-}
-
-function removeHouseNumbers(location = '') {
-  return normalizeWhitespace(
-    String(location)
-      .replace(/^\s*\d{1,5}\s+/, '')
-      .replace(/\b\d{1,5}\s+(?=[A-Za-z])/g, '')
-  );
-}
-
-function sanitizeLocationText(location = '') {
-  const clean =
-    normalizeWhitespace(String(location));
-
-  // Remove leading civic numbers and common unit markers
-  // from anything stored publicly.
-  const withoutNumbers = clean
-    .replace(
-      /^\s*\d{1,6}[-\s]+(?=[A-Za-z])/,
-      ''
-    )
-    .replace(
-      /\b(?:unit|apt|apartment|suite|#)\s*[-A-Za-z0-9]+\b/gi,
-      ''
-    )
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-
-  return scrubPII(withoutNumbers);
-}
-
-function looksLikePrivateResidentialAddress(
-  location = ''
+function extractIntersection(
+  text = ''
 ) {
-  const text =
-    normalizeWhitespace(location);
 
-  // Hard reject civic-number + residential street
-  // combinations.
-  if (
-    /^\d{1,6}\s+[A-Za-z][^,]*(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Lane|Ln|Crescent|Cres|Court|Ct|Place|Pl|Way|Terrace|Ter|Trail|Close)(?:\b|,)/i.test(
+  const s =
+    normalizeWhitespace(
       text
-    )
-  ) {
-    return true;
-  }
+    );
 
-  // Hard reject unit/suite/apartment identifiers.
-  if (
-    /\b(?:unit|apt|apartment|suite|#)\s*[-A-Za-z0-9]+\b/i.test(
-      text
-    )
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-/* ------------------------------------------------------------------ */
-/* Classification                                                     */
-/* ------------------------------------------------------------------ */
-
-const CATEGORY_RULES = [
-  [
-    'shooting',
-    /\bshooting|gunfire|shots fired|firearm|bullet\b/i
-  ],
-  [
-    'assault',
-    /\bassault|stabbing|attack|violent attack\b/i
-  ],
-  [
-    'collision',
-    /\bcollision|crash|vehicle struck|pedestrian struck\b/i
-  ],
-  [
-    'fire',
-    /\bfire|arson|structure fire\b/i
-  ],
-  [
-    'drug',
-    /\bdrug|fentanyl|opioid|trafficking|overdose\b/i
-  ],
-  [
-    'theft',
-    /\btheft|stolen|robbery|break.?in|break and enter\b/i
-  ],
-  [
-    'missing-person',
-    /\bmissing person\b/i
-  ],
-  [
-    'hazard',
-    /\bhazard|danger|unsafe|road closure|spill\b/i
-  ],
-  [
-    'suspicious',
-    /\bsuspicious\b/i
-  ]
-];
-
-function classify(title, summary) {
-  const text = `${title} ${summary}`;
-
-  for (const [
-    category,
-    expression
-  ] of CATEGORY_RULES) {
-    if (expression.test(text)) {
-      return category;
-    }
-  }
-
-  return 'community-safety';
-}
-
-/* ------------------------------------------------------------------ */
-/* Hamilton location extraction                                       */
-/* ------------------------------------------------------------------ */
-
-function extractIntersection(text = '') {
-  const clean =
-    normalizeWhitespace(text);
-
-  /*
-   * Examples:
-   *   Main Street West and Frid Street
-   *   Queenston Road / Parkdale Avenue
-   *   Upper Centennial Parkway and Green Mountain Road
-   *
-   * It intentionally does not convert arbitrary numbers
-   * into coordinates.
-   */
-
-  const match = clean.match(
-    /\b([A-Z][A-Za-z.'’-]{1,40}\s+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Parkway|Pkwy|Crescent|Cres|Lane|Ln|Court|Ct|Way|Place|Pl|Trail|Highway|Hwy)(?:\s+(?:North|South|East|West))?)\s+(?:and|at|\/|&)\s+([A-Z][A-Za-z.'’-]{1,40}\s+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Parkway|Pkwy|Crescent|Cres|Lane|Ln|Court|Ct|Way|Place|Pl|Trail|Highway|Hwy)(?:\s+(?:North|South|East|West))?)/i
-  );
+  const match =
+    s.match(
+      /\b([A-Z][A-Za-z.'’\- ]{1,50}\s+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Parkway|Pkwy|Crescent|Cres|Lane|Ln|Court|Ct|Way|Place|Pl|Trail|Highway|Hwy)(?:\s+(?:North|South|East|West))?)\s+(?:and|at|\/|&)\s+([A-Z][A-Za-z.'’\- ]{1,50}\s+(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Parkway|Pkwy|Crescent|Cres|Lane|Ln|Court|Ct|Way|Place|Pl|Trail|Highway|Hwy)(?:\s+(?:North|South|East|West))?)/i
+    );
 
   if (!match) {
     return null;
   }
 
-  return `${removeHouseNumbers(
-    match[1]
-  )} & ${removeHouseNumbers(
-    match[2]
-  )}, Hamilton, Ontario, Canada`;
+  return safePublicLocation(
+    `${match[1]} & ${match[2]}, Hamilton, Ontario, Canada`
+  );
 }
 
 /* ------------------------------------------------------------------ */
-/* Optional LLM extraction                                            */
+/* Source URL integrity                                               */
 /* ------------------------------------------------------------------ */
 
-async function extractWithGroq(
-  title,
-  summary
+async function resolveFinalUrl(
+  url
 ) {
-  if (!groq) {
-    return null;
+
+  if (
+    !url ||
+    !url.includes(
+      'news.google.com'
+    )
+  ) {
+    return url;
   }
 
-  const prompt = `
-You are a location extraction component for a safety-awareness application.
-
-Return ONLY valid JSON.
-
-Rules:
-- Determine whether the report is actually about Hamilton, Ontario.
-- Never invent an intersection.
-- Never infer coordinates.
-- Prefer a public intersection or public facility.
-- If only a residential street address is available, return null for location.
-- Do not return personal names.
-- Do not return coordinates.
-
-Schema:
-{
-  "isHamilton": true,
-  "category": "shooting|assault|collision|fire|drug|theft|missing-person|hazard|suspicious|community-safety",
-  "locationText": "intersection or public place, or null",
-  "confidence": 0.0
-}
-
-TITLE:
-${title}
-
-SUMMARY:
-${summary}
-`;
-
   try {
+
     const response =
-      await groq.chat.completions.create({
-        model: GROQ_MODEL,
-        temperature: 0,
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a deterministic information extraction service.'
-          },
-          {
-            role: 'user',
-            content: prompt
+      await fetch(
+        url,
+        {
+          redirect: 'follow',
+          headers: {
+            'User-Agent':
+              'WetFloorWatch/1.0'
           }
-        ]
-      });
+        }
+      );
 
-    const content =
-      response.choices?.[0]?.message?.content ||
-      '';
+    const finalUrl =
+      response.url ||
+      url;
 
-    const start =
-      content.indexOf('{');
-
-    const end =
-      content.lastIndexOf('}');
-
+    /*
+     * Do not store a Google News redirect
+     * as though it were the actual publisher.
+     */
     if (
-      start < 0 ||
-      end <= start
+      finalUrl.includes(
+        'news.google.com'
+      )
     ) {
       return null;
     }
 
-    const parsed = JSON.parse(
-      content.slice(start, end + 1)
-    );
+    return finalUrl;
 
-    if (
-      parsed.isHamilton !== true ||
-      typeof parsed.confidence !== 'number' ||
-      parsed.confidence < 0.75
-    ) {
-      return null;
-    }
-
-    return parsed;
-  } catch (error) {
-    console.warn(
-      'Groq extraction failed:',
-      error.message
-    );
+  } catch {
 
     return null;
+
   }
 }
 
@@ -487,34 +539,59 @@ ${summary}
 /* Geocoding                                                          */
 /* ------------------------------------------------------------------ */
 
-const geocodeCache = new Map();
-let lastGeocodeAt = 0;
-
-async function geocodeHamilton(
+async function geocode(
   locationText
 ) {
+
   if (!locationText) {
     return null;
   }
 
   const query =
-    removeHouseNumbers(locationText);
+    locationText;
 
-  if (geocodeCache.has(query)) {
-    return geocodeCache.get(query);
+  if (
+    !global.geocodeCache
+  ) {
+    global.geocodeCache =
+      new Map();
   }
 
-  const elapsed =
-    Date.now() - lastGeocodeAt;
-
-  if (elapsed < 1100) {
-    await sleep(1100 - elapsed);
+  if (
+    global.geocodeCache.has(
+      query
+    )
+  ) {
+    return global.geocodeCache.get(
+      query
+    );
   }
 
-  lastGeocodeAt = Date.now();
+  const wait =
+    Math.max(
+      0,
+      1100 -
+        (
+          Date.now() -
+          (
+            global.lastGeo || 0
+          )
+        )
+    );
+
+  if (wait) {
+    await sleep(
+      wait
+    );
+  }
+
+  global.lastGeo =
+    Date.now();
 
   const url =
-    new URL(NOMINATIM_URL);
+    new URL(
+      NOMINATIM_URL
+    );
 
   url.searchParams.set(
     'format',
@@ -527,40 +604,46 @@ async function geocodeHamilton(
   );
 
   url.searchParams.set(
-    'q',
-    query
-  );
-
-  url.searchParams.set(
     'countrycodes',
     'ca'
   );
 
+  url.searchParams.set(
+    'q',
+    query
+  );
+
   try {
+
     const response =
-      await fetch(url, {
-        headers: {
-          'User-Agent':
-            NOMINATIM_USER_AGENT,
-          'Accept':
-            'application/json'
+      await fetch(
+        url,
+        {
+          headers: {
+            'User-Agent':
+              NOMINATIM_USER_AGENT,
+
+            'Accept':
+              'application/json'
+          }
         }
-      });
+      );
 
     if (!response.ok) {
       throw new Error(
-        `Nominatim HTTP ${response.status}`
+        `Nominatim ${response.status}`
       );
     }
 
-    const results =
+    const data =
       await response.json();
 
     const candidate =
-      results?.[0];
+      data?.[0];
 
     if (!candidate) {
-      geocodeCache.set(
+
+      global.geocodeCache.set(
         query,
         null
       );
@@ -569,18 +652,23 @@ async function geocodeHamilton(
     }
 
     const lat =
-      Number(candidate.lat);
+      Number(
+        candidate.lat
+      );
 
     const lon =
-      Number(candidate.lon);
+      Number(
+        candidate.lon
+      );
 
     if (
-      !isHamiltonCoordinate(
+      !isHamiltonCoord(
         lat,
         lon
       )
     ) {
-      geocodeCache.set(
+
+      global.geocodeCache.set(
         query,
         null
       );
@@ -596,19 +684,22 @@ async function geocodeHamilton(
         query
     };
 
-    geocodeCache.set(
+    global.geocodeCache.set(
       query,
       result
     );
 
     return result;
+
   } catch (error) {
+
     console.warn(
-      `Geocoding failed for "${query}":`,
+      'Geocode failed:',
+      query,
       error.message
     );
 
-    geocodeCache.set(
+    global.geocodeCache.set(
       query,
       null
     );
@@ -618,15 +709,146 @@ async function geocodeHamilton(
 }
 
 /* ------------------------------------------------------------------ */
-/* Feed ingestion                                                     */
+/* Groq extraction                                                    */
 /* ------------------------------------------------------------------ */
 
-function parseFeedItem(
+async function extractWithGroq(
+  title,
+  summary
+) {
+
+  if (!groq) {
+    return null;
+  }
+
+  const prompt = `
+Return ONLY valid JSON.
+
+This is a Hamilton, Ontario public-safety extraction task.
+
+Never invent facts, locations or coordinates.
+
+Prefer public intersections and public facilities.
+
+If the only location is a private residence,
+return null for location.
+
+Return a concise factual brief,
+maximum 240 characters.
+
+Schema:
+
+{
+  "isHamilton": true,
+  "category": "shooting|assault|fire|collision|drug|weapons|theft|missing-person|suspicious|hazard|community-safety",
+  "locationText": "public intersection or place, or null",
+  "brief": "factual one or two sentence summary",
+  "confidence": 0.0
+}
+
+TITLE:
+${title}
+
+SUMMARY:
+${summary}
+`;
+
+  try {
+
+    const response =
+      await groq.chat.completions.create(
+        {
+          model:
+            GROQ_MODEL,
+
+          temperature:
+            0,
+
+          messages: [
+            {
+              role:
+                'system',
+
+              content:
+                'Deterministic public-safety information extractor.'
+            },
+
+            {
+              role:
+                'user',
+
+              content:
+                prompt
+            }
+          ]
+        }
+      );
+
+    const content =
+      response
+        .choices?.[0]
+        ?.message
+        ?.content ||
+      '';
+
+    const start =
+      content.indexOf(
+        '{'
+      );
+
+    const end =
+      content.lastIndexOf(
+        '}'
+      );
+
+    if (
+      start < 0 ||
+      end <= start
+    ) {
+      return null;
+    }
+
+    const parsed =
+      JSON.parse(
+        content.slice(
+          start,
+          end + 1
+        )
+      );
+
+    if (
+      parsed.isHamilton !== true ||
+      typeof parsed.confidence !==
+        'number' ||
+      parsed.confidence < 0.75
+    ) {
+      return null;
+    }
+
+    return parsed;
+
+  } catch (error) {
+
+    console.warn(
+      'Groq extraction failed:',
+      error.message
+    );
+
+    return null;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* RSS                                                                 */
+/* ------------------------------------------------------------------ */
+
+async function parseFeedItem(
   item,
   feed
 ) {
-  const sourceUrl =
-    absoluteUrl(
+
+  let sourceUrl =
+    absUrl(
       item.link ||
         item.guid ||
         item.id,
@@ -637,19 +859,30 @@ function parseFeedItem(
     return null;
   }
 
+  sourceUrl =
+    await resolveFinalUrl(
+      sourceUrl
+    );
+
+  if (!sourceUrl) {
+    return null;
+  }
+
   const title =
-    normalizeWhitespace(
-      item.title ||
-        'Untitled report'
+    scrubPII(
+      normalizeWhitespace(
+        item.title ||
+        ''
+      )
     );
 
   const summary =
     scrubPII(
       normalizeWhitespace(
         item.contentSnippet ||
-          item.content ||
-          item.summary ||
-          ''
+        item.content ||
+        item.summary ||
+        ''
       )
     );
 
@@ -661,13 +894,36 @@ function parseFeedItem(
 
   const date =
     publishedAt
-      ? new Date(publishedAt)
+      ? new Date(
+          publishedAt
+        )
       : null;
 
   if (
     date &&
-    !Number.isNaN(date.getTime()) &&
+    !Number.isNaN(
+      date.getTime()
+    ) &&
     date < cutoffDate()
+  ) {
+    return null;
+  }
+
+  if (
+    !title ||
+    BOILERPLATE.test(
+      title
+    )
+  ) {
+    return null;
+  }
+
+  if (
+    !isRelevant(
+      title,
+      summary,
+      feed.type
+    )
   ) {
     return null;
   }
@@ -676,39 +932,60 @@ function parseFeedItem(
     title,
     summary,
     sourceUrl,
+
     publishedAt:
-      date?.toISOString() ||
-      null,
+      date &&
+      !Number.isNaN(
+        date.getTime()
+      )
+        ? date.toISOString()
+        : null,
+
     source:
       feed.name,
+
     sourceType:
-      feed.type ||
-      'rss'
+      feed.type
   };
 }
 
-async function ingestRSSFeed(feed) {
-  console.log(
-    `RSS: ${feed.name}`
-  );
+async function ingestRSS(
+  feed
+) {
 
   try {
+
     const parsed =
       await parser.parseURL(
         feed.url
       );
 
-    return parsed.items
-      .map(item =>
-        parseFeedItem(
+    const out = [];
+
+    for (
+      const item of
+      parsed.items
+    ) {
+
+      const record =
+        await parseFeedItem(
           item,
           feed
-        )
-      )
-      .filter(Boolean);
+        );
+
+      if (record) {
+        out.push(
+          record
+        );
+      }
+    }
+
+    return out;
+
   } catch (error) {
+
     console.warn(
-      `RSS failed for ${feed.name}:`,
+      `RSS failed ${feed.name}:`,
       error.message
     );
 
@@ -717,144 +994,75 @@ async function ingestRSSFeed(feed) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Hamilton Police archive fallback                                   */
+/* Hamilton Police                                                    */
 /* ------------------------------------------------------------------ */
 
-async function fetchText(url) {
-  const response =
-    await fetch(url, {
-      headers: {
-        'User-Agent':
-          'WetFloorWatch/1.0'
-      }
-    });
+async function ingestHamiltonPolice() {
 
-  if (!response.ok) {
-    throw new Error(
-      `HTTP ${response.status} for ${url}`
+  const rss =
+    await ingestRSS(
+      {
+        name:
+          'Hamilton Police Service',
+
+        url:
+          'https://hamiltonpolice.on.ca/news/feed/en-ca',
+
+        type:
+          'police'
+      }
     );
+
+  /*
+   * Use the genuine RSS feed whenever it gives
+   * us enough real articles.
+   */
+  if (
+    rss.length >= 5
+  ) {
+    return rss;
   }
 
-  return response.text();
-}
-
-function extractArchivePageLinks(
-  html,
-  pageUrl
-) {
-  const $ =
-    cheerio.load(html);
-
-  const links = [];
-
-  $('a[href]').each(
-    (_, a) => {
-      const href =
-        $(a).attr('href');
-
-      const text =
-        normalizeWhitespace(
-          $(a).text()
-        );
-
-      if (!href) {
-        return;
-      }
-
-      const absolute =
-        absoluteUrl(
-          href,
-          pageUrl
-        );
-
-      if (!absolute) {
-        return;
-      }
-
-      const looksPagination =
-        /next|older|previous|prev|page/i.test(
-          text
-        ) ||
-        /[?&](?:page|p)=\d+/i.test(
-          absolute
-        );
-
-      if (looksPagination) {
-        links.push(
-          absolute
-        );
-      }
-    }
-  );
-
-  return [
-    ...new Set(links)
-  ];
-}
-
-async function ingestHamiltonPoliceArchive() {
   console.log(
-    'Hamilton Police archive'
+    'Hamilton Police RSS returned limited results; using archive fallback.'
   );
 
-  const cutoff =
-    cutoffDate();
+  try {
 
-  const queue = [
-    HAMILTON_POLICE_ARCHIVE
-  ];
-
-  const visited =
-    new Set();
-
-  const results =
-    new Map();
-
-  const maxPages = 100;
-
-  let pagesRead = 0;
-  let oldestSeen = null;
-
-  while (
-    queue.length &&
-    pagesRead < maxPages
-  ) {
-    const pageUrl =
-      queue.shift();
-
-    if (
-      visited.has(pageUrl)
-    ) {
-      continue;
-    }
-
-    visited.add(
-      pageUrl
-    );
-
-    pagesRead++;
-
-    let html;
-
-    try {
-      html =
-        await fetchText(
-          pageUrl
-        );
-    } catch (error) {
-      console.warn(
-        `Hamilton Police archive page failed: ${pageUrl}`,
-        error.message
+    const response =
+      await fetch(
+        HPS_ARCHIVE,
+        {
+          headers: {
+            'User-Agent':
+              'WetFloorWatch/1.0'
+          }
+        }
       );
 
-      continue;
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status}`
+      );
     }
 
-    const $ =
-      cheerio.load(html);
+    const html =
+      await response.text();
 
-    $('a').each(
+    const $ =
+      cheerio.load(
+        html
+      );
+
+    const out = [];
+    const seen =
+      new Set();
+
+    $(
+      'a[href]'
+    ).each(
       (_, anchor) => {
+
         const href =
           $(anchor).attr(
             'href'
@@ -867,28 +1075,66 @@ async function ingestHamiltonPoliceArchive() {
 
         if (
           !href ||
-          !text
+          !text ||
+          BOILERPLATE.test(
+            text
+          )
         ) {
           return;
         }
 
-        const sourceUrl =
-          absoluteUrl(
+        const url =
+          absUrl(
             href,
-            pageUrl
+            HPS_ARCHIVE
           );
 
-        if (!sourceUrl) {
+        if (
+          !url ||
+          !url.startsWith(
+            'https://hamiltonpolice.on.ca/news/'
+          )
+        ) {
           return;
         }
 
-        const looksLikeArticle =
-          text.length >= 12 &&
-          !/read more|rss feed|search|filter|archive|next|previous|older/i.test(
-            text
-          );
+        const pathname =
+          new URL(
+            url
+          ).pathname;
 
-        if (!looksLikeArticle) {
+        /*
+         * These are archive/navigation/feed
+         * URLs, not articles.
+         */
+        if (
+          pathname ===
+            '/news/' ||
+          pathname.includes(
+            '/feed'
+          )
+        ) {
+          return;
+        }
+
+        if (
+          seen.has(
+            url
+          )
+        ) {
+          return;
+        }
+
+        /*
+         * Article titles are meaningful and
+         * usually at least 12 characters.
+         */
+        if (
+          text.length < 12 ||
+          /^(tags|case number|hamont|media|rss)/i.test(
+            text
+          )
+        ) {
           return;
         }
 
@@ -906,193 +1152,452 @@ async function ingestHamiltonPoliceArchive() {
             /\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b/i
           );
 
-        let publishedAt =
-          null;
+        const date =
+          dateMatch
+            ? new Date(
+                dateMatch[0]
+              )
+            : null;
 
-        if (dateMatch) {
-          const candidate =
-            new Date(
-              dateMatch[0]
-            );
-
-          if (
-            !Number.isNaN(
-              candidate.getTime()
-            )
-          ) {
-            publishedAt =
-              candidate.toISOString();
-
-            oldestSeen =
-              !oldestSeen ||
-              candidate < oldestSeen
-                ? candidate
-                : oldestSeen;
-
-            if (
-              candidate >= cutoff
-            ) {
-              results.set(
-                sourceUrl,
-                {
-                  title: text,
-                  summary:
-                    scrubPII(
-                      containerText.slice(
-                        0,
-                        1500
-                      )
-                    ),
-                  sourceUrl,
-                  publishedAt,
-                  source:
-                    'Hamilton Police Service',
-                  sourceType:
-                    'police'
-                }
-              );
-            }
-          }
-        } else {
-          results.set(
-            sourceUrl,
-            {
-              title: text,
-              summary:
-                scrubPII(
-                  containerText.slice(
-                    0,
-                    1500
-                  )
-                ),
-              sourceUrl,
-              publishedAt: null,
-              source:
-                'Hamilton Police Service',
-              sourceType:
-                'police'
-            }
-          );
+        if (
+          date &&
+          !Number.isNaN(
+            date.getTime()
+          ) &&
+          date < cutoffDate()
+        ) {
+          return;
         }
+
+        const summary =
+          scrubPII(
+            containerText.slice(
+              0,
+              1800
+            )
+          );
+
+        if (
+          !isRelevant(
+            text,
+            summary,
+            'police'
+          )
+        ) {
+          return;
+        }
+
+        seen.add(
+          url
+        );
+
+        out.push(
+          {
+            title:
+              scrubPII(
+                text
+              ),
+
+            summary,
+
+            sourceUrl:
+              url,
+
+            publishedAt:
+              date &&
+              !Number.isNaN(
+                date.getTime()
+              )
+                ? date.toISOString()
+                : null,
+
+            source:
+              'Hamilton Police Service',
+
+            sourceType:
+              'police'
+          }
+        );
+
       }
     );
 
-    // Follow pagination / older links.
+    const merged =
+      new Map();
+
     for (
-      const link of
-      extractArchivePageLinks(
-        html,
-        pageUrl
-      )
+      const record of
+      [
+        ...rss,
+        ...out
+      ]
     ) {
-      if (
-        !visited.has(link) &&
-        !queue.includes(link)
-      ) {
-        queue.push(link);
-      }
+      merged.set(
+        record.sourceUrl,
+        record
+      );
     }
 
-    if (
-      oldestSeen &&
-      oldestSeen < cutoff &&
-      pagesRead >= 5
-    ) {
+    return [
+      ...merged.values()
+    ];
+
+  } catch (error) {
+
+    console.warn(
+      'HPS archive failed:',
+      error.message
+    );
+
+    return rss;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Hamilton Fire — official ArcGIS layer                              */
+/* ------------------------------------------------------------------ */
+
+async function ingestFire() {
+
+  const out = [];
+
+  let offset = 0;
+
+  for (
+    let page = 0;
+    page < 8;
+    page++
+  ) {
+
+    const url =
+      new URL(
+        `${HFD_FEATURE_URL}/query`
+      );
+
+    url.searchParams.set(
+      'where',
+      '1=1'
+    );
+
+    url.searchParams.set(
+      'outFields',
+      '*'
+    );
+
+    url.searchParams.set(
+      'returnGeometry',
+      'false'
+    );
+
+    url.searchParams.set(
+      'f',
+      'json'
+    );
+
+    url.searchParams.set(
+      'resultOffset',
+      String(offset)
+    );
+
+    url.searchParams.set(
+      'resultRecordCount',
+      '2000'
+    );
+
+    url.searchParams.set(
+      'orderByFields',
+      'DATE_TIME DESC'
+    );
+
+    try {
+
+      const response =
+        await fetch(
+          url,
+          {
+            headers: {
+              'User-Agent':
+                'WetFloorWatch/1.0'
+            }
+          }
+        );
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}`
+        );
+      }
+
+      const data =
+        await response.json();
+
+      const features =
+        data.features ||
+        [];
+
+      if (
+        !features.length
+      ) {
+        break;
+      }
+
+      for (
+        const feature of
+        features
+      ) {
+
+        const attrs =
+          feature.attributes ||
+          {};
+
+        const date =
+          attrs.DATE_TIME
+            ? new Date(
+                attrs.DATE_TIME
+              )
+            : null;
+
+        if (
+          date &&
+          !Number.isNaN(
+            date.getTime()
+          ) &&
+          date < cutoffDate()
+        ) {
+          return out;
+        }
+
+        const street1 =
+          safePublicLocation(
+            attrs.XSTREET_1 ||
+            ''
+          );
+
+        const street2 =
+          safePublicLocation(
+            attrs.XSTREET_2 ||
+            ''
+          );
+
+        const location =
+          street1 &&
+          street2
+            ? `${street1} & ${street2}, Hamilton, Ontario, Canada`
+            : null;
+
+        let coordinates =
+          null;
+
+        if (
+          location
+        ) {
+          coordinates =
+            await geocode(
+              location
+            );
+        }
+
+        const title =
+          `Hamilton Fire: ${
+            attrs.TYPE_OF_CALL ||
+            'Incident'
+          }`;
+
+        const summary =
+          scrubPII(
+            `${
+              attrs.TYPE_OF_CALL ||
+              'Fire Department incident'
+            }${
+              location
+                ? ` near ${location}`
+                : ''
+            }. Units dispatched: ${
+              attrs.UNITS_DISPATCHED ||
+              'not published'
+            }.`
+          );
+
+        /*
+         * Direct record-level ArcGIS query URL,
+         * rather than the dashboard homepage.
+         */
+        const sourceUrl =
+          `${HFD_FEATURE_URL}/query?where=OBJECTID%3D${encodeURIComponent(
+            attrs.OBJECTID
+          )}&outFields=*&returnGeometry=false&f=pjson`;
+
+        out.push(
+          {
+            title,
+
+            summary,
+
+            sourceUrl,
+
+            publishedAt:
+              date &&
+              !Number.isNaN(
+                date.getTime()
+              )
+                ? date.toISOString()
+                : null,
+
+            source:
+              'Hamilton Fire Department',
+
+            sourceType:
+              'fire',
+
+            locationText:
+              location,
+
+            coordinates
+          }
+        );
+
+      }
+
+      if (
+        features.length <
+        2000
+      ) {
+        break;
+      }
+
+      offset +=
+        2000;
+
+    } catch (error) {
+
+      console.warn(
+        'HFD ArcGIS failed:',
+        error.message
+      );
+
       break;
     }
   }
 
-  console.log(
-    `Hamilton Police archive pages read: ${pagesRead}; records found: ${results.size}`
-  );
-
-  return [
-    ...results.values()
-  ];
+  return out;
 }
 
 /* ------------------------------------------------------------------ */
-/* Normalize + enrich                                                 */
+/* Enrichment                                                         */
 /* ------------------------------------------------------------------ */
 
-async function enrichRecord(
+async function enrich(
   raw
 ) {
-  const summary =
-    scrubPII(
-      raw.summary
+
+  let location =
+    raw.locationText ||
+    extractIntersection(
+      `${raw.title} ${raw.summary}`
     );
 
-  const title =
-    scrubPII(
-      raw.title
-    );
+  let brief =
+    raw.brief ||
+    null;
 
   let extracted =
     null;
 
   if (groq) {
+
     extracted =
       await extractWithGroq(
-        title,
-        summary
+        raw.title,
+        raw.summary
       );
   }
 
   if (
-    extracted &&
-    extracted.isHamilton !== true
+    extracted?.isHamilton ===
+    false
   ) {
     return null;
   }
 
-  const candidateLocation =
-    extracted?.locationText ||
-    extractIntersection(
-      `${title} ${summary}`
-    );
+  if (
+    extracted?.locationText
+  ) {
 
-  const locationText =
-    candidateLocation &&
-    !looksLikePrivateResidentialAddress(
-      candidateLocation
+    location =
+      safePublicLocation(
+        extracted.locationText
+      ) ||
+      location;
+  }
+
+  if (
+    extracted?.brief
+  ) {
+
+    brief =
+      scrubPII(
+        extracted.brief
+      );
+  }
+
+  if (
+    !isRelevant(
+      raw.title,
+      raw.summary,
+      raw.sourceType
     )
-      ? sanitizeLocationText(
-          candidateLocation
-        )
-      : null;
+  ) {
+    return null;
+  }
 
-  /*
-   * If we cannot establish a real, privacy-safe
-   * public location, retain the source record
-   * but do not map it.
-   */
-  const coordinates =
-    locationText
-      ? await geocodeHamilton(
-          locationText
-        )
-      : null;
+  if (
+    location &&
+    !raw.coordinates
+  ) {
+
+    raw.coordinates =
+      await geocode(
+        location
+      );
+  }
+
+  if (
+    !brief
+  ) {
+
+    brief =
+      normalizeWhitespace(
+        `${raw.title}. ${raw.summary}`
+      ).slice(
+        0,
+        320
+      );
+  }
 
   const category =
     extracted?.category ||
     classify(
-      title,
-      summary
-    );
-
-  const id =
-    incidentId(
-      raw.sourceUrl,
-      raw.publishedAt,
-      title
+      raw.title,
+      raw.summary,
+      raw.sourceType
     );
 
   return {
-    id,
 
-    title,
-    summary,
+    id:
+      incidentId(
+        raw.sourceUrl,
+        raw.publishedAt,
+        raw.title
+      ),
+
+    title:
+      raw.title,
+
+    summary:
+      raw.summary,
+
+    brief,
 
     category,
 
@@ -1102,10 +1607,6 @@ async function enrichRecord(
     sourceType:
       raw.sourceType,
 
-    /*
-     * This is the actual originating article/feed URL.
-     * There is deliberately NO fallback URL.
-     */
     sourceUrl:
       raw.sourceUrl,
 
@@ -1117,32 +1618,29 @@ async function enrichRecord(
         : null,
 
     locationText:
-      locationText ||
+      location ||
       null,
 
     coordinates:
-      coordinates
+      raw.coordinates
         ? {
             lat:
-              coordinates.lat,
+              raw.coordinates.lat,
+
             lon:
-              coordinates.lon
+              raw.coordinates.lon
           }
         : null,
 
-    /*
-     * Only records with actual coordinates
-     * should appear as mapped incidents.
-     */
     mapped:
-      Boolean(coordinates),
-
-    geocodeDisplayName:
-      coordinates?.displayName ||
-      null,
+      Boolean(
+        raw.coordinates
+      ),
 
     verifiedLocation:
-      Boolean(coordinates),
+      Boolean(
+        raw.coordinates
+      ),
 
     importedAt:
       admin.firestore.FieldValue.serverTimestamp(),
@@ -1152,13 +1650,10 @@ async function enrichRecord(
   };
 }
 
-/* ------------------------------------------------------------------ */
-/* Firestore                                                          */
-/* ------------------------------------------------------------------ */
-
-async function writeRecord(
+async function write(
   record
 ) {
+
   if (
     !record?.id ||
     !record?.sourceUrl
@@ -1166,14 +1661,13 @@ async function writeRecord(
     return;
   }
 
-  /*
-   * Firestore document ID is deterministic.
-   * Re-running the seeder therefore updates
-   * instead of multiplying duplicate incidents.
-   */
   await db
-    .collection(COLLECTION)
-    .doc(record.id)
+    .collection(
+      COLLECTION
+    )
+    .doc(
+      record.id
+    )
     .set(
       record,
       {
@@ -1182,28 +1676,148 @@ async function writeRecord(
     );
 }
 
-async function processRawRecords(
-  records
-) {
+/* ------------------------------------------------------------------ */
+/* Main                                                               */
+/* ------------------------------------------------------------------ */
+
+async function main() {
+
+  const customFeeds =
+    process.env.RSS_FEEDS
+      ? JSON.parse(
+          process.env.RSS_FEEDS
+        )
+      : [];
+
+  const feeds = [
+    ...DEFAULT_FEEDS,
+    ...(
+      Array.isArray(
+        customFeeds
+      )
+        ? customFeeds
+        : []
+    )
+  ];
+
+  /*
+   * Real Instagram adapter only.
+   * No HTML scraping of Instagram.
+   */
+  if (
+    INSTAGRAM_FEED_URL
+  ) {
+
+    feeds.push(
+      {
+        name:
+          '@interventionintersection2026',
+
+        url:
+          INSTAGRAM_FEED_URL,
+
+        type:
+          'instagram'
+      }
+    );
+  }
+
+  /*
+   * Optional official EMS adapter.
+   *
+   * Do not invent a dispatch feed if one
+   * is not publicly available.
+   */
+  if (
+    EMS_FEED_URL
+  ) {
+
+    feeds.push(
+      {
+        name:
+          'Hamilton Paramedic Service',
+
+        url:
+          EMS_FEED_URL,
+
+        type:
+          'ems'
+      }
+    );
+  }
+
+  const [
+    feedGroups,
+    police,
+    fire
+  ] =
+    await Promise.all(
+      [
+        Promise.all(
+          feeds.map(
+            ingestRSS
+          )
+        ),
+
+        ingestHamiltonPolice(),
+
+        ingestFire()
+      ]
+    );
+
+  const all = [
+    ...feedGroups.flat(),
+    ...(
+      Array.isArray(
+        police
+      )
+        ? police
+        : []
+    ),
+    ...fire
+  ];
+
+  const unique =
+    [
+      ...new Map(
+        all
+          .filter(
+            item =>
+              item?.sourceUrl
+          )
+          .map(
+            item => [
+              `${item.sourceUrl}|${item.title}`,
+              item
+            ]
+          )
+      ).values()
+    ];
+
   let processed = 0;
   let mapped = 0;
   let skipped = 0;
 
   for (
-    const raw of records
+    const raw of
+    unique
   ) {
+
     try {
+
       const record =
-        await enrichRecord(
+        await enrich(
           raw
         );
 
       if (!record) {
+
         skipped++;
+
         continue;
       }
 
-      await writeRecord(
+      await write(
         record
       );
 
@@ -1216,166 +1830,47 @@ async function processRawRecords(
       }
 
       console.log(
-        `${record.mapped ? 'MAP' : 'TEXT'} ${record.category}: ${record.title}`
+        `${
+          record.mapped
+            ? 'MAP'
+            : 'TEXT'
+        } ${
+          record.sourceType
+        } ${
+          record.category
+        }: ${
+          record.title
+        }`
       );
+
     } catch (error) {
+
       skipped++;
 
       console.warn(
-        'Record processing failed:',
+        'Record failed:',
         error.message
       );
     }
   }
 
-  return {
-    processed,
-    mapped,
-    skipped
-  };
-}
-
-/* ------------------------------------------------------------------ */
-/* Instagram                                                          */
-/* ------------------------------------------------------------------ */
-
-/*
- * Do NOT scrape Instagram HTML and pretend it is an RSS feed.
- *
- * Instagram's supported API requires appropriate authentication and
- * permissions. The application therefore accepts a genuine feed/API
- * adapter through:
- *
- *   INSTAGRAM_FEED_URL
- *
- * The returned entries must contain their real permalink.
- *
- * This prevents the common failure mode where every card links to
- * instagram.com instead of the actual post.
- */
-
-async function ingestInstagramFeed() {
-  const feedUrl =
-    process.env.INSTAGRAM_FEED_URL;
-
-  if (!feedUrl) {
-    console.log(
-      'Instagram: no supported feed configured; skipping.'
-    );
-
-    return [];
-  }
-
-  const feed = {
-    name:
-      '@interventionintersection2026',
-    url:
-      feedUrl,
-    type:
-      'instagram'
-  };
-
-  return ingestRSSFeed(
-    feed
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Main                                                               */
-/* ------------------------------------------------------------------ */
-
-async function main() {
-  console.log(
-    `WetFloorWatch ingestion starting; historical depth=${HISTORY_DAYS} days`
-  );
-
-  const feeds = [];
-
-  if (
-    process.env.RSS_FEEDS
-  ) {
-    try {
-      const configured =
-        JSON.parse(
-          process.env.RSS_FEEDS
-        );
-
-      if (
-        Array.isArray(
-          configured
-        )
-      ) {
-        feeds.push(
-          ...configured
-        );
-      }
-    } catch (error) {
-      throw new Error(
-        `Invalid RSS_FEEDS JSON: ${error.message}`
-      );
-    }
-  }
-
-  const [
-    rssRecords,
-    policeRecords,
-    instagramRecords
-  ] =
-    await Promise.all([
-      Promise.all(
-        feeds.map(
-          ingestRSSFeed
-        )
-      ).then(
-        groups =>
-          groups.flat()
-      ),
-
-      ingestHamiltonPoliceArchive(),
-
-      ingestInstagramFeed()
-    ]);
-
-  const allRecords = [
-    ...rssRecords,
-    ...policeRecords,
-    ...instagramRecords
-  ];
-
-  const unique = [
-    ...new Map(
-      allRecords
-        .filter(
-          item =>
-            item?.sourceUrl
-        )
-        .map(
-          item => [
-            `${item.sourceUrl}|${item.title}`,
-            item
-          ]
-        )
-    ).values()
-  ];
-
-  console.log(
-    `Collected ${unique.length} unique source records.`
-  );
-
-  const result =
-    await processRawRecords(
-      unique
-    );
-
   console.log(
     JSON.stringify(
       {
-        ok: true,
+        ok:
+          true,
+
         historyDays:
           HISTORY_DAYS,
+
         collected:
           unique.length,
-        ...result
+
+        processed,
+
+        mapped,
+
+        skipped
       },
       null,
       2
@@ -1385,10 +1880,14 @@ async function main() {
 
 main().catch(
   error => {
+
     console.error(
       error
     );
 
-    process.exit(1);
+    process.exit(
+      1
+    );
+
   }
 );
