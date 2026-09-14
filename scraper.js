@@ -55,7 +55,7 @@ const NOMINATIM_USER_AGENT =
 
 const GROQ_MODEL =
   process.env.GROQ_MODEL ||
-  'llama-3.3-70b-versatile';
+  'model: "openai/gpt-oss-120b"';
 
 const HPS_ARCHIVE =
   process.env.HAMILTON_POLICE_ARCHIVE ||
