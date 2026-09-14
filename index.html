@@ -196,6 +196,11 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // LIVE PUBLIC INCIDENTS: populated by the Node ingestion worker in "incidents".
+        // COMMUNITY SUBMISSIONS: authenticated reports continue to use "reports".
+        const INCIDENTS_COLLECTION = "incidents";
+        const REPORTS_COLLECTION = "reports";
+
         const map = L.map('map', { zoomControl: false }).setView([43.2557, -79.8711], 13);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -308,6 +313,52 @@
             filterAndRender();
         };
 
+
+        function normalizeIncident(doc) {
+            const d = doc.data();
+            const coords = d.coordinates && Number.isFinite(Number(d.coordinates.lat)) && Number.isFinite(Number(d.coordinates.lon))
+                ? { lat: Number(d.coordinates.lat), lng: Number(d.coordinates.lon) }
+                : null;
+
+            return {
+                id: doc.id,
+                platform: mapSourceTypeToPlatform(d.sourceType, d.source),
+                category: d.category || 'hazard',
+                source: d.source || 'Unknown source',
+                description: [d.title, d.summary].filter(Boolean).join(' — '),
+                title: d.title || 'Untitled report',
+                summary: d.summary || '',
+                url: d.sourceUrl || '',
+                timestamp: d.publishedAt || d.importedAt || d.updatedAt || null,
+                hasPin: Boolean(d.mapped && coords),
+                lat: coords ? coords.lat : null,
+                lng: coords ? coords.lng : null,
+                locationText: d.locationText || null,
+                verifiedLocation: Boolean(d.verifiedLocation)
+            };
+        }
+
+        function mapSourceTypeToPlatform(sourceType, sourceName) {
+            const t = String(sourceType || '').toLowerCase();
+            const s = String(sourceName || '').toLowerCase();
+
+            if (t === 'police' || t === 'ems' || s.includes('police')) return 'police';
+            if (t === 'instagram' || t === 'social' || t === 'community' || t === 'reddit') return 'social';
+            if (t === 'news' || t === 'rss-news') return 'news';
+
+            return 'news';
+        }
+
+        function mapCategoryToMarkerCategory(category) {
+            const c = String(category || '').toLowerCase();
+            if (c === 'shooting' || c === 'assault') return 'emergency';
+            if (c === 'collision' || c === 'fire') return 'emergency';
+            if (c === 'drug' || c === 'hazard') return 'hazard';
+            if (c === 'suspicious' || c === 'missing-person') return 'street';
+            if (c === 'theft') return 'street';
+            return 'advisory';
+        }
+
         function formatTimestamp(ts) {
             if (!ts) return 'Unknown';
             const date = ts.toDate ? ts.toDate() : new Date(ts);
@@ -356,7 +407,7 @@
 
                 if (item.hasPin && item.lat && item.lng) {
                     heatPoints.push([item.lat, item.lng, 0.8]);
-                    const marker = L.marker([item.lat, item.lng], { icon: getIcon(item.category) });
+                    const marker = L.marker([item.lat, item.lng], { icon: getIcon(mapCategoryToMarkerCategory(item.category)) });
                     marker.bindPopup(`
                         <div class="font-sans min-w-[220px]">
                             <strong class="text-xs text-white block">${item.source}</strong>
@@ -372,10 +423,10 @@
                 card.className = `p-3 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-600 transition`;
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-1">
-                        <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.source}</p>
+                        <p class="text-xs font-bold text-slate-200 line-clamp-1">${item.title || item.source}</p>
                         <span class="text-[9px] text-slate-500 font-mono whitespace-nowrap ml-2">${formatTimestamp(item.timestamp)}</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 line-clamp-2">${item.description}</p>
+                    <p class="text-[11px] text-slate-400 line-clamp-2">${item.description}</p>\n                    ${item.locationText ? `<p class="text-[9px] text-slate-500 mt-1">📍 ${item.locationText}</p>` : ""}
                     ${item.url && item.url.startsWith('http') ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="text-[9px] text-sky-400 hover:underline font-bold mt-1.5 inline-block" onclick="event.stopPropagation()">🔗 Direct Link</a>` : ''}
                 `;
                 if (item.hasPin && item.lat && item.lng) card.onclick = () => map.flyTo([item.lat, item.lng], 16);
@@ -395,9 +446,27 @@
             }
         }
 
-        onSnapshot(query(collection(db, "reports"), orderBy("timestamp", "desc"), limit(100)), (snapshot) => {
-            rawReports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const incidentsQuery = query(
+            collection(db, INCIDENTS_COLLECTION),
+            orderBy("publishedAt", "desc"),
+            limit(1000)
+        );
+
+        onSnapshot(incidentsQuery, (snapshot) => {
+            rawReports = snapshot.docs
+                .map(normalizeIncident)
+                .filter(item => item.source && item.description);
+
             filterAndRender();
+        }, (error) => {
+            console.error("Firestore incidents listener failed:", error);
+            document.getElementById('active-count').innerText = "Firestore connection error";
+            const feed = document.getElementById('feed-list');
+            feed.innerHTML = `
+                <div class="p-3 bg-rose-950/30 border border-rose-500/30 rounded-xl">
+                    <p class="text-xs font-bold text-rose-300">Unable to load live incidents.</p>
+                    <p class="text-[10px] text-slate-400 mt-1">${String(error.message || 'Unknown Firestore error').replace(/[<>&"]/g, '')}</p>
+                </div>`;
         });
 
         document.getElementById('heatmap-toggle').onchange = filterAndRender;
@@ -457,7 +526,7 @@
             if (!lat || !lng) return alert("Location required. Please allow GPS, drop a pin, or select an intersection.");
             
             try {
-                await addDoc(collection(db, "reports"), {
+                await addDoc(collection(db, REPORTS_COLLECTION), {
                     category: document.getElementById('hazard-type').value,
                     platform: 'word_of_mouth',
                     hasPin: true,
