@@ -1,475 +1,555 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WetFloorWatch | Hamilton Intelligence Grid</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WetFloorWatch | Hamilton Safety Intelligence</title>
 
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z' fill='%23f59e0b'/><path d='M11 10h2v4h-2zm0 6h2v2h-2z' fill='%23020617'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='8' fill='%23f5c400'/><path d='M11 45h42L41 18H23z' fill='%23101010'/><path d='M29 25l-4 12h7l-3 8 10-13h-7l5-7z' fill='%23f5c400'/></svg>">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
 
-    <link rel="stylesheet"
-          href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
-    <style>
-        body {
-            -webkit-font-smoothing: antialiased;
-            font-family: ui-sans-serif, system-ui, sans-serif;
-        }
+<style>
+html,body{
+    height:100%;
+    margin:0;
+    background:#02050a;
+    color:#e5e7eb;
+    font-family:ui-sans-serif,system-ui,sans-serif;
+    overflow:hidden
+}
 
-        .leaflet-container {
-            background: #020617 !important;
-            cursor: default;
-        }
+#map{
+    height:100%;
+    width:100%;
+    background:#02050a
+}
 
-        .leaflet-crosshair {
-            cursor: crosshair !important;
-        }
+.leaflet-container{
+    background:#02050a
+}
 
-        .leaflet-tile {
-            filter:
-                brightness(0.5)
-                invert(1)
-                contrast(2.8)
-                hue-rotate(200deg)
-                saturate(0.25);
-        }
+.leaflet-control-attribution{
+    background:rgba(2,5,10,.8)!important;
+    color:#64748b!important
+}
 
-        .custom-div-icon {
-            background: transparent;
-            border: none;
-        }
+.leaflet-control-attribution a{
+    color:#94a3b8!important
+}
 
-        .leaflet-popup-content-wrapper,
-        .leaflet-popup-tip {
-            background: #0f172a !important;
-            color: #f8fafc !important;
-            border: 1px solid #1e293b;
-        }
+.leaflet-control-zoom a{
+    background:#0b1118!important;
+    color:#e5e7eb!important;
+    border-color:#1f2937!important
+}
 
-        .marker-cluster {
-            background-color: rgba(245, 158, 11, 0.7);
-            border-radius: 50%;
-            font-weight: bold;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #f59e0b;
-            box-shadow: 0 0 15px rgba(245,158,11,.4);
-        }
+.glass{
+    background:rgba(7,12,18,.94);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(71,85,105,.35);
+    box-shadow:0 16px 35px rgba(0,0,0,.3)
+}
 
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-    </style>
+.map-dim{
+    filter:brightness(.68) saturate(.7) contrast(1.08)
+}
+
+.marker-cluster{
+    background:rgba(245,158,11,.78);
+    border:2px solid #f59e0b;
+    color:#fff;
+    font-weight:800
+}
+
+.marker-cluster div{
+    background:rgba(15,23,42,.9)!important;
+    color:#fff!important
+}
+
+.crosshair{
+    cursor:crosshair!important
+}
+
+.scroll::-webkit-scrollbar{
+    width:7px
+}
+
+.scroll::-webkit-scrollbar-thumb{
+    background:#253140;
+    border-radius:99px
+}
+
+.tab-active{
+    background:#f5c400!important;
+    color:#02050a!important;
+    border-color:#f5c400!important
+}
+
+.danger-toggle{
+    min-width:210px
+}
+</style>
 </head>
 
-<body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
+<body class="h-full">
 
-<!-- ================================================================
-     DISCLAIMER
-     ================================================================ -->
+<div id="terms"
+     class="fixed inset-0 z-[5000] flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
 
-<div id="disclaimer-modal"
-     class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/95 backdrop-blur-md p-4">
+    <div class="max-w-2xl w-full rounded-3xl border border-amber-500/30 bg-[#0a1017] p-6 shadow-2xl">
 
-    <div class="bg-slate-900 border border-amber-500/50 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
+        <div class="flex gap-4 items-start">
 
-        <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
-
-            <div class="bg-amber-500/20 p-2.5 rounded-xl border border-amber-500/30">
-                <svg class="w-7 h-7 text-amber-500"
-                     viewBox="0 0 24 24"
-                     fill="none"
-                     stroke="currentColor"
-                     stroke-width="2">
-                    <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/>
-                    <path d="M11 10h2v4h-2zm0 6h2v2h-2z"/>
-                </svg>
+            <div class="grid place-items-center w-14 h-14 rounded-2xl bg-amber-400 text-black text-2xl">
+                ⚠
             </div>
 
             <div>
-                <h2 class="text-lg font-bold text-white">
+
+                <div class="text-[10px] uppercase tracking-[.25em] text-amber-400">
                     WetFloorWatch
-                    <span class="text-amber-500 text-xs block font-mono">
-                        TERMS OF USE & LIABILITY WAIVER
-                    </span>
-                </h2>
+                </div>
+
+                <h1 class="text-2xl font-black">
+                    Safety intelligence — not emergency dispatch
+                </h1>
+
+                <p class="mt-2 text-sm text-slate-400">
+                    Public records and community reports can be incomplete,
+                    delayed, disputed or approximate.
+                </p>
+
             </div>
 
         </div>
 
-        <div class="text-xs text-slate-300 space-y-2.5 leading-relaxed">
+        <div class="grid md:grid-cols-2 gap-3 mt-6 text-xs text-slate-400">
 
-            <p>
-                <strong class="text-rose-400">
-                    APPROXIMATE DATA NOTICE:
-                </strong>
-                Map pins, hazard zones and heatmaps may be approximate,
-                delayed or incomplete.
-            </p>
+            <div class="rounded-2xl border border-slate-800 p-4">
+                <b class="text-white">Approximate locations</b><br>
+                Only public/appropriate locations are mapped.
+                Residential house numbers are removed.
+            </div>
 
-            <p>
-                <strong class="text-amber-400">
-                    MODERATION POLICY:
-                </strong>
-                Community submissions require authentication and may be
-                moderated or rejected.
-            </p>
+            <div class="rounded-2xl border border-slate-800 p-4">
+                <b class="text-white">Source integrity</b><br>
+                Cards should link to originating records.
+                A source does not become verified merely because
+                it appears here.
+            </div>
 
-            <p>
-                <strong class="text-cyan-400">
-                    EMERGENCY NOTICE:
-                </strong>
-                If you are witnessing an immediate emergency,
-                <strong class="text-rose-400">CALL 911.</strong>
-            </p>
+            <div class="rounded-2xl border border-slate-800 p-4">
+                <b class="text-white">No targeting</b><br>
+                Do not confront, identify, follow, threaten or harass
+                anyone because of information shown here.
+            </div>
 
-            <p>
-                Do not use this service to identify, threaten, follow,
-                confront or harass people.
-            </p>
+            <div class="rounded-2xl border border-slate-800 p-4">
+                <b class="text-white">Emergency</b><br>
+                For immediate danger, fire or medical crisis,
+                call <b class="text-white">911</b>.
+            </div>
 
         </div>
 
-        <button id="accept-disclaimer-btn"
-                class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider">
-            I Understand & Accept Terms
+        <label class="mt-5 flex gap-3 rounded-2xl border border-slate-800 p-4 text-xs">
+
+            <input id="terms-check"
+                   type="checkbox"
+                   class="mt-1 accent-amber-400">
+
+            <span>
+                I understand and will use WetFloorWatch lawfully
+                and responsibly.
+            </span>
+
+        </label>
+
+        <button id="terms-ok"
+                disabled
+                class="mt-4 w-full rounded-2xl bg-slate-700 py-3 font-black text-slate-400">
+            ENTER WETFLOORWATCH
         </button>
 
     </div>
 </div>
 
 
-<!-- ================================================================
-     HEADER
-     ================================================================ -->
+<div class="h-full flex">
 
-<header class="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 h-16 flex items-center justify-between px-4 z-20 shadow-lg">
+<aside class="w-[420px] shrink-0 bg-[#070c12] border-r border-slate-800 flex flex-col z-[1200]">
 
-    <div class="flex items-center space-x-3">
-
-        <div class="bg-amber-500/10 p-2 rounded-xl border border-amber-500/30">
-            <svg class="w-6 h-6 text-amber-500"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2">
-                <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5z"/>
-                <path d="M11 10h2v4h-2zm0 6h2v2h-2z"/>
-            </svg>
-        </div>
+    <div class="h-16 px-4 flex items-center justify-between border-b border-slate-800">
 
         <div>
-            <h1 class="font-bold text-lg text-white flex items-center gap-2">
-                WetFloorWatch
-                <span class="text-pink-400 font-mono text-[9px] uppercase bg-pink-500/10 px-2 py-0.5 rounded border border-pink-500/30">
-                    Active Grid
-                </span>
-            </h1>
 
-            <p class="text-[10px] text-slate-400 hidden sm:block uppercase tracking-wide">
-                Hamilton Threat & Hazard Intelligence
-            </p>
+            <div class="font-black tracking-tight">
+                WetFloorWatch
+                <span class="text-pink-400 text-[9px]">
+                    ACTIVE GRID
+                </span>
+            </div>
+
+            <div class="text-[9px] text-slate-500 uppercase tracking-widest">
+                Hamilton safety intelligence
+            </div>
+
         </div>
 
-    </div>
-
-    <div class="flex items-center gap-2">
-
-        <button id="auth-btn"
-                class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700">
+        <button id="auth"
+                class="text-[10px] bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">
             Sign In
         </button>
 
-        <button id="open-report-modal"
-                class="hidden bg-gradient-to-r from-amber-600 to-amber-500 text-slate-950 font-extrabold text-xs px-3.5 py-2.5 rounded-xl">
-            + Report Wet Floor
-        </button>
+    </div>
+
+
+    <div class="p-3 grid grid-cols-2 gap-2 border-b border-slate-800">
+
+        <a href="https://ko-fi.com/eclipz"
+           target="_blank"
+           class="rounded-xl border border-sky-400/30 bg-sky-400/10 py-2 text-center text-[10px] font-bold text-sky-300">
+            Ko-fi Support
+        </a>
+
+        <a href="https://www.paypal.com/paypalme/3cl1pz"
+           target="_blank"
+           class="rounded-xl border border-blue-400/30 bg-blue-400/10 py-2 text-center text-[10px] font-bold text-blue-300">
+            PayPal Support
+        </a>
 
     </div>
-</header>
 
 
-<!-- ================================================================
-     MAIN
-     ================================================================ -->
+    <div class="p-3 border-b border-slate-800">
 
-<div class="flex-1 flex relative overflow-hidden bg-slate-950">
+        <a href="https://www.instagram.com/interventionintersection2026"
+           target="_blank"
+           class="flex items-center justify-between rounded-xl border border-fuchsia-500/20 bg-fuchsia-500/5 p-3">
 
-    <!-- SIDEBAR -->
+            <div>
 
-    <aside class="absolute md:relative inset-y-0 left-0 z-30 w-[420px] bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl">
+                <div class="text-[9px] uppercase tracking-widest text-fuchsia-400">
+                    Community Watch
+                </div>
 
-        <!-- SUPPORT -->
+                <div class="text-xs font-black">
+                    @interventionintersection2026
+                </div>
 
-        <div class="p-3 border-b border-slate-800 bg-slate-950/90 grid grid-cols-2 gap-2.5">
+            </div>
 
-            <a href="https://ko-fi.com/eclipz"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="bg-[#13C3FF]/15 border border-[#13C3FF]/40 text-[#13C3FF] font-bold text-xs py-2 rounded-xl text-center">
-                Ko-fi Support
-            </a>
+            <span class="text-[10px] text-fuchsia-300">
+                Profile ↗
+            </span>
 
-            <a href="https://www.paypal.com/paypalme/3cl1pz"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="bg-[#00457C]/30 border border-[#0079C1]/50 text-[#0079C1] font-bold text-xs py-2 rounded-xl text-center">
-                PayPal Support
-            </a>
+        </a>
+
+        <div class="mt-2 text-[9px] uppercase tracking-widest text-slate-500">
+            Recent posts
+        </div>
+
+        <div id="ig-feed"
+             class="mt-1 space-y-1.5 max-h-40 overflow-auto scroll">
+
+            <div class="text-[9px] text-slate-600">
+                Waiting for synced posts…
+            </div>
 
         </div>
 
+    </div>
 
-        <!-- INSTAGRAM -->
 
-        <div class="p-3 border-b border-slate-800 bg-slate-950/60">
+    <div class="p-3 border-b border-slate-800 space-y-3">
 
-            <a href="https://www.instagram.com/interventionintersection2026"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="flex items-center justify-between p-2.5 bg-slate-900 border border-fuchsia-500/30 rounded-xl">
+        <div class="rounded-2xl border border-amber-500/25 bg-amber-500/5 p-3">
 
-                <div class="flex items-center gap-3">
+            <div class="flex items-center justify-between">
 
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-fuchsia-500 p-[2px]">
-                        <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center text-[10px]">
-                            IG
-                        </div>
+                <div>
+
+                    <div class="text-[10px] uppercase tracking-widest text-amber-300">
+                        Threat density
                     </div>
 
-                    <div>
-                        <span class="text-[9px] font-mono text-fuchsia-400 uppercase block font-bold">
-                            Community Watch
-                        </span>
-
-                        <span class="text-xs font-bold">
-                            @interventionintersection2026
-                        </span>
+                    <div class="text-sm font-black">
+                        Storm-watch heatmap
                     </div>
 
                 </div>
 
-                <span class="text-[10px] text-fuchsia-400">
-                    Profile ↗
-                </span>
+                <button id="heat-toggle"
+                        class="danger-toggle rounded-xl px-4 py-2 bg-amber-400 text-black font-black text-xs">
+                    HEATMAP ON
+                </button>
 
-            </a>
+            </div>
 
-
-            <div class="mt-2">
-
-                <div class="text-[9px] text-fuchsia-400 uppercase tracking-widest font-bold mb-1">
-                    Recent Posts
-                </div>
-
-                <div id="intervention-mini-feed"
-                     class="space-y-1.5 max-h-48 overflow-y-auto">
-
-                    <div class="text-[9px] text-slate-500 font-mono">
-                        Waiting for Instagram records…
-                    </div>
-
-                </div>
-
+            <div class="text-[9px] text-slate-500 mt-2">
+                Stronger areas reflect more mapped reports in the
+                selected history window; they do not prove a location
+                is currently dangerous.
             </div>
 
         </div>
 
 
-        <!-- HEATMAP -->
+        <div>
 
-        <div class="p-3 border-b border-slate-800">
+            <div class="flex justify-between">
 
-            <div class="bg-slate-950 border border-slate-700/50 p-2.5 rounded-xl flex items-center justify-between">
-
-                <span class="text-xs font-bold">
-                    City-Wide Danger Heatmap
+                <span class="text-[10px] uppercase tracking-widest text-slate-500">
+                    History window
                 </span>
 
-                <input type="checkbox"
-                       id="heatmap-toggle"
-                       checked
-                       class="accent-rose-600">
-
-            </div>
-
-        </div>
-
-
-        <!-- HISTORY SLIDER -->
-
-        <div class="p-3 border-b border-slate-800 bg-slate-950/40">
-
-            <div class="flex items-center justify-between mb-1">
-
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    History Window
-                </span>
-
-                <span id="history-label"
-                      class="text-[10px] font-mono text-amber-400">
+                <span id="age-label"
+                      class="text-[10px] font-mono text-amber-300">
                     2 years
                 </span>
 
             </div>
 
-            <input id="history-slider"
+            <input id="age"
                    type="range"
                    min="0"
                    max="730"
                    value="730"
-                   step="1"
-                   class="w-full accent-amber-500 cursor-pointer">
+                   class="w-full accent-amber-400">
 
-            <div class="flex justify-between text-[8px] text-slate-600 font-mono">
-                <span>Most Recent</span>
-                <span>2 Years Ago</span>
+            <div class="flex justify-between text-[8px] text-slate-600">
+                <span>Most recent</span>
+                <span>2 years</span>
             </div>
 
         </div>
 
-
-        <!-- TABS -->
-
-        <div class="px-3 pt-3 pb-2 border-b border-slate-800">
-
-            <div class="flex gap-1.5 overflow-x-auto scrollbar-hide text-[10px]">
-
-                <button onclick="switchMainTab('all')"
-                        id="main-tab-all"
-                        class="main-tab px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
-                    All Sources
-                </button>
-
-                <button onclick="switchMainTab('police')"
-                        id="main-tab-police"
-                        class="main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-bold">
-                    Police/EMS
-                </button>
-
-                <button onclick="switchMainTab('news')"
-                        id="main-tab-news"
-                        class="main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-bold">
-                    Local News
-                </button>
-
-                <button onclick="switchMainTab('social')"
-                        id="main-tab-social"
-                        class="main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-bold">
-                    Social & Residents
-                </button>
-
-            </div>
-        </div>
+    </div>
 
 
-        <!-- FEED -->
+    <div class="p-3 border-b border-slate-800">
 
-        <div class="flex-1 overflow-y-auto p-3 bg-slate-950/40">
+        <div id="tabs"
+             class="flex flex-wrap gap-1.5">
 
-            <div class="flex items-center justify-between mb-2 gap-2">
+            <button data-tab="all"
+                    class="tab tab-active rounded-lg border px-2.5 py-1.5 text-[9px] font-bold">
+                All
+            </button>
 
-                <span id="active-count"
-                      class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    0 records
-                </span>
+            <button data-tab="police"
+                    class="tab rounded-lg border border-slate-700 px-2.5 py-1.5 text-[9px] font-bold">
+                Police
+            </button>
 
-                <span id="data-status"
-                      class="text-[9px] font-mono text-slate-500">
-                    Connecting…
-                </span>
+            <button data-tab="ems"
+                    class="tab rounded-lg border border-slate-700 px-2.5 py-1.5 text-[9px] font-bold">
+                EMS
+            </button>
 
-            </div>
+            <button data-tab="fire"
+                    class="tab rounded-lg border border-slate-700 px-2.5 py-1.5 text-[9px] font-bold">
+                Fire
+            </button>
 
-            <div id="feed-list"
-                 class="space-y-2">
-            </div>
+            <button data-tab="news"
+                    class="tab rounded-lg border border-slate-700 px-2.5 py-1.5 text-[9px] font-bold">
+                Local News
+            </button>
+
+            <button data-tab="social"
+                    class="tab rounded-lg border border-slate-700 px-2.5 py-1.5 text-[9px] font-bold">
+                Social
+            </button>
 
         </div>
 
-    </aside>
 
+        <div class="mt-2">
 
-    <!-- MAP -->
+            <select id="category"
+                    class="w-full rounded-lg border border-slate-700 bg-slate-950 px-2 py-2 text-[10px]">
 
-    <main class="flex-1 h-full relative">
+                <option value="all">
+                    All safety themes
+                </option>
 
-        <div id="map"
-             class="w-full h-full z-10">
+                <option value="shooting">
+                    Shootings
+                </option>
+
+                <option value="assault">
+                    Stabbings / Assault / Harassment
+                </option>
+
+                <option value="drug">
+                    Open drug use / needles / pipes
+                </option>
+
+                <option value="fire">
+                    Fire / Explosion
+                </option>
+
+                <option value="collision">
+                    Collisions / Pedestrians
+                </option>
+
+                <option value="weapons">
+                    Weapons
+                </option>
+
+                <option value="theft">
+                    Theft / Robbery / Break-in
+                </option>
+
+                <option value="missing-person">
+                    Missing Person
+                </option>
+
+                <option value="suspicious">
+                    Suspicious / Death
+                </option>
+
+                <option value="hazard">
+                    Hazards / Other
+                </option>
+
+            </select>
+
         </div>
 
-    </main>
+    </div>
+
+
+    <div class="px-3 py-2 flex justify-between items-center">
+
+        <span id="counts"
+              class="text-[9px] uppercase tracking-widest text-slate-500">
+            0 records
+        </span>
+
+        <span id="status"
+              class="text-[9px] text-amber-300">
+            Connecting…
+        </span>
+
+    </div>
+
+
+    <div id="feed"
+         class="flex-1 overflow-auto scroll p-3 space-y-2">
+    </div>
+
+
+    <div class="p-3 border-t border-slate-800 text-[9px] leading-relaxed text-slate-600">
+        Police, Fire, EMS and public-news records are sourced only
+        when a usable public source exists. Community submissions
+        remain subject to authentication and moderation.
+    </div>
+
+</aside>
+
+
+<main class="flex-1 relative">
+
+    <div id="map"
+         class="map-dim">
+    </div>
+
+
+    <div class="absolute left-4 top-4 z-[1000] flex flex-wrap gap-2">
+
+        <button id="locate"
+                class="glass rounded-xl px-3 py-2 text-[10px] font-bold">
+            ◎ Locate me
+        </button>
+
+        <button id="pin"
+                class="glass rounded-xl px-3 py-2 text-[10px] font-bold">
+            ⌖ Drop report pin
+        </button>
+
+        <div class="glass rounded-xl px-3 py-2 text-[10px] font-bold">
+
+            <span id="live-dot"
+                  class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1">
+            </span>
+
+            <span id="map-status">
+                LIVE
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div id="pin-mode"
+         class="hidden absolute left-1/2 top-16 -translate-x-1/2 z-[1000] rounded-full border border-amber-400/30 bg-black/85 text-amber-300 px-4 py-2 text-[10px] font-black">
+        DROP-PIN MODE — CLICK THE MAP
+    </div>
+
+</main>
 
 </div>
 
 
-<!-- ================================================================
-     REPORT MODAL
-     ================================================================ -->
+<div id="report"
+     class="hidden fixed inset-0 z-[4000] items-center justify-center bg-black/80 backdrop-blur p-4">
 
-<div id="report-modal"
-     class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+    <div class="w-full max-w-lg rounded-3xl border border-slate-700 bg-[#0a1017] p-6">
 
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+        <div class="flex justify-between">
 
-        <div class="flex justify-between border-b border-slate-800 pb-3">
+            <h2 class="font-black">
+                Community report
+            </h2>
 
-            <h3 id="modal-title"
-                class="font-bold text-lg">
-                Sign In
-            </h3>
-
-            <button id="close-modal">
+            <button id="report-close">
                 ✕
             </button>
 
         </div>
 
 
-        <!-- AUTH -->
+        <div id="report-auth"
+             class="mt-4 space-y-3">
 
-        <div id="auth-section"
-             class="space-y-3 mt-4">
-
-            <p class="text-xs text-amber-400">
-                Secure sign-in required for community reports.
-            </p>
-
-            <input id="auth-email"
+            <input id="email"
                    type="email"
-                   placeholder="Email Address"
-                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs">
+                   placeholder="Email"
+                   class="w-full rounded-xl bg-black/20 border border-slate-700 px-3 py-2 text-xs">
 
-            <input id="auth-pass"
+            <input id="password"
                    type="password"
                    placeholder="Password"
-                   class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs">
+                   class="w-full rounded-xl bg-black/20 border border-slate-700 px-3 py-2 text-xs">
 
             <div class="flex gap-2">
 
-                <button id="btn-login"
-                        class="flex-1 bg-slate-800 py-2 rounded-xl text-xs font-bold">
+                <button id="login"
+                        class="flex-1 rounded-xl bg-slate-800 py-2 text-xs font-bold">
                     Login
                 </button>
 
-                <button id="btn-signup"
-                        class="flex-1 bg-slate-700 py-2 rounded-xl text-xs font-bold">
+                <button id="signup"
+                        class="flex-1 rounded-xl bg-slate-700 py-2 text-xs font-bold">
                     Register
                 </button>
 
@@ -478,76 +558,88 @@
         </div>
 
 
-        <!-- REPORT -->
+        <form id="report-form"
+              class="hidden mt-4 space-y-3">
 
-        <form id="hazard-form"
-              class="hidden space-y-3 mt-4">
+            <select id="report-cat"
+                    class="w-full rounded-xl bg-black/20 border border-slate-700 px-3 py-2 text-xs">
 
-            <div id="gps-status"
-                 class="bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs">
-                📡 Waiting for location…
-            </div>
+                <option value="hazard">
+                    Hazard
+                </option>
 
-            <button type="button"
-                    id="btn-manual-pin"
-                    class="w-full bg-slate-800 border border-slate-600 py-2 rounded-xl text-xs font-bold">
-                📍 Drop Pin on Map
-            </button>
+                <option value="drug">
+                    Open drug use / needles / pipes
+                </option>
 
-            <select id="hazard-type"
-                    class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs">
+                <option value="assault">
+                    Assault / harassment
+                </option>
 
-                <option value="hazard">Drug / Hazard</option>
-                <option value="street">Social Intel / Harassment</option>
-                <option value="emergency">Emergency</option>
+                <option value="shooting">
+                    Shooting / gunfire
+                </option>
+
+                <option value="suspicious">
+                    Suspicious activity
+                </option>
 
             </select>
 
-            <div class="relative">
 
-                <input id="hazard-loc"
-                       autocomplete="off"
-                       placeholder="Or type intersection..."
-                       class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs">
+            <div id="report-loc-wrap"
+                 class="relative">
 
-                <div id="address-suggestions"
-                     class="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl z-50 max-h-40 overflow-y-auto hidden">
-                </div>
+                <input id="report-loc"
+                       placeholder="Public intersection / place"
+                       class="w-full rounded-xl bg-black/20 border border-slate-700 px-3 py-2 text-xs">
 
             </div>
 
-            <input id="selected-lat"
-                   type="hidden">
 
-            <input id="selected-lng"
-                   type="hidden">
-
-            <textarea id="hazard-desc"
+            <textarea id="report-text"
+                      required
                       rows="4"
-                      placeholder="Specific details. No names or exact house numbers."
-                      class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs"
-                      required></textarea>
+                      placeholder="What did you actually observe? No names or exact house numbers."
+                      class="w-full rounded-xl bg-black/20 border border-slate-700 px-3 py-2 text-xs">
+            </textarea>
 
-            <button type="submit"
-                    class="w-full bg-amber-500 text-slate-950 font-extrabold py-3 rounded-xl text-xs">
-                Submit Report
+
+            <input id="report-lat"
+                   type="hidden">
+
+            <input id="report-lng"
+                   type="hidden">
+
+
+            <label class="text-[9px] text-slate-500 flex gap-2">
+
+                <input id="report-confirm"
+                       required
+                       type="checkbox"
+                       class="accent-amber-400">
+
+                I am submitting this in good faith and understand it will be moderated.
+
+            </label>
+
+
+            <button class="w-full rounded-xl bg-amber-400 py-3 text-xs font-black text-black">
+                Submit for moderation
             </button>
 
         </form>
 
     </div>
+
 </div>
 
-
-<!-- ================================================================
-     FIREBASE + APP
-     ================================================================ -->
 
 <script type="module">
 
 import {
     initializeApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
 
 import {
     getFirestore,
@@ -557,8 +649,9 @@ import {
     query,
     orderBy,
     limit,
+    where,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 import {
     getAuth,
@@ -566,85 +659,264 @@ import {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+} from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
 
-/* ================================================================
-   EXISTING FIREBASE CONFIG
-   ================================================================ */
+const app =
+    initializeApp(
+        {
+            apiKey:
+                'AIzaSyDsUcJX5_sTFZ4gYbetTtQjN95sDD1vuks',
 
-const app = initializeApp({
-    apiKey: "AIzaSyDsUcJX5_sTFZ4gYbetTtQjN95sDD1vuks",
-    authDomain: "wetfloorwatch.firebaseapp.com",
-    projectId: "wetfloorwatch"
-});
+            authDomain:
+                'wetfloorwatch.firebaseapp.com',
 
-
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-
-const INCIDENTS_COLLECTION = "incidents";
-const REPORTS_COLLECTION = "reports";
+            projectId:
+                'wetfloorwatch'
+        }
+    );
 
 
-/* ================================================================
-   MAP
-   ================================================================ */
+const db =
+    getFirestore(
+        app
+    );
 
-const map = L.map("map", {
-    zoomControl: false
-}).setView(
-    [43.2557, -79.8711],
-    13
+const auth =
+    getAuth(
+        app
+    );
+
+
+const INCIDENTS =
+    'incidents';
+
+const REPORTS =
+    'reports';
+
+
+/* ------------------------------------------------------------- */
+/* MAP */
+/* ------------------------------------------------------------- */
+
+const map =
+    L.map(
+        'map',
+        {
+            zoomControl:
+                false,
+
+            minZoom:
+                10,
+
+            maxZoom:
+                18
+        }
+    ).setView(
+        [
+            43.2557,
+            -79.8711
+        ],
+        12
+    );
+
+
+L.control.zoom(
+    {
+        position:
+            'bottomright'
+    }
+).addTo(
+    map
 );
 
 
-L.control.zoom({
-    position: "bottomright"
-}).addTo(map);
-
-
 L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     {
-        attribution: "&copy; OpenStreetMap contributors"
+        subdomains:
+            'abcd',
+
+        maxZoom:
+            20,
+
+        attribution:
+            '&copy; OpenStreetMap &copy; CARTO'
     }
-).addTo(map);
+).addTo(
+    map
+);
 
 
-const clusterGroup =
-    L.markerClusterGroup({
-        maxClusterRadius: 40,
-        showCoverageOnHover: false
-    });
+const clusters =
+    L.markerClusterGroup(
+        {
+            maxClusterRadius:
+                42,
+
+            showCoverageOnHover:
+                false
+        }
+    );
 
 
-map.addLayer(clusterGroup);
+map.addLayer(
+    clusters
+);
 
 
-let heatLayer = null;
-let rawReports = [];
-let currentMainTab = "all";
-let isDroppingPin = false;
+let heat =
+    null;
+
+let dropPin =
+    false;
+
+let userMarker =
+    null;
 
 
-/* ================================================================
-   GENERAL HELPERS
-   ================================================================ */
+const STATE = {
 
-function escapeHtml(value) {
+    incidents:
+        [],
 
-    return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    community:
+        [],
+
+    tab:
+        'all',
+
+    heat:
+        true,
+
+    age:
+        730,
+
+    category:
+        'all'
+
+};
+
+
+/* ------------------------------------------------------------- */
+/* HELPERS */
+/* ------------------------------------------------------------- */
+
+const $ =
+    id =>
+        document.getElementById(
+            id
+        );
+
+
+const escapeHtml =
+    value =>
+        String(
+            value ?? ''
+        )
+        .replaceAll(
+            '&',
+            '&amp;'
+        )
+        .replaceAll(
+            '<',
+            '&lt;'
+        )
+        .replaceAll(
+            '>',
+            '&gt;'
+        )
+        .replaceAll(
+            '"',
+            '&quot;'
+        )
+        .replaceAll(
+            "'",
+            '&#039;'
+        );
+
+
+function dateOf(
+    value
+) {
+
+    if (!value) {
+        return null;
+    }
+
+    if (
+        typeof value.toDate ===
+        'function'
+    ) {
+        return value.toDate();
+    }
+
+    const date =
+        new Date(
+            value
+        );
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? null
+        : date;
 }
 
 
-function safeUrl(value) {
+function timestamp(
+    value
+) {
+
+    const date =
+        dateOf(
+            value
+        );
+
+    return date
+        ? date.getTime()
+        : 0;
+}
+
+
+function formatDate(
+    value
+) {
+
+    const date =
+        dateOf(
+            value
+        );
+
+    if (!date) {
+        return 'Unknown';
+    }
+
+    return date.toLocaleString(
+        'en-CA',
+        {
+            month:
+                'short',
+
+            day:
+                'numeric',
+
+            year:
+                'numeric',
+
+            hour:
+                'numeric',
+
+            minute:
+                '2-digit'
+        }
+    );
+}
+
+
+function safeUrl(
+    value
+) {
 
     try {
 
@@ -655,11 +927,14 @@ function safeUrl(value) {
         const u =
             new URL(
                 value,
-                window.location.href
+                location.href
             );
 
         if (
-            !["http:", "https:"].includes(
+            ![
+                'https:',
+                'http:'
+            ].includes(
                 u.protocol
             )
         ) {
@@ -676,297 +951,160 @@ function safeUrl(value) {
 }
 
 
-function normalizeDate(value) {
+/* ------------------------------------------------------------- */
+/* NORMALIZATION */
+/* ------------------------------------------------------------- */
 
-    if (!value) {
-        return null;
-    }
-
-    try {
-
-        if (
-            typeof value.toDate === "function"
-        ) {
-            return value.toDate();
-        }
-
-        const date =
-            new Date(value);
-
-        return Number.isNaN(
-            date.getTime()
-        )
-            ? null
-            : date;
-
-    } catch {
-
-        return null;
-
-    }
-}
-
-
-function timeValue(value) {
-
-    const d =
-        normalizeDate(value);
-
-    return d
-        ? d.getTime()
-        : 0;
-}
-
-
-function formatTimestamp(value) {
-
-    const d =
-        normalizeDate(value);
-
-    if (!d) {
-        return "Unknown";
-    }
-
-    return d.toLocaleDateString(
-        "en-CA",
-        {
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-        }
-    );
-}
-
-
-/* ================================================================
-   CATEGORY / PLATFORM
-   ================================================================ */
-
-function mapSourceTypeToPlatform(
+function sourceBucket(
     sourceType,
-    sourceName
+    sourceName,
+    platform
 ) {
 
     const type =
         String(
-            sourceType || ""
+            sourceType ||
+            platform ||
+            ''
         ).toLowerCase();
 
     const source =
         String(
-            sourceName || ""
+            sourceName ||
+            ''
         ).toLowerCase();
 
 
     if (
-        type === "police" ||
-        type === "ems" ||
-        source.includes("police")
-    ) {
-        return "police";
-    }
-
-
-    if (
-        type === "instagram" ||
+        type === 'police' ||
         source.includes(
-            "interventionintersection2026"
+            'police'
         )
     ) {
-        return "intervention";
+        return 'police';
     }
 
 
     if (
-        type === "community" ||
-        type === "social" ||
-        type === "reddit"
+        type === 'fire' ||
+        source.includes(
+            'fire department'
+        )
     ) {
-        return "social";
+        return 'fire';
     }
 
 
     if (
-        type === "news" ||
-        type === "rss-news"
+        type === 'ems' ||
+        source.includes(
+            'paramedic'
+        )
     ) {
-        return "news";
+        return 'ems';
     }
 
 
-    return "news";
+    if (
+        type === 'instagram' ||
+        source.includes(
+            'interventionintersection2026'
+        )
+    ) {
+        return 'intervention';
+    }
+
+
+    if (
+        type === 'community' ||
+        type === 'social' ||
+        type === 'reddit' ||
+        platform === 'word_of_mouth'
+    ) {
+        return 'social';
+    }
+
+
+    return 'news';
 }
 
 
-function mapCategoryToMarkerCategory(
-    category
+function normalize(
+    doc
 ) {
 
-    const c =
-        String(
-            category || ""
-        ).toLowerCase();
+    const data =
+        doc.data() ||
+        {};
 
 
-    if (
-        c === "shooting" ||
-        c === "assault" ||
-        c === "collision" ||
-        c === "fire"
-    ) {
-        return "emergency";
-    }
+    let lat =
+        null;
 
-
-    if (
-        c === "drug" ||
-        c === "hazard"
-    ) {
-        return "hazard";
-    }
-
-
-    if (
-        c === "suspicious" ||
-        c === "missing-person" ||
-        c === "theft"
-    ) {
-        return "street";
-    }
-
-
-    return "advisory";
-}
-
-
-function getIcon(category) {
-
-    const colors = {
-
-        emergency:
-            "#dc2626",
-
-        advisory:
-            "#38bdf8",
-
-        hazard:
-            "#f59e0b",
-
-        street:
-            "#d946ef"
-
-    };
-
-
-    const color =
-        colors[category] ||
-        "#f59e0b";
-
-
-    return L.divIcon({
-
-        className:
-            "custom-div-icon",
-
-        html:
-            `<div style="
-                width:16px;
-                height:16px;
-                border-radius:50%;
-                border:2px solid #020617;
-                background:${color};
-                box-shadow:0 0 10px ${color};
-            "></div>`,
-
-        iconSize:
-            [16, 16]
-
-    });
-}
-
-
-/* ================================================================
-   NORMALIZE FIRESTORE RECORDS
-   ================================================================ */
-
-function normalizeIncident(doc) {
-
-    const d =
-        doc.data();
+    let lng =
+        null;
 
 
     /*
-     * CURRENT SCRAPER:
+     * Current scraper:
      *
-     * coordinates:
-     *   lat
-     *   lon
+     * coordinates.lat
+     * coordinates.lon
      *
-     * Older frontend/community records may have:
+     * Older community records:
      *
      * lat
      * lng
      */
 
-    let lat = null;
-    let lng = null;
-
-
     if (
-        d.coordinates &&
+        data.coordinates &&
         Number.isFinite(
             Number(
-                d.coordinates.lat
+                data.coordinates.lat
             )
         ) &&
         Number.isFinite(
             Number(
-                d.coordinates.lon
+                data.coordinates.lon
             )
         )
     ) {
 
         lat =
             Number(
-                d.coordinates.lat
+                data.coordinates.lat
             );
 
         lng =
             Number(
-                d.coordinates.lon
+                data.coordinates.lon
             );
 
     } else if (
         Number.isFinite(
-            Number(d.lat)
+            Number(
+                data.lat
+            )
         ) &&
         Number.isFinite(
-            Number(d.lng)
+            Number(
+                data.lng
+            )
         )
     ) {
 
         lat =
-            Number(d.lat);
+            Number(
+                data.lat
+            );
 
         lng =
-            Number(d.lng);
+            Number(
+                data.lng
+            );
 
     }
-
-
-    const timestamp =
-        normalizeDate(
-            d.publishedAt
-        ) ||
-        normalizeDate(
-            d.timestamp
-        ) ||
-        normalizeDate(
-            d.importedAt
-        ) ||
-        normalizeDate(
-            d.updatedAt
-        );
 
 
     return {
@@ -975,400 +1113,324 @@ function normalizeIncident(doc) {
             doc.id,
 
         platform:
-            mapSourceTypeToPlatform(
-                d.sourceType ||
-                d.platform,
-                d.source
+            sourceBucket(
+                data.sourceType,
+                data.source,
+                data.platform
             ),
 
         category:
-            d.category ||
-            "hazard",
+            data.category ||
+            'hazard',
 
         source:
-            d.source ||
-            "Unknown source",
+            data.source ||
+            'Unknown source',
 
         title:
-            d.title ||
-            "Untitled report",
+            data.title ||
+            'Untitled report',
 
         summary:
-            d.summary ||
-            d.description ||
-            "",
-
-        description:
-            [
-                d.title,
-                d.summary ||
-                d.description
-            ]
-                .filter(Boolean)
-                .join(" — "),
+            data.brief ||
+            data.summary ||
+            data.description ||
+            '',
 
         url:
-            d.sourceUrl ||
-            d.url ||
-            "",
+            data.sourceUrl ||
+            data.url ||
+            '',
 
-        timestamp,
-
-        hasPin:
-            Number.isFinite(lat) &&
-            Number.isFinite(lng),
-
-        lat,
-
-        lng,
-
-        locationText:
-            d.locationText ||
-            d.geocodeDisplayName ||
+        timestamp:
+            data.publishedAt ||
+            data.timestamp ||
+            data.importedAt ||
             null,
 
-        verifiedLocation:
-            Boolean(
-                d.verifiedLocation
-            )
+        lat,
+        lng,
+
+        mapped:
+            Number.isFinite(
+                lat
+            ) &&
+            Number.isFinite(
+                lng
+            ),
+
+        location:
+            data.locationText ||
+            data.geocodeDisplayName ||
+            null
 
     };
 }
 
 
-/* ================================================================
-   HISTORY SLIDER
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* FILTERING */
+/* ------------------------------------------------------------- */
 
-function getHistoryDays() {
+function inHistoryWindow(
+    record
+) {
 
-    const slider =
-        document.getElementById(
-            "history-slider"
-        );
+    if (
+        !record.timestamp
+    ) {
+        return true;
+    }
 
-    return Number(
-        slider.value
-    );
-}
-
-
-function getHistoryCutoff() {
-
-    const days =
-        getHistoryDays();
-
-
-    return new Date(
+    return (
+        timestamp(
+            record.timestamp
+        ) >=
         Date.now() -
-        days *
-        24 *
-        60 *
-        60 *
-        1000
+        STATE.age *
+        86400000
     );
 }
 
 
-function updateHistoryLabel() {
+function currentRecords() {
 
-    const days =
-        getHistoryDays();
+    return [
+        ...STATE.incidents,
+        ...STATE.community
+    ]
 
-    const label =
-        document.getElementById(
-            "history-label"
+        .filter(
+            inHistoryWindow
+        )
+
+        .filter(
+            record => {
+
+                if (
+                    STATE.tab ===
+                    'all'
+                ) {
+                    return true;
+                }
+
+                if (
+                    STATE.tab ===
+                    'social'
+                ) {
+                    return [
+                        'social',
+                        'intervention'
+                    ].includes(
+                        record.platform
+                    );
+                }
+
+                return (
+                    record.platform ===
+                    STATE.tab
+                );
+            }
+        )
+
+        .filter(
+            record =>
+                STATE.category ===
+                'all' ||
+                record.category ===
+                STATE.category
+        )
+
+        .sort(
+            (a,b) =>
+                timestamp(
+                    b.timestamp
+                ) -
+                timestamp(
+                    a.timestamp
+                )
         );
-
-
-    if (days === 0) {
-
-        label.textContent =
-            "Today";
-
-        return;
-
-    }
-
-
-    if (days === 730) {
-
-        label.textContent =
-            "2 years";
-
-        return;
-
-    }
-
-
-    label.textContent =
-        `${days} days`;
-
 }
 
 
-/* ================================================================
-   INSTAGRAM FEED
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* MAP */
+/* ------------------------------------------------------------- */
 
-function populateInterventionFeed() {
+function heatWeight(
+    category
+) {
 
-    const container =
-        document.getElementById(
-            "intervention-mini-feed"
-        );
+    return {
+        shooting:
+            1,
+
+        assault:
+            .95,
+
+        weapons:
+            .90,
+
+        fire:
+            .80,
+
+        collision:
+            .72,
+
+        drug:
+            .65,
+
+        suspicious:
+            .58,
+
+        theft:
+            .50,
+
+        hazard:
+            .42,
+
+        'missing-person':
+            .40
+
+    }[
+        category
+    ] || .35;
+}
 
 
-    const cutoff =
-        getHistoryCutoff();
+function markerIcon(
+    category
+) {
 
-
-    const posts =
-        rawReports
-
-            .filter(
-                item =>
-                    item.platform ===
-                    "intervention"
-            )
-
-            .filter(
-                item =>
-                    !item.timestamp ||
-                    item.timestamp >= cutoff
-            )
-
-            .sort(
-                (a, b) =>
-                    timeValue(
-                        b.timestamp
-                    ) -
-                    timeValue(
-                        a.timestamp
-                    )
-            )
-
-            .slice(
-                0,
-                5
-            );
+    let color =
+        '#38bdf8';
 
 
     if (
-        posts.length === 0
+        [
+            'shooting',
+            'assault',
+            'weapons'
+        ].includes(
+            category
+        )
     ) {
+        color =
+            '#ef4444';
+    }
 
-        container.innerHTML = `
-            <div class="text-[9px] text-slate-500 font-mono py-1">
-                No synced posts in this history window.
-            </div>
-        `;
+    else if (
+        [
+            'fire',
+            'collision'
+        ].includes(
+            category
+        )
+    ) {
+        color =
+            '#f97316';
+    }
 
-        return;
+    else if (
+        category ===
+        'drug'
+    ) {
+        color =
+            '#a855f7';
+    }
+
+    else if (
+        [
+            'theft',
+            'suspicious'
+        ].includes(
+            category
+        )
+    ) {
+        color =
+            '#eab308';
     }
 
 
-    container.innerHTML =
-        posts.map(
-            post => {
+    return L.divIcon(
+        {
+            className:
+                'custom-div-icon',
 
-                const url =
-                    safeUrl(
-                        post.url
-                    );
+            html:
+                `<div style="
+                    width:17px;
+                    height:17px;
+                    border-radius:50%;
+                    background:${color};
+                    border:2px solid #02050a;
+                    box-shadow:0 0 12px ${color};
+                "></div>`,
 
-
-                return `
-                    <a
-                        href="${url || "#"}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="
-                            block
-                            p-2
-                            bg-slate-950/50
-                            hover:bg-slate-800
-                            border
-                            border-fuchsia-500/20
-                            rounded-lg
-                            ${url ? "" : "pointer-events-none opacity-60"}
-                        "
-                    >
-
-                        <div class="text-[10px] font-bold text-slate-200 line-clamp-2">
-                            ${escapeHtml(
-                                post.title
-                            )}
-                        </div>
-
-                        <div class="text-[9px] text-slate-500 line-clamp-2 mt-1">
-                            ${escapeHtml(
-                                post.summary
-                            )}
-                        </div>
-
-                        <div class="flex justify-between items-center mt-1 pt-1 border-t border-slate-800">
-
-                            <span class="text-[8px] text-slate-600 font-mono">
-                                ${escapeHtml(
-                                    formatTimestamp(
-                                        post.timestamp
-                                    )
-                                )}
-                            </span>
-
-                            <span class="text-[8px] text-fuchsia-400 font-bold">
-                                ${url
-                                    ? "🔗 View Post"
-                                    : "No permalink"}
-                            </span>
-
-                        </div>
-
-                    </a>
-                `;
-
-            }
-        ).join("");
+            iconSize:
+                [
+                    17,
+                    17
+                ]
+        }
+    );
 }
 
 
-/* ================================================================
-   FILTER + MAP RENDER
-   ================================================================ */
+function render() {
 
-function filterAndRender() {
-
-    clusterGroup.clearLayers();
+    clusters.clearLayers();
 
 
-    if (heatLayer) {
+    if (heat) {
 
         map.removeLayer(
-            heatLayer
+            heat
         );
 
-        heatLayer = null;
+        heat =
+            null;
+
     }
 
 
-    const cutoff =
-        getHistoryCutoff();
+    const records =
+        currentRecords();
 
 
     const feed =
-        document.getElementById(
-            "feed-list"
+        $(
+            'feed'
         );
 
-
     feed.innerHTML =
-        "";
+        '';
 
 
-    let heatPoints =
+    const heatPoints =
         [];
 
-    let visibleCount =
-        0;
-
-    let mappedCount =
+    let mapped =
         0;
 
 
-    populateInterventionFeed();
-
-
-    const filtered =
-        rawReports
-
-            .filter(
-                item =>
-                    !item.timestamp ||
-                    item.timestamp >= cutoff
-            )
-
-            .filter(
-                item => {
-
-                    const p =
-                        (
-                            item.platform ||
-                            ""
-                        ).toLowerCase();
-
-
-                    if (
-                        currentMainTab ===
-                        "police"
-                    ) {
-                        return p ===
-                            "police";
-                    }
-
-
-                    if (
-                        currentMainTab ===
-                        "news"
-                    ) {
-                        return p ===
-                            "news";
-                    }
-
-
-                    if (
-                        currentMainTab ===
-                        "social"
-                    ) {
-                        return [
-                            "social",
-                            "reddit",
-                            "word_of_mouth",
-                            "intervention"
-                        ].includes(p);
-                    }
-
-
-                    return true;
-
-                }
-            )
-
-            .sort(
-                (a, b) =>
-                    timeValue(
-                        b.timestamp
-                    ) -
-                    timeValue(
-                        a.timestamp
-                    )
-            );
-
-
-    filtered.forEach(
-        item => {
-
-            visibleCount++;
-
+    records.forEach(
+        record => {
 
             if (
-                item.hasPin &&
-                Number.isFinite(
-                    item.lat
-                ) &&
-                Number.isFinite(
-                    item.lng
-                )
+                record.mapped
             ) {
 
-                mappedCount++;
+                mapped++;
 
 
                 heatPoints.push(
                     [
-                        item.lat,
-                        item.lng,
-                        0.8
+                        record.lat,
+                        record.lng,
+                        heatWeight(
+                            record.category
+                        )
                     ]
                 );
 
@@ -1376,91 +1438,123 @@ function filterAndRender() {
                 const marker =
                     L.marker(
                         [
-                            item.lat,
-                            item.lng
+                            record.lat,
+                            record.lng
                         ],
                         {
                             icon:
-                                getIcon(
-                                    mapCategoryToMarkerCategory(
-                                        item.category
-                                    )
+                                markerIcon(
+                                    record.category
                                 )
                         }
                     );
 
 
-                const url =
+                const source =
                     safeUrl(
-                        item.url
+                        record.url
                     );
 
 
-                marker.bindPopup(`
-                    <div class="font-sans min-w-[230px]">
+                marker.bindPopup(
+                    `
+                    <div style="
+                        min-width:240px;
+                        color:#e5e7eb;
+                        background:#0a1017;
+                        font-family:system-ui,sans-serif;
+                    ">
 
-                        <div class="text-[9px] uppercase tracking-wider text-amber-400">
+                        <div style="
+                            font-size:10px;
+                            color:#f5c400;
+                            text-transform:uppercase;
+                            font-weight:800;
+                        ">
                             ${escapeHtml(
-                                item.category
+                                record.category
                             )}
                         </div>
 
-                        <strong class="text-xs text-white block mt-1">
+                        <div style="
+                            font-weight:800;
+                            margin-top:4px;
+                        ">
                             ${escapeHtml(
-                                item.title
+                                record.title
                             )}
-                        </strong>
+                        </div>
 
-                        <p class="text-[11px] text-slate-300 mt-1">
+                        <div style="
+                            font-size:11px;
+                            color:#94a3b8;
+                            margin-top:4px;
+                        ">
                             ${escapeHtml(
-                                item.summary
-                            )}
-                        </p>
-
-                        ${
-                            item.locationText
-                                ? `
-                                    <div class="text-[9px] text-slate-400 mt-2">
-                                        📍 ${escapeHtml(
-                                            item.locationText
-                                        )}
-                                    </div>
-                                `
-                                : ""
-                        }
-
-                        <div class="text-[9px] text-slate-500 mt-2 pt-1 border-t border-slate-800">
-                            ${escapeHtml(
-                                item.source
+                                record.source
                             )}
                             •
                             ${escapeHtml(
-                                formatTimestamp(
-                                    item.timestamp
+                                formatDate(
+                                    record.timestamp
                                 )
                             )}
                         </div>
 
+                        <div style="
+                            font-size:11px;
+                            color:#cbd5e1;
+                            margin-top:8px;
+                        ">
+                            ${escapeHtml(
+                                record.summary
+                            )}
+                        </div>
+
                         ${
-                            url
+                            record.location
                                 ? `
-                                    <a
-                                        href="${url}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="block text-center mt-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-[10px] rounded px-2 py-1.5"
-                                    >
-                                        🔗 View Original Source
-                                    </a>
+                                <div style="
+                                    font-size:10px;
+                                    color:#94a3b8;
+                                    margin-top:7px;
+                                ">
+                                    📍
+                                    ${escapeHtml(
+                                        record.location
+                                    )}
+                                </div>
                                 `
-                                : ""
+                                : ''
+                        }
+
+                        ${
+                            source
+                                ? `
+                                <a
+                                    href="${source}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style="
+                                        display:block;
+                                        margin-top:9px;
+                                        color:#f5c400;
+                                        font-size:11px;
+                                        font-weight:800;
+                                    "
+                                >
+                                    View original source ↗
+                                </a>
+                                `
+                                : ''
                         }
 
                     </div>
-                `);
+                    `
+                );
 
 
-                clusterGroup.addLayer(
+                clusters.addLayer(
                     marker
                 );
 
@@ -1469,121 +1563,113 @@ function filterAndRender() {
 
             const card =
                 document.createElement(
-                    "div"
+                    'article'
                 );
 
 
             card.className =
-                "p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-slate-600 transition";
+                'rounded-2xl border border-slate-800 bg-[#0a1017] p-3 hover:border-amber-500/20';
 
 
-            const url =
+            const source =
                 safeUrl(
-                    item.url
+                    record.url
                 );
 
 
-            card.innerHTML = `
-                <div class="flex justify-between gap-2 items-start">
+            card.innerHTML =
+                `
+                <div class="flex justify-between gap-2">
 
-                    <div class="min-w-0">
-
-                        <div class="text-[9px] uppercase text-amber-400 font-bold">
-                            ${escapeHtml(
-                                item.source
-                            )}
-                        </div>
-
-                        <div class="text-xs font-bold text-slate-100 mt-1 line-clamp-2">
-                            ${escapeHtml(
-                                item.title
-                            )}
-                        </div>
-
+                    <div class="text-[9px] uppercase text-amber-300 font-bold">
+                        ${escapeHtml(
+                            record.source
+                        )}
                     </div>
 
-                    <span class="text-[9px] text-slate-500 font-mono whitespace-nowrap">
+                    <div class="text-[9px] text-slate-600">
                         ${escapeHtml(
-                            formatTimestamp(
-                                item.timestamp
+                            formatDate(
+                                record.timestamp
                             )
                         )}
-                    </span>
+                    </div>
 
                 </div>
 
-
-                <div class="text-[11px] text-slate-400 mt-2 line-clamp-3">
+                <div class="mt-1 text-xs font-black">
                     ${escapeHtml(
-                        item.summary
+                        record.title
                     )}
                 </div>
 
+                <div class="mt-2 text-[11px] leading-relaxed text-slate-400">
+                    ${escapeHtml(
+                        record.summary
+                    )}
+                </div>
 
                 ${
-                    item.locationText
+                    record.location
                         ? `
-                            <div class="text-[9px] text-slate-500 mt-1">
-                                📍 ${escapeHtml(
-                                    item.locationText
-                                )}
-                            </div>
+                        <div class="mt-1 text-[9px] text-slate-500">
+                            📍
+                            ${escapeHtml(
+                                record.location
+                            )}
+                        </div>
                         `
-                        : ""
+                        : ''
                 }
-
 
                 ${
-                    item.hasPin
+                    record.mapped
                         ? `
-                            <div class="text-[9px] text-emerald-400 mt-1">
-                                ● mapped
-                            </div>
+                        <div class="mt-1 text-[9px] text-emerald-400">
+                            ● mapped
+                        </div>
                         `
-                        : ""
+                        : ''
                 }
-
 
                 ${
-                    url
+                    source
                         ? `
-                            <a
-                                href="${url}"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="inline-block mt-2 text-[9px] text-sky-400 font-bold hover:underline"
-                                onclick="event.stopPropagation()"
-                            >
-                                🔗 Direct Source
-                            </a>
+                        <a
+                            href="${source}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-block mt-2 text-[9px] text-sky-300 font-bold"
+                        >
+                            Direct Source ↗
+                        </a>
                         `
-                        : ""
+                        : ''
                 }
-            `;
+                `;
 
 
             if (
-                item.hasPin
+                record.mapped
             ) {
 
                 card.classList.add(
-                    "cursor-pointer"
+                    'cursor-pointer'
                 );
 
-
                 card.onclick =
-                    () => {
-
+                    () =>
                         map.flyTo(
                             [
-                                item.lat,
-                                item.lng
+                                record.lat,
+                                record.lng
                             ],
-                            16
+                            15,
+                            {
+                                duration:
+                                    .6
+                            }
                         );
-
-                    };
-
             }
 
 
@@ -1595,36 +1681,54 @@ function filterAndRender() {
     );
 
 
-    document.getElementById(
-        "active-count"
+    $(
+        'counts'
     ).textContent =
-        `${visibleCount} records • ${mappedCount} mapped`;
-
-
-    updateHistoryLabel();
+        `${records.length} records • ${mapped} mapped`;
 
 
     if (
-        document.getElementById(
-            "heatmap-toggle"
-        ).checked &&
+        STATE.heat &&
         heatPoints.length
     ) {
 
-        heatLayer =
+        heat =
             L.heatLayer(
                 heatPoints,
                 {
-                    radius: 25,
-                    blur: 15,
-                    maxZoom: 15,
+                    radius:
+                        34,
+
+                    blur:
+                        28,
+
+                    maxZoom:
+                        14,
+
+                    minOpacity:
+                        .18,
+
+                    max:
+                        .95,
 
                     gradient: {
-                        0.2: "#3b82f6",
-                        0.4: "#2dd4bf",
-                        0.6: "#facc15",
-                        0.8: "#f97316",
-                        1.0: "#ef4444"
+                        .15:
+                            '#1d4ed8',
+
+                        .35:
+                            '#06b6d4',
+
+                        .55:
+                            '#84cc16',
+
+                        .72:
+                            '#facc15',
+
+                        .86:
+                            '#f97316',
+
+                        1:
+                            '#ef4444'
                     }
                 }
             ).addTo(
@@ -1633,845 +1737,844 @@ function filterAndRender() {
 
     }
 
+
+    updateInstagramFeed(
+        records
+    );
 }
 
 
-/* ================================================================
-   SOURCE TABS
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* INSTAGRAM */
+/* ------------------------------------------------------------- */
 
-window.switchMainTab =
-    function(tab) {
+function updateInstagramFeed(
+    records
+) {
 
-        currentMainTab =
-            tab;
+    const box =
+        $(
+            'ig-feed'
+        );
 
 
-        document
-            .querySelectorAll(
-                ".main-tab"
+    const posts =
+        records
+            .filter(
+                record =>
+                    record.platform ===
+                    'intervention'
             )
-            .forEach(
-                button => {
+            .slice(
+                0,
+                5
+            );
 
-                    button.className =
-                        "main-tab px-2.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-bold";
+
+    if (
+        !posts.length
+    ) {
+
+        box.innerHTML =
+            `
+            <div class="text-[9px] text-slate-600">
+                No synced Instagram posts in this history window.
+                The backend needs a real Instagram/RSS.app feed URL.
+            </div>
+            `;
+
+        return;
+    }
+
+
+    box.innerHTML =
+        posts
+            .map(
+                post => {
+
+                    const source =
+                        safeUrl(
+                            post.url
+                        );
+
+                    return `
+                    <a
+                        href="${source || '#'}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="
+                            block
+                            rounded-lg
+                            border
+                            border-fuchsia-500/15
+                            bg-black/20
+                            p-2
+                        "
+                    >
+
+                        <div class="text-[10px] font-bold">
+                            ${escapeHtml(
+                                post.title
+                            )}
+                        </div>
+
+                        <div class="mt-1 text-[9px] text-slate-500">
+                            ${escapeHtml(
+                                formatDate(
+                                    post.timestamp
+                                )
+                            )}
+                        </div>
+
+                        <div class="mt-1 text-[9px] text-fuchsia-300 font-bold">
+                            View post ↗
+                        </div>
+
+                    </a>
+                    `;
 
                 }
-            );
+            )
+            .join('');
+}
 
 
-        const active =
-            document.getElementById(
-                `main-tab-${tab}`
-            );
+/* ------------------------------------------------------------- */
+/* STATUS */
+/* ------------------------------------------------------------- */
+
+function setStatus(
+    text,
+    good = true
+) {
+
+    $(
+        'status'
+    ).textContent =
+        text;
+
+    $(
+        'status'
+    ).className =
+        good
+            ? 'text-[9px] text-emerald-400'
+            : 'text-[9px] text-rose-400';
+}
 
 
-        if (
-            active
-        ) {
+/* ------------------------------------------------------------- */
+/* TERMS */
+/* ------------------------------------------------------------- */
 
-            const colors = {
-                all:
-                    "amber",
+$(
+    'terms-check'
+).onchange =
+    event => {
 
-                police:
-                    "red",
+        const enabled =
+            event.target.checked;
 
-                news:
-                    "sky",
+        $(
+            'terms-ok'
+        ).disabled =
+            !enabled;
 
-                social:
-                    "fuchsia"
-            };
-
-
-            active.className =
-                `main-tab px-2.5 py-1.5 rounded-lg bg-${colors[tab]}-500/20 text-${colors[tab]}-300 border border-${colors[tab]}-500/40 font-bold`;
-
-        }
-
-
-        filterAndRender();
+        $(
+            'terms-ok'
+        ).className =
+            enabled
+                ? 'mt-4 w-full rounded-2xl bg-amber-400 py-3 font-black text-black'
+                : 'mt-4 w-full rounded-2xl bg-slate-700 py-3 font-black text-slate-400';
 
     };
 
 
-/* ================================================================
-   TERMS
-   ================================================================ */
-
-document.getElementById(
-    "accept-disclaimer-btn"
+$(
+    'terms-ok'
 ).onclick =
     () => {
 
-        document.getElementById(
-            "disclaimer-modal"
+        $(
+            'terms'
         ).classList.add(
-            "hidden"
+            'hidden'
         );
 
     };
 
 
-/* ================================================================
-   HISTORY / HEATMAP
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* HEATMAP / HISTORY */
+/* ------------------------------------------------------------- */
 
-document.getElementById(
-    "history-slider"
-).addEventListener(
-    "input",
-    filterAndRender
-);
+$(
+    'heat-toggle'
+).onclick =
+    () => {
 
-
-document.getElementById(
-    "heatmap-toggle"
-).addEventListener(
-    "change",
-    filterAndRender
-);
+        STATE.heat =
+            !STATE.heat;
 
 
-/* ================================================================
-   LIVE FIRESTORE INCIDENTS
-   ================================================================ */
+        $(
+            'heat-toggle'
+        ).textContent =
+            STATE.heat
+                ? 'HEATMAP ON'
+                : 'HEATMAP OFF';
 
-function startIncidentListener() {
 
-    const incidentsQuery =
-        query(
-            collection(
-                db,
-                INCIDENTS_COLLECTION
-            ),
+        $(
+            'heat-toggle'
+        ).classList.toggle(
+            'bg-amber-400',
+            STATE.heat
+        );
 
-            orderBy(
-                "publishedAt",
-                "desc"
-            ),
-
-            limit(
-                2000
-            )
+        $(
+            'heat-toggle'
+        ).classList.toggle(
+            'bg-slate-800',
+            !STATE.heat
         );
 
 
-    onSnapshot(
+        render();
 
-        incidentsQuery,
+    };
 
-        snapshot => {
 
-            rawReports =
-                snapshot.docs
-                    .map(
-                        normalizeIncident
-                    )
-                    .filter(
-                        item =>
-                            item.source ||
-                            item.title
+$(
+    'age'
+).oninput =
+    event => {
+
+        STATE.age =
+            Number(
+                event.target.value
+            );
+
+
+        $(
+            'age-label'
+        ).textContent =
+            STATE.age === 0
+                ? 'Today'
+                : STATE.age === 730
+                    ? '2 years'
+                    : `${STATE.age} days`;
+
+
+        render();
+
+    };
+
+
+$(
+    'category'
+).onchange =
+    event => {
+
+        STATE.category =
+            event.target.value;
+
+        render();
+
+    };
+
+
+document
+    .querySelectorAll(
+        '.tab'
+    )
+    .forEach(
+        button => {
+
+            button.onclick =
+                () => {
+
+                    document
+                        .querySelectorAll(
+                            '.tab'
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    'tab-active'
+                                )
+                        );
+
+
+                    button.classList.add(
+                        'tab-active'
                     );
 
 
-            document.getElementById(
-                "data-status"
-            ).textContent =
-                `${rawReports.length} live records`;
+                    STATE.tab =
+                        button.dataset.tab;
 
-            document.getElementById(
-                "data-status"
-            ).className =
-                "text-[9px] font-mono text-emerald-400";
+                    render();
 
-
-            filterAndRender();
-
-        },
-
-
-        error => {
-
-            console.error(
-                "Firestore incidents listener failed:",
-                error
-            );
-
-
-            document.getElementById(
-                "data-status"
-            ).textContent =
-                "READ BLOCKED";
-
-
-            document.getElementById(
-                "data-status"
-            ).className =
-                "text-[9px] font-mono text-rose-400";
-
-
-            document.getElementById(
-                "active-count"
-            ).textContent =
-                "Firestore read blocked";
-
-
-            document.getElementById(
-                "feed-list"
-            ).innerHTML = `
-
-                <div class="p-3 bg-rose-950/30 border border-rose-500/30 rounded-xl">
-
-                    <div class="text-xs font-bold text-rose-300">
-                        Unable to load live incidents.
-                    </div>
-
-                    <div class="text-[10px] text-slate-400 mt-1">
-                        ${escapeHtml(
-                            error.message ||
-                            "Unknown Firestore error"
-                        )}
-                    </div>
-
-                    <div class="text-[10px] text-amber-300 mt-2">
-                        The incidents may exist in Firebase, but Firestore
-                        rules must allow this public page to read
-                        <strong>/incidents/*</strong>.
-                    </div>
-
-                </div>
-
-            `;
-
+                };
         }
-
-    );
-
-}
-
-
-startIncidentListener();
-
-
-/* ================================================================
-   AUTH / REPORTING
-   ================================================================ */
-
-const modal =
-    document.getElementById(
-        "report-modal"
     );
 
 
-const authSection =
-    document.getElementById(
-        "auth-section"
-    );
+/* ------------------------------------------------------------- */
+/* GPS */
+/* ------------------------------------------------------------- */
 
-
-const reportForm =
-    document.getElementById(
-        "hazard-form"
-    );
-
-
-document.getElementById(
-    "close-modal"
-).onclick =
-    () => {
-
-        modal.classList.add(
-            "hidden"
-        );
-
-        modal.classList.remove(
-            "flex"
-        );
-
-        isDroppingPin =
-            false;
-
-        document.getElementById(
-            "map"
-        ).classList.remove(
-            "leaflet-crosshair"
-        );
-
-    };
-
-
-document.getElementById(
-    "auth-btn"
+$(
+    'locate'
 ).onclick =
     () => {
 
         if (
-            auth.currentUser
+            !navigator.geolocation
         ) {
-
-            signOut(
-                auth
-            );
-
-        } else {
-
-            modal.classList.remove(
-                "hidden"
-            );
-
-            modal.classList.add(
-                "flex"
-            );
-
-            document.getElementById(
-                "modal-title"
-            ).textContent =
-                "Sign In Required";
-
+            return;
         }
 
-    };
+        navigator.geolocation.getCurrentPosition(
+            position => {
 
-
-onAuthStateChanged(
-    auth,
-    user => {
-
-        if (user) {
-
-            document.getElementById(
-                "auth-btn"
-            ).textContent =
-                "Sign Out";
-
-
-            document.getElementById(
-                "open-report-modal"
-            ).classList.remove(
-                "hidden"
-            );
-
-
-            authSection.classList.add(
-                "hidden"
-            );
-
-
-            reportForm.classList.remove(
-                "hidden"
-            );
-
-
-        } else {
-
-            document.getElementById(
-                "auth-btn"
-            ).textContent =
-                "Sign In";
-
-
-            document.getElementById(
-                "open-report-modal"
-            ).classList.add(
-                "hidden"
-            );
-
-
-            authSection.classList.remove(
-                "hidden"
-            );
-
-
-            reportForm.classList.add(
-                "hidden"
-            );
-
-        }
-
-    }
-);
-
-
-document.getElementById(
-    "btn-login"
-).onclick =
-    () => {
-
-        signInWithEmailAndPassword(
-            auth,
-
-            document.getElementById(
-                "auth-email"
-            ).value,
-
-            document.getElementById(
-                "auth-pass"
-            ).value
-
-        ).catch(
-            error =>
-                alert(
-                    error.message
-                )
-        );
-
-    };
-
-
-document.getElementById(
-    "btn-signup"
-).onclick =
-    () => {
-
-        createUserWithEmailAndPassword(
-            auth,
-
-            document.getElementById(
-                "auth-email"
-            ).value,
-
-            document.getElementById(
-                "auth-pass"
-            ).value
-
-        ).catch(
-            error =>
-                alert(
-                    error.message
-                )
-        );
-
-    };
-
-
-document.getElementById(
-    "open-report-modal"
-).onclick =
-    () => {
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-        modal.classList.add(
-            "flex"
-        );
-
-        document.getElementById(
-            "modal-title"
-        ).textContent =
-            "Report Wet Floor";
-
-
-        if (
-            navigator.geolocation
-        ) {
-
-            navigator.geolocation.getCurrentPosition(
-
-                position => {
-
-                    document.getElementById(
-                        "selected-lat"
-                    ).value =
-                        position.coords.latitude;
-
-                    document.getElementById(
-                        "selected-lng"
-                    ).value =
-                        position.coords.longitude;
-
-
-                    document.getElementById(
-                        "gps-status"
-                    ).textContent =
-                        "📍 Browser GPS acquired";
-
-                },
-
-                () => {
-
-                    document.getElementById(
-                        "gps-status"
-                    ).textContent =
-                        "❌ GPS unavailable — use search or map pin";
-
-                },
-
-                {
-                    enableHighAccuracy:
-                        true,
-
-                    timeout:
-                        8000
+                if (
+                    userMarker
+                ) {
+                    map.removeLayer(
+                        userMarker
+                    );
                 }
 
-            );
+                userMarker =
+                    L.circleMarker(
+                        [
+                            position.coords.latitude,
+                            position.coords.longitude
+                        ],
+                        {
+                            radius:
+                                7,
 
-        }
+                            color:
+                                '#38bdf8',
+
+                            fillColor:
+                                '#38bdf8',
+
+                            fillOpacity:
+                                .9
+                        }
+                    ).addTo(
+                        map
+                    );
+
+
+                map.flyTo(
+                    [
+                        position.coords.latitude,
+                        position.coords.longitude
+                    ],
+                    15
+                );
+
+            }
+        );
 
     };
 
 
-/* ================================================================
-   MANUAL PIN
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* DROP PIN */
+/* ------------------------------------------------------------- */
 
-document.getElementById(
-    "btn-manual-pin"
+$(
+    'pin'
 ).onclick =
     () => {
 
-        modal.classList.add(
-            "hidden"
-        );
-
-        modal.classList.remove(
-            "flex"
-        );
-
-
-        isDroppingPin =
+        dropPin =
             true;
 
-
-        document.getElementById(
-            "map"
-        ).classList.add(
-            "leaflet-crosshair"
+        $(
+            'pin-mode'
+        ).classList.remove(
+            'hidden'
         );
 
-        alert(
-            "Click the map where you want to place the report pin."
-        );
+        map
+            .getContainer()
+            .classList.add(
+                'crosshair'
+            );
 
     };
 
 
 map.on(
-    "click",
+    'click',
     event => {
 
         if (
-            !isDroppingPin
+            !dropPin
         ) {
             return;
         }
 
 
-        document.getElementById(
-            "selected-lat"
+        dropPin =
+            false;
+
+
+        $(
+            'pin-mode'
+        ).classList.add(
+            'hidden'
+        );
+
+
+        map
+            .getContainer()
+            .classList.remove(
+                'crosshair'
+            );
+
+
+        $(
+            'report-lat'
         ).value =
             event.latlng.lat;
 
 
-        document.getElementById(
-            "selected-lng"
+        $(
+            'report-lng'
         ).value =
             event.latlng.lng;
 
 
-        document.getElementById(
-            "gps-status"
-        ).textContent =
-            `📍 Pin: ${event.latlng.lat.toFixed(5)}, ${event.latlng.lng.toFixed(5)}`;
-
-
-        isDroppingPin =
-            false;
-
-
-        document.getElementById(
-            "map"
-        ).classList.remove(
-            "leaflet-crosshair"
-        );
-
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-        modal.classList.add(
-            "flex"
-        );
+        openReport();
 
     }
 );
 
 
-/* ================================================================
-   NOMINATIM SEARCH
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* SEARCH */
+/* ------------------------------------------------------------- */
 
-const locInput =
-    document.getElementById(
-        "hazard-loc"
+async function searchAddress(
+    query
+) {
+
+    const url =
+        new URL(
+            'https://nominatim.openstreetmap.org/search'
+        );
+
+    url.searchParams.set(
+        'format',
+        'json'
+    );
+
+    url.searchParams.set(
+        'limit',
+        '5'
+    );
+
+    url.searchParams.set(
+        'countrycodes',
+        'ca'
+    );
+
+    url.searchParams.set(
+        'q',
+        `${query}, Hamilton, Ontario, Canada`
     );
 
 
-const suggestionsBox =
-    document.getElementById(
-        "address-suggestions"
-    );
-
-
-let searchTimeout =
-    null;
-
-
-locInput.addEventListener(
-    "input",
-    event => {
-
-        clearTimeout(
-            searchTimeout
+    const response =
+        await fetch(
+            url
         );
 
 
-        const q =
+    return response.json();
+}
+
+
+let searchTimer =
+    null;
+
+
+$(
+    'report-loc'
+).oninput =
+    event => {
+
+        clearTimeout(
+            searchTimer
+        );
+
+
+        const query =
             event.target.value.trim();
 
 
         if (
-            q.length < 4
+            query.length < 4
         ) {
-
-            suggestionsBox.classList.add(
-                "hidden"
-            );
-
             return;
-
         }
 
 
-        suggestionsBox.innerHTML =
-            `<div class="p-2.5 text-xs text-slate-400">Searching OpenStreetMap…</div>`;
-
-
-        suggestionsBox.classList.remove(
-            "hidden"
-        );
-
-
-        searchTimeout =
+        searchTimer =
             setTimeout(
                 async () => {
 
                     try {
 
-                        const url =
-                            new URL(
-                                "https://nominatim.openstreetmap.org/search"
-                            );
-
-
-                        url.searchParams.set(
-                            "format",
-                            "json"
-                        );
-
-                        url.searchParams.set(
-                            "addressdetails",
-                            "1"
-                        );
-
-                        url.searchParams.set(
-                            "limit",
-                            "5"
-                        );
-
-                        url.searchParams.set(
-                            "countrycodes",
-                            "ca"
-                        );
-
-                        url.searchParams.set(
-                            "q",
-                            `${q}, Hamilton, Ontario, Canada`
-                        );
-
-
-                        const response =
-                            await fetch(
-                                url
-                            );
-
-
                         const results =
-                            await response.json();
+                            await searchAddress(
+                                query
+                            );
 
 
-                        if (
-                            !results.length
-                        ) {
+                        const list =
+                            document.createElement(
+                                'div'
+                            );
 
-                            suggestionsBox.innerHTML =
-                                `<div class="p-2.5 text-xs text-rose-400">No Hamilton result found.</div>`;
 
-                            return;
+                        list.className =
+                            'absolute left-0 right-0 top-[100%] mt-1 bg-[#0a1017] border border-slate-700 rounded-xl z-50 overflow-hidden';
 
+
+                        list.innerHTML =
+                            results
+                                .map(
+                                    result =>
+                                        `
+                                        <button
+                                            type="button"
+                                            class="block w-full text-left p-2 border-b border-slate-800 text-[10px] hover:bg-slate-800"
+                                            data-lat="${escapeHtml(result.lat)}"
+                                            data-lng="${escapeHtml(result.lon)}"
+                                        >
+                                            📍
+                                            ${escapeHtml(result.display_name)}
+                                        </button>
+                                        `
+                                )
+                                .join('');
+
+
+                        const old =
+                            document.querySelector(
+                                '#report-loc-wrap .suggestions'
+                            );
+
+                        if (old) {
+                            old.remove();
                         }
 
 
-                        suggestionsBox.innerHTML =
-                            results.map(
-                                result => `
-
-                                    <button
-                                        type="button"
-                                        class="block w-full text-left p-2.5 hover:bg-slate-800 border-b border-slate-800 text-xs"
-                                        data-lat="${escapeHtml(result.lat)}"
-                                        data-lng="${escapeHtml(result.lon)}"
-                                        data-name="${escapeHtml(result.display_name)}"
-                                    >
-                                        📍 ${escapeHtml(
-                                            result.display_name
-                                        )}
-                                    </button>
-
-                                `
-                            ).join("");
+                        list.classList.add(
+                            'suggestions'
+                        );
 
 
-                        suggestionsBox
-                            .querySelectorAll("button")
+                        $(
+                            'report-loc-wrap'
+                        ).appendChild(
+                            list
+                        );
+
+
+                        list
+                            .querySelectorAll(
+                                'button'
+                            )
                             .forEach(
                                 button => {
 
                                     button.onclick =
                                         () => {
 
-                                            locInput.value =
-                                                button.dataset.name;
+                                            $(
+                                                'report-loc'
+                                            ).value =
+                                                button.textContent
+                                                    .replace(
+                                                        '📍',
+                                                        ''
+                                                    )
+                                                    .trim();
 
 
-                                            document.getElementById(
-                                                "selected-lat"
+                                            $(
+                                                'report-lat'
                                             ).value =
                                                 button.dataset.lat;
 
 
-                                            document.getElementById(
-                                                "selected-lng"
+                                            $(
+                                                'report-lng'
                                             ).value =
                                                 button.dataset.lng;
 
 
-                                            document.getElementById(
-                                                "gps-status"
-                                            ).textContent =
-                                                "📍 Location selected from OpenStreetMap";
-
-
-                                            suggestionsBox.classList.add(
-                                                "hidden"
-                                            );
+                                            list.remove();
 
                                         };
 
                                 }
                             );
 
+                    } catch {
 
-                    } catch (
-                        error
-                    ) {
-
-                        console.error(
-                            error
-                        );
-
-                        suggestionsBox.innerHTML =
-                            `<div class="p-2.5 text-xs text-rose-400">Location search unavailable.</div>`;
+                        // Search failure is non-fatal.
 
                     }
 
                 },
-                500
+                450
             );
+
+    };
+
+
+/* ------------------------------------------------------------- */
+/* REPORT AUTH / MODAL */
+/* ------------------------------------------------------------- */
+
+function openReport() {
+
+    $(
+        'report'
+    ).classList.remove(
+        'hidden'
+    );
+
+    $(
+        'report'
+    ).classList.add(
+        'flex'
+    );
+
+
+    if (
+        !auth.currentUser
+    ) {
+        return;
+    }
+
+
+    if (
+        !$(
+            'report-lat'
+        ).value &&
+        navigator.geolocation
+    ) {
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+
+                $(
+                    'report-lat'
+                ).value =
+                    position.coords.latitude;
+
+                $(
+                    'report-lng'
+                ).value =
+                    position.coords.longitude;
+
+            }
+        );
+    }
+}
+
+
+$(
+    'auth'
+).onclick =
+    () =>
+        auth.currentUser
+            ? signOut(
+                auth
+              )
+            : openReport();
+
+
+$(
+    'report-close'
+).onclick =
+    () => {
+
+        $(
+            'report'
+        ).classList.add(
+            'hidden'
+        );
+
+        $(
+            'report'
+        ).classList.remove(
+            'flex'
+        );
+
+    };
+
+
+$(
+    'login'
+).onclick =
+    () =>
+        signInWithEmailAndPassword(
+            auth,
+            $(
+                'email'
+            ).value,
+            $(
+                'password'
+            ).value
+        ).catch(
+            error =>
+                alert(
+                    error.message
+                )
+        );
+
+
+$(
+    'signup'
+).onclick =
+    () =>
+        createUserWithEmailAndPassword(
+            auth,
+            $(
+                'email'
+            ).value,
+            $(
+                'password'
+            ).value
+        ).catch(
+            error =>
+                alert(
+                    error.message
+                )
+        );
+
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if (
+            user
+        ) {
+
+            $(
+                'auth'
+            ).textContent =
+                'Sign Out';
+
+            $(
+                'report-auth'
+            ).classList.add(
+                'hidden'
+            );
+
+            $(
+                'report-form'
+            ).classList.remove(
+                'hidden'
+            );
+
+        } else {
+
+            $(
+                'auth'
+            ).textContent =
+                'Sign In';
+
+            $(
+                'report-auth'
+            ).classList.remove(
+                'hidden'
+            );
+
+            $(
+                'report-form'
+            ).classList.add(
+                'hidden'
+            );
+
+        }
 
     }
 );
 
 
-/* ================================================================
-   COMMUNITY REPORT SUBMISSION
-   ================================================================ */
+/* ------------------------------------------------------------- */
+/* COMMUNITY REPORT SUBMISSION */
+/* ------------------------------------------------------------- */
 
-reportForm.onsubmit =
+$(
+    'report-form'
+).onsubmit =
     async event => {
 
         event.preventDefault();
 
 
-        const description =
-            document.getElementById(
-                "hazard-desc"
-            ).value.trim();
-
-
         const lat =
             Number(
-                document.getElementById(
-                    "selected-lat"
+                $(
+                    'report-lat'
                 ).value
             );
-
 
         const lng =
             Number(
-                document.getElementById(
-                    "selected-lng"
+                $(
+                    'report-lng'
                 ).value
             );
 
+        const description =
+            $(
+                'report-text'
+            ).value.trim();
+
 
         if (
-            description.length < 10
+            !Number.isFinite(
+                lat
+            ) ||
+            !Number.isFinite(
+                lng
+            )
         ) {
 
             alert(
-                "Please provide more detail."
+                'Choose a public location.'
             );
 
             return;
-
         }
 
 
         if (
-            !Number.isFinite(lat) ||
-            !Number.isFinite(lng)
+            description.length <
+            10
         ) {
 
             alert(
-                "Location required. Use GPS, search or Drop Pin."
+                'Please provide more detail.'
             );
 
             return;
-
-        }
-
-
-        const user =
-            auth.currentUser;
-
-
-        if (
-            !user
-        ) {
-
-            alert(
-                "Please sign in first."
-            );
-
-            return;
-
         }
 
 
@@ -2480,80 +2583,205 @@ reportForm.onsubmit =
             await addDoc(
                 collection(
                     db,
-                    REPORTS_COLLECTION
+                    REPORTS
                 ),
                 {
 
                     uid:
-                        user.uid,
+                        auth.currentUser.uid,
 
                     category:
-                        document.getElementById(
-                            "hazard-type"
+                        $(
+                            'report-cat'
                         ).value,
 
                     platform:
-                        "word_of_mouth",
+                        'word_of_mouth',
 
-                    hasPin:
-                        true,
+                    source:
+                        'Word of Mouth • Verified Resident',
+
+                    description,
+
+                    locationText:
+                        $(
+                            'report-loc'
+                        ).value ||
+                        null,
 
                     lat,
 
                     lng,
 
-                    source:
-                        "Word of Mouth • Verified Resident",
-
-                    description,
-
-                    url:
-                        "",
-
-                    timestamp:
-                        serverTimestamp(),
+                    hasPin:
+                        true,
 
                     status:
-                        "pending"
+                        'pending',
+
+                    timestamp:
+                        serverTimestamp()
 
                 }
             );
 
 
             alert(
-                "Report submitted for moderation."
+                'Submitted for moderation.'
             );
 
 
-            reportForm.reset();
-
-
-            modal.classList.add(
-                "hidden"
-            );
-
-            modal.classList.remove(
-                "flex"
+            $(
+                'report'
+            ).classList.add(
+                'hidden'
             );
 
 
-        } catch (
-            error
-        ) {
+            $(
+                'report-form'
+            ).reset();
 
-            console.error(
-                error
-            );
+        } catch (error) {
 
             alert(
-                `Report submission failed: ${error.message}`
+                error.message
             );
 
         }
 
     };
 
-</script>
 
+/* ------------------------------------------------------------- */
+/* LIVE INCIDENTS */
+/* ------------------------------------------------------------- */
+
+const incidentQuery =
+    query(
+        collection(
+            db,
+            INCIDENTS
+        ),
+
+        orderBy(
+            'publishedAt',
+            'desc'
+        ),
+
+        limit(
+            2000
+        )
+    );
+
+
+onSnapshot(
+    incidentQuery,
+
+    snapshot => {
+
+        STATE.incidents =
+            snapshot.docs.map(
+                normalize
+            );
+
+
+        setStatus(
+            `${STATE.incidents.length} live source records`
+        );
+
+
+        render();
+
+    },
+
+    error => {
+
+        setStatus(
+            'READ BLOCKED',
+            false
+        );
+
+
+        $(
+            'feed'
+        ).innerHTML =
+            `
+            <div class="rounded-2xl border border-rose-500/25 bg-rose-500/5 p-4">
+
+                <div class="text-xs font-bold text-rose-300">
+                    Firestore read failed
+                </div>
+
+                <div class="mt-1 text-[10px] text-slate-400">
+                    ${escapeHtml(
+                        error.message
+                    )}
+                </div>
+
+            </div>
+            `;
+
+    }
+);
+
+
+/* ------------------------------------------------------------- */
+/* APPROVED COMMUNITY REPORTS */
+/* ------------------------------------------------------------- */
+
+const reportQuery =
+    query(
+        collection(
+            db,
+            REPORTS
+        ),
+
+        where(
+            'status',
+            '==',
+            'approved'
+        ),
+
+        limit(
+            500
+        )
+    );
+
+
+onSnapshot(
+    reportQuery,
+
+    snapshot => {
+
+        STATE.community =
+            snapshot.docs
+                .map(
+                    normalize
+                )
+                .sort(
+                    (a,b) =>
+                        timestamp(
+                            b.timestamp
+                        ) -
+                        timestamp(
+                            a.timestamp
+                        )
+                );
+
+
+        render();
+
+    },
+
+    () => {
+        /*
+         * Community feed failure must not prevent
+         * the public incident map from working.
+         */
+    }
+);
+
+</script>
 </body>
 </html>
