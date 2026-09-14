@@ -1,14 +1,15 @@
 {
-  "name": "wetfloorwatch-engine",
+  "name": "wetfloorwatch",
   "version": "1.0.0",
-  "description": "Tactical Scraper Engine for WetFloorWatch Hamilton Grid",
-  "main": "scraper.js",
+  "private": true,
+  "type": "commonjs",
   "scripts": {
-    "start": "node scraper.js"
+    "ingest": "node scraper.js"
   },
   "dependencies": {
-    "crypto": "^1.0.1",
-    "firebase-admin": "^12.0.0",
+    "cheerio": "^1.1.2",
+    "firebase-admin": "^13.5.0",
+    "groq-sdk": "^0.33.0",
     "rss-parser": "^3.13.0"
   }
 }
