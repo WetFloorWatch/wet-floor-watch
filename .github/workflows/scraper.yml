@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: npm
 
       - name: Install scraper dependencies
         run: npm install firebase-admin rss-parser cheerio groq-sdk
@@ -27,3 +28,5 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           NOMINATIM_USER_AGENT: ${{ secrets.NOMINATIM_USER_AGENT }}
+          INSTAGRAM_FEED_URL: ${{ secrets.INSTAGRAM_FEED_URL }}
+          HAMILTON_EMS_FEED_URL: ${{ secrets.HAMILTON_EMS_FEED_URL }}
