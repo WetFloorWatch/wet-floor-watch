@@ -140,60 +140,7 @@ const DEFAULT_FEEDS = [
  * records are therefore rejected.
  */
 const SAFETY_TERMS =
-  /\b(
-    shooting|
-    shot fired|
-    gunfire|
-    gunshot|
-    stabbing|
-    stabbed|
-    assault|
-    attack|
-    harassment|
-    violent|
-    violence|
-    homicide|
-    murder|
-    death|
-    suspicious death|
-    sexual assault|
-    robbery|
-    theft|
-    stolen|
-    break.?in|
-    arson|
-    fire|
-    explosion|
-    collision|
-    crash|
-    pedestrian struck|
-    cyclist struck|
-    impaired driving|
-    drug|
-    fentanyl|
-    opioid|
-    overdose|
-    open drug|
-    needle|
-    syringe|
-    pipe|
-    paraphernalia|
-    weapon|
-    firearm|
-    gun|
-    bomb|
-    hazard|
-    gas leak|
-    carbon monoxide|
-    missing person|
-    encampment|
-    tent|
-    road closure|
-    emergency|
-    paramedic|
-    ambulance|
-    fire department
-  )\b/ix;
+  /\b(?:shooting|shot fired|gunfire|gunshot|stabbing|stabbed|assault|attack|harassment|violent|violence|homicide|murder|death|suspicious death|sexual assault|robbery|theft|stolen|break.?in|arson|fire|explosion|collision|crash|pedestrian struck|cyclist struck|impaired driving|drug|fentanyl|opioid|overdose|open drug|needle|syringe|pipe|paraphernalia|weapon|firearm|gun|bomb|hazard|gas leak|carbon monoxide|missing person|encampment|tent|road closure|emergency|paramedic|ambulance|fire department)\b/i;
 
 /*
  * This is specifically what prevents the garbage cards
